@@ -1,6 +1,7 @@
 package br.ifsp.vvts.controller;
 
 import br.ifsp.vvts.security.auth.AuthenticationInfoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/hello")
+@SecurityRequirement(name = "bearerAuth")
 @AllArgsConstructor
 @Tag(name = "Hello API")
 public class TransactionController {

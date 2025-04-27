@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "app_user")
-public class User implements UserDetails {
+public class ApplicationUser implements UserDetails {
     @Id
     @JdbcTypeCode(Types.VARCHAR)
     @NonNull @Column(nullable = false)

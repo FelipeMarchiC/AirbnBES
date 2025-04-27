@@ -26,6 +26,5 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")
                         )
                 );
-        // <- no .addSecurityItem(...) here
     }
 }

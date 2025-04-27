@@ -38,6 +38,12 @@
             <version>3.4.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>br.ifsp</groupId>
+            <artifactId>rental</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Others -->
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -1,14 +1,13 @@
 package br.ifsp.domain.shared.valueobjects;
 
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter
 @Embeddable
+@EqualsAndHashCode
 @NoArgsConstructor
 public class Price {
 

@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.*;
 public class UpdateRentalServiceTest {
     @Nested
     @DisplayName("Rental Denial Tests")
-    class DenyRetalService{
+    class DenyRentalServiceTest{
         @Tag("UnitTest")
         @Tag("TDD")
         @DisplayName("Should set a pending rental as denied if property owner denies it")

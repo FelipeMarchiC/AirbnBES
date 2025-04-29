@@ -14,4 +14,7 @@ public class Rental {
         this.rentalID = rentalID;
     }
 
+    public String getRentalID() {
+        return rentalID;
+    }
 }

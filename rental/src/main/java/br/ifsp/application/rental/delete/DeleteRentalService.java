@@ -16,6 +16,7 @@ public class DeleteRentalService {
         if (rental.getState() != RentalState.PENDING && rental.getState() != RentalState.DENIED) {
             throw new IllegalArgumentException("State must be PENDING or DENIED");
         }
-        return null;
+        rentalRepository.deleteById(rental.getRentalID());
+        return rental.getRentalID();
     }
 }

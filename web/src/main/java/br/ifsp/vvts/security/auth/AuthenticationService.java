@@ -2,9 +2,9 @@ package br.ifsp.vvts.security.auth;
 
 import br.ifsp.vvts.exception.EntityAlreadyExistsException;
 import br.ifsp.vvts.security.config.JwtService;
-import br.ifsp.vvts.security.user.ApplicationUser;
-import br.ifsp.vvts.security.user.JpaUserRepository;
-import br.ifsp.vvts.security.user.Role;
+import br.ifsp.domain.models.user.User;
+import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.domain.models.user.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +29,7 @@ public class AuthenticationService {
         String encryptedPassword = passwordEncoder.encode(request.password());
 
         final UUID id = UUID.randomUUID();
-        final ApplicationUser user = ApplicationUser.builder()
+        final User user = User.builder()
                 .id(id)
                 .name(request.name())
                 .lastname(request.lastname())
@@ -46,7 +46,7 @@ public class AuthenticationService {
         final var authentication = new UsernamePasswordAuthenticationToken(request.username(), request.password());
         authenticationManager.authenticate(authentication);
 
-        final ApplicationUser user = userRepository.findByEmail(request.username()).orElseThrow();
+        final User user = userRepository.findByEmail(request.username()).orElseThrow();
         final String token = jwtService.generateToken(user);
 
         return new AuthResponse(token);

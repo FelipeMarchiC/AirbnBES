@@ -1,4 +1,4 @@
-package br.ifsp.vvts.security.user;
+package br.ifsp.domain.models.user;
 
 public enum Role {
     USER,

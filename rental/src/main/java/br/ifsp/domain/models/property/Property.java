@@ -1,6 +1,6 @@
 package br.ifsp.domain.models.property;
 
-import br.ifsp.domain.models.user.Owner;
+import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import jakarta.persistence.*;
@@ -41,5 +41,5 @@ public class Property {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    private Owner owner;
+    private User user;
 }

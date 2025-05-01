@@ -40,4 +40,24 @@ class FindRentalServiceTest {
             verify(jpaRentalRepository).findByPropertyId(propertyId);
         }
     }
+    @Nested
+    @DisplayName("Tenant Rental History Retrieval Tests")
+    class TenantRentalHistoryRetrievalTests {
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should return all rentals for a given tenant ID")
+        @Test
+        void shouldReturnAllRentalsForGivenTenantId() {
+            UUID tenantId = UUID.randomUUID();
+            List<Rental> mockRentals = List.of(
+                    mock(Rental.class),
+                    mock(Rental.class)
+            );
+            when(jpaRentalRepository.findByTenantId(tenantId)).thenReturn(mockRentals);
+            List<Rental> result = findRentalService.getRentalHistoryByTenant(tenantId);
+            assertThat(result).isEqualTo(mockRentals);
+            verify(jpaRentalRepository).findByTenantId(tenantId);
+        }
+    }
+
 }

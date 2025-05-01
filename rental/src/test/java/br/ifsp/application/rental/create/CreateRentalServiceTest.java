@@ -85,7 +85,7 @@ class CreateRentalServiceTest {
                 new ArrayList<>()
         );
 
-         property = new Property(
+        property = new Property(
                 UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
                 "Wuthering Heights",
                 "An isolated farmhouse on the Yorkshire moors.",
@@ -108,7 +108,7 @@ class CreateRentalServiceTest {
         @Tag("UnitTest")
         @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
         @CsvSource({
-            "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
+                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
         })
         @DisplayName("Should create when rental start date is before endDate")
         void shouldCreateRentalWhenStartDateIsBeforeEndDate(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
@@ -129,18 +129,39 @@ class CreateRentalServiceTest {
         @Tag("TDD")
         @Tag("UnitTest")
         @Test()
-        @DisplayName("shouldThrowExceptionWhenEndDateIsInThePast")
-        void shouldThrowExceptionWhenEndDateIsInThePast() {
-            var startDate = LocalDate.parse("1800-02-22");
-            var endDate = LocalDate.parse("1800-03-22");
-
-            Instant instant = LocalDate.of(2025, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
-            Clock fixedClock = Clock.fixed(instant, ZoneOffset.UTC);
-
-            CreateRentalService sut = new CreateRentalService(userRepositoryMock, propertyRepositoryMock, rentalRepositoryMock, fixedClock);
+        @DisplayName("Should throw exception when rental duration is bigger than one year")
+        void shouldThrowExceptionWhenRentalDurationIsBiggerThanOneYear() {
+            var startDate = LocalDate.parse("1801-02-22");
+            var endDate = LocalDate.parse("1802-02-23");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> sut.registerRental(UUID.randomUUID(), UUID.randomUUID(), startDate, endDate))
+                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
+                    .withMessageContaining("Rental duration must be 1 year or less");
+        }
+
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @Test()
+        @DisplayName("Should throw exception when start date is after end date")
+        void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
+            var startDate = LocalDate.parse("1801-03-22");
+            var endDate = LocalDate.parse("1802-02-22");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
+                    .withMessageContaining("Start date must be before end date");
+        }
+
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @Test()
+        @DisplayName("Should throw exception when start date is in the past")
+        void shouldThrowExceptionWhenStartDateIsInThePast() {
+            var startDate = LocalDate.parse("1800-02-22");
+            var endDate = LocalDate.parse("1802-03-22");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
                     .withMessageContaining("Rental cannot start in the past");
         }
     }

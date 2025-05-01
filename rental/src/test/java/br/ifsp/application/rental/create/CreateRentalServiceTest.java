@@ -15,10 +15,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,10 +33,35 @@ class CreateRentalServiceTest {
     @Mock private JpaPropertyRepository propertyRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks private CreateRentalService sut;
+
+    private Clock fixedClock;
+    private AutoCloseable closeable;
+
     private User owner;
     private User tenant;
     private Property property;
 
+    @BeforeEach
+    void setupService() {
+        closeable = MockitoAnnotations.openMocks(this);
+
+        fixedClock = Clock.fixed(
+                LocalDate.of(1801, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant(),
+                ZoneOffset.UTC
+        );
+
+        sut = new CreateRentalService(
+                userRepositoryMock,
+                propertyRepositoryMock,
+                rentalRepositoryMock,
+                fixedClock
+        );
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+    }
 
     @BeforeEach
     void setup() {
@@ -75,20 +101,47 @@ class CreateRentalServiceTest {
         );
     }
 
-    @Tag("TDD")
-    @Tag("UnitTest")
-    @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
-    @CsvSource({
+    @Nested
+    @DisplayName("Testing valid equivalent classes")
+    class TestingValidEquivalentClasses {
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
+        @CsvSource({
             "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
-    })
-    @DisplayName("Should create when rental start date is before endDate")
-    void shouldCreateRentalWhenStartDateIsBeforeEndDate(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
-        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
-        when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
-        when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        })
+        @DisplayName("Should create when rental start date is before endDate")
+        void shouldCreateRentalWhenStartDateIsBeforeEndDate(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
+            when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
+            when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
+            Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
 
-        assertThat(rental).isNotNull();
+            assertThat(rental).isNotNull();
+        }
+
+    }
+
+    @Nested
+    @DisplayName("Testing invalid equivalent classes")
+    class TestingInvalidEquivalentClasses {
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @Test()
+        @DisplayName("shouldThrowExceptionWhenEndDateIsInThePast")
+        void shouldThrowExceptionWhenEndDateIsInThePast() {
+            var startDate = LocalDate.parse("1800-02-22");
+            var endDate = LocalDate.parse("1800-03-22");
+
+            Instant instant = LocalDate.of(2025, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            Clock fixedClock = Clock.fixed(instant, ZoneOffset.UTC);
+
+            CreateRentalService sut = new CreateRentalService(userRepositoryMock, propertyRepositoryMock, rentalRepositoryMock, fixedClock);
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> sut.registerRental(UUID.randomUUID(), UUID.randomUUID(), startDate, endDate))
+                    .withMessageContaining("Rental cannot start in the past");
+        }
     }
 }

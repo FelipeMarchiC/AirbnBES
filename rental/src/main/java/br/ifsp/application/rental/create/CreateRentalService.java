@@ -8,6 +8,7 @@ import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -15,15 +16,18 @@ public class CreateRentalService implements ICreateRentalService {
     private final JpaUserRepository userRepository;
     private final JpaPropertyRepository propertyRepository;
     private final JpaRentalRepository rentalRepository;
+    private final Clock clock;
 
     public CreateRentalService(
             JpaUserRepository userRepository,
             JpaPropertyRepository propertyRepository,
-            JpaRentalRepository rentalRepository
+            JpaRentalRepository rentalRepository,
+            Clock clock
     ) {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.rentalRepository = rentalRepository;
+        this.clock = clock;
     }
 
     @Override

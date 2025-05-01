@@ -35,7 +35,7 @@ class FindRentalServiceTest {
                     mock(Rental.class)
             );
             when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentals);
-            List<Rental> result = findRentalService.getRentalHistory(propertyId);
+            List<Rental> result = findRentalService.getRentalHistoryByProperty(propertyId);
             assertThat(result).isEqualTo(mockRentals);
             verify(jpaRentalRepository).findByPropertyId(propertyId);
         }

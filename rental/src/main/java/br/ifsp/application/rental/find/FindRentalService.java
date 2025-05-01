@@ -13,6 +13,6 @@ public class FindRentalService {
         this.jpaRentalRepository = jpaRentalRepository;
     }
     public List<Rental> getRentalHistory(UUID propertyId) {
-        return null;
+        return jpaRentalRepository.findByPropertyId(propertyId);
     }
 }

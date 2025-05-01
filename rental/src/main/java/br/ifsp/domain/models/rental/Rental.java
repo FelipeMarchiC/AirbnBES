@@ -1,20 +1,25 @@
 package br.ifsp.domain.models.rental;
 
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+
+import java.sql.Types;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "rental")
 public class Rental {
-    private String rentalID;
+
+    @Id
+    @JdbcTypeCode(Types.VARCHAR)
+    @NonNull @Column(nullable = false)
+    private UUID id;
+
+    @Enumerated(EnumType.STRING)
     private RentalState state;
-    public RentalState getState(){
-        return state;
-    }
-    public void setState(RentalState state){
-        this.state=state;
-
-    }
-    public void setRentalID(String rentalID) {
-        this.rentalID = rentalID;
-    }
-
-    public String getRentalID() {
-        return rentalID;
-    }
 }

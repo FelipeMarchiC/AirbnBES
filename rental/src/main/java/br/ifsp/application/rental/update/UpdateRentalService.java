@@ -4,6 +4,7 @@ import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UpdateRentalService {
@@ -24,7 +25,24 @@ public class UpdateRentalService {
 
 
     public void confirmRental(UUID rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
+        if (rental.getState() != RentalState.PENDING) {
+            return;
+        }
+        List<Rental> overlappingRentals = rentalRepository.findRentalsByOverlapAndState(
+                rental.getProperty().getId(),
+                RentalState.CONFIRMED,
+                rental.getStartDate(),
+                rental.getEndDate(),
+                rental.getId()
+        );
+        if (overlappingRentals.isEmpty()) {
+            rental.setState(RentalState.CONFIRMED);
+            rentalRepository.save(rental);
+        }
     }
-
 }
+
+

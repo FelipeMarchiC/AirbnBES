@@ -40,6 +40,10 @@ public class CreateRentalService implements ICreateRentalService {
             throw new IllegalArgumentException("Rental cannot start in the past.");
         }
 
+        if (endDate.isAfter(startDate.plusYears(1))) {
+            throw new IllegalArgumentException("Rental duration must be 1 year or less");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 

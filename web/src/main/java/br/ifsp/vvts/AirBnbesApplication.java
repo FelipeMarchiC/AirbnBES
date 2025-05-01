@@ -3,13 +3,15 @@ package br.ifsp.vvts;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan(basePackages = "br.ifsp")
-public class DemoAuthAppApplication {
+@EnableJpaRepositories(basePackages = "br.ifsp")
+public class AirBnbesApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoAuthAppApplication.class, args);
+        SpringApplication.run(AirBnbesApplication.class, args);
     }
 
 }

@@ -5,6 +5,7 @@ import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
@@ -97,7 +98,8 @@ class CreateRentalServiceTest {
                         "West Yorkshire",
                         "BD22"
                 ),
-                owner
+                owner,
+                new ArrayList<>()
         );
     }
 
@@ -111,7 +113,12 @@ class CreateRentalServiceTest {
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
         })
         @DisplayName("Should create when rental start date is before endDate")
-        void shouldCreateRentalWhenStartDateIsBeforeEndDate(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
+        void shouldCreateRentalWhenStartDateIsBeforeEndDate(
+                UUID userId,
+                UUID propertyId,
+                LocalDate startDate,
+                LocalDate endDate
+        ) {
             when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
             when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
             when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -126,6 +133,48 @@ class CreateRentalServiceTest {
     @Nested
     @DisplayName("Testing invalid equivalent classes")
     class TestingInvalidEquivalentClasses {
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @ParameterizedTest(
+                name = "[{index}]: should throw exception when property has rental from {2} to {3} and is requested from {4} to {5}"
+        )
+        @CsvSource({
+                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22, 1801-02-22, 1801-03-22",
+                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-04-30, 1801-04-30, 1801-05-10",
+        })
+        @DisplayName("Should throw exception when property is already rented in any period between start and end dates")
+        void shouldThrowExceptionWhenPropertyIsAlreadyRentedInAnyPeriodBetweenStartAndEndDates(
+                UUID userId,
+                UUID propertyId,
+                LocalDate startOfRentedPeriod,
+                LocalDate endOfRentedPeriod,
+                LocalDate startDateOfRentRequest,
+                LocalDate endDateOfRentRequest
+        ) {
+             var currentRental = new Rental(
+                    UUID.fromString("607a3cdc-19b4-450f-8a70-cb135b2cf26f"),
+                    tenant,
+                    property,
+                    startOfRentedPeriod,
+                    endOfRentedPeriod,
+                    RentalState.CONFIRMED
+            );
+
+             property.addRental(currentRental);
+
+            when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() ->
+                            sut.registerRental(
+                                    userId,
+                                    propertyId,
+                                    startDateOfRentRequest,
+                                    endDateOfRentRequest))
+                    .withMessageContaining("Property is already rented during the requested period");
+        }
+
         @Tag("TDD")
         @Tag("UnitTest")
         @Test()

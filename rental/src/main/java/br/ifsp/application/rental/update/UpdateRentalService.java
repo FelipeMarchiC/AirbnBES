@@ -4,7 +4,6 @@ import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 
-import java.util.List;
 import java.util.UUID;
 
 public class UpdateRentalService {
@@ -18,7 +17,7 @@ public class UpdateRentalService {
 
     public void deny(Rental rental){
         if(!rental.getState().equals(RentalState.PENDING) && !rental.getState().equals(RentalState.RESTRAINED)){
-            throw new UnsupportedOperationException(String.format("it´s not possible to deny a rental that is %s",rental.getState().toString()));
+            throw new UnsupportedOperationException(String.format("it´s not possible to deny a rental that is %s",rental.getState()));
         }
         rental.setState(RentalState.DENIED);
     }
@@ -29,20 +28,25 @@ public class UpdateRentalService {
                 .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
         if (rental.getState() != RentalState.PENDING) {
-            return;
+            throw new IllegalStateException("Rental is not in pending state");
         }
-        List<Rental> overlappingRentals = rentalRepository.findRentalsByOverlapAndState(
+
+        var conflictingRentals = rentalRepository.findRentalsByOverlapAndState(
                 rental.getProperty().getId(),
                 RentalState.CONFIRMED,
                 rental.getStartDate(),
                 rental.getEndDate(),
                 rental.getId()
         );
-        if (overlappingRentals.isEmpty()) {
-            rental.setState(RentalState.CONFIRMED);
-            rentalRepository.save(rental);
+
+        if (!conflictingRentals.isEmpty()) {
+            throw new IllegalStateException("Cannot confirm rental due to conflict with an already confirmed rental");
         }
+
+        rental.setState(RentalState.CONFIRMED);
+        rentalRepository.save(rental);
     }
+
 }
 
 

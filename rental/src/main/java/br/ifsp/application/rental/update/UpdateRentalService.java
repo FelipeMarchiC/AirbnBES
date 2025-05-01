@@ -47,6 +47,10 @@ public class UpdateRentalService {
         rentalRepository.save(rental);
     }
 
+    public void restrainPendingRentalsInConflict(Rental confirmedRental) {
+
+    }
+
 }
 
 

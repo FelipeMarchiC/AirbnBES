@@ -129,4 +129,48 @@ ATUALIZAR POIS AGORA TEM RENTALREPOSITORY
         }
     }
 
+    @Nested
+    @DisplayName("Update Rental Tests")
+    class UpdateRentalTests {
+
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should restrain conflicting pending rentals")
+        @Test
+        void shouldRestrainConflictingPendingRentals() {
+            UUID rentalId = UUID.randomUUID();
+            Rental confirmedRental = Rental.builder()
+                    .id(rentalId)
+                    .user(tenant)
+                    .property(property)
+                    .startDate(LocalDate.of(1801, 2, 1))
+                    .endDate(LocalDate.of(1801, 2, 10))
+                    .state(RentalState.CONFIRMED)
+                    .build();
+
+            UUID conflictingRentalId = UUID.randomUUID();
+            Rental conflictingRental = Rental.builder()
+                    .id(conflictingRentalId)
+                    .user(tenant)
+                    .property(property)
+                    .startDate(LocalDate.of(1801, 2, 5))
+                    .endDate(LocalDate.of(1801, 2, 8))
+                    .state(RentalState.PENDING)
+                    .build();
+
+            when(rentalRepositoryMock.findRentalsByOverlapAndState(
+                    property.getId(),
+                    RentalState.PENDING,
+                    confirmedRental.getStartDate(),
+                    confirmedRental.getEndDate(),
+                    confirmedRental.getId()))
+                    .thenReturn(List.of(conflictingRental));
+
+            sut.restrainPendingRentalsInConflict(confirmedRental);
+
+            assertThat(conflictingRental.getState()).isEqualTo(RentalState.RESTRAINED);
+            verify(rentalRepositoryMock).save(conflictingRental);
+        }
+    }
+
 }

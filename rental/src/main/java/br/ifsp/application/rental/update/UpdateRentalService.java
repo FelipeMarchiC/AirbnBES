@@ -3,9 +3,9 @@ package br.ifsp.application.rental.update;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
-
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
-
 public class UpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;
@@ -48,18 +48,29 @@ public class UpdateRentalService {
     }
 
     public void restrainPendingRentalsInConflict(Rental confirmedRental) {
-        var conflictingRentals = rentalRepository.findRentalsByOverlapAndState(
-                confirmedRental.getProperty().getId(),
-                RentalState.PENDING,
-                confirmedRental.getStartDate(),
-                confirmedRental.getEndDate(),
-                confirmedRental.getId()
-        );
+        UUID propertyId = confirmedRental.getProperty().getId();
+        UUID confirmedRentalId = confirmedRental.getId();
+        LocalDate confirmedStart = confirmedRental.getStartDate();
+        LocalDate confirmedEnd = confirmedRental.getEndDate();
 
-        for (Rental conflictingRental : conflictingRentals) {
-            conflictingRental.setState(RentalState.RESTRAINED);
-            rentalRepository.save(conflictingRental);
-        }
+        List<Rental> conflictingRentals = findPendingRentalsInConflict(propertyId, confirmedStart, confirmedEnd, confirmedRentalId);
+
+        conflictingRentals.forEach(this::restrainRental);
+    }
+
+    private List<Rental> findPendingRentalsInConflict(UUID propertyId, LocalDate startDate, LocalDate endDate, UUID excludedRentalId) {
+        return rentalRepository.findRentalsByOverlapAndState(
+                propertyId,
+                RentalState.PENDING,
+                startDate,
+                endDate,
+                excludedRentalId
+        );
+    }
+
+    private void restrainRental(Rental rental) {
+        rental.setState(RentalState.RESTRAINED);
+        rentalRepository.save(rental);
     }
 }
 

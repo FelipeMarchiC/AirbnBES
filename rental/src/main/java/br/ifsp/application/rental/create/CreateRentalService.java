@@ -32,6 +32,22 @@ public class CreateRentalService implements ICreateRentalService {
 
     @Override
     public Rental registerRental(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
+        CheckForRequestedDatesValidity(startDate, endDate);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
+
+        CheckForOverlappingDates(startDate, endDate, property);
+
+        Rental rental = new Rental(UUID.randomUUID(), user, property, startDate, endDate, RentalState.PENDING);
+
+        return rentalRepository.save(rental);
+    }
+
+    private void CheckForRequestedDatesValidity(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
@@ -43,15 +59,18 @@ public class CreateRentalService implements ICreateRentalService {
         if (endDate.isAfter(startDate.plusYears(1))) {
             throw new IllegalArgumentException("Rental duration must be 1 year or less");
         }
+    }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    private static void CheckForOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
+        for (Rental existingRental : property.getRentals()) {
+            if (!existingRental.getState().equals(RentalState.CONFIRMED)) {
+                continue;
+            }
 
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
-
-        Rental rental = new Rental(UUID.randomUUID(), user, property, startDate, endDate, RentalState.PENDING);
-
-        return rentalRepository.save(rental);
+            boolean overlaps = !(endDate.isBefore(existingRental.getStartDate()) || startDate.isAfter(existingRental.getEndDate()));
+            if (overlaps) {
+                throw new IllegalArgumentException("Property is already rented during the requested period");
+            }
+        }
     }
 }

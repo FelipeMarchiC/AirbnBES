@@ -129,7 +129,20 @@ class CreateRentalServiceTest {
         @Tag("TDD")
         @Tag("UnitTest")
         @Test()
-        @DisplayName("Should throw exception when startDate is in the past")
+        @DisplayName("Should throw exception when start date is after end date")
+        void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
+            var startDate = LocalDate.parse("1801-03-22");
+            var endDate = LocalDate.parse("1802-02-22");
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> sut.registerRental(UUID.randomUUID(), UUID.randomUUID(), startDate, endDate))
+                    .withMessageContaining("Start date must be before end date");
+        }
+
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @Test()
+        @DisplayName("Should throw exception when start date is in the past")
         void shouldThrowExceptionWhenStartDateIsInThePast() {
             var startDate = LocalDate.parse("1800-02-22");
             var endDate = LocalDate.parse("1802-03-22");

@@ -60,7 +60,8 @@ public class UpdateRentalServiceTest {
                         "West Yorkshire",
                         "BD22"
                 ),
-                tenant
+                tenant,
+                new ArrayList<>()
         );
     }
 

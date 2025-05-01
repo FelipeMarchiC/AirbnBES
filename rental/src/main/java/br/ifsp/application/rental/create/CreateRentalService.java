@@ -32,6 +32,10 @@ public class CreateRentalService implements ICreateRentalService {
 
     @Override
     public Rental registerRental(UUID userId, UUID propertyId, LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
         if (startDate.isBefore(LocalDate.now(clock))) {
             throw new IllegalArgumentException("Rental cannot start in the past.");
         }

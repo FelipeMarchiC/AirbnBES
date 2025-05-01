@@ -48,9 +48,19 @@ public class UpdateRentalService {
     }
 
     public void restrainPendingRentalsInConflict(Rental confirmedRental) {
+        var conflictingRentals = rentalRepository.findRentalsByOverlapAndState(
+                confirmedRental.getProperty().getId(),
+                RentalState.PENDING,
+                confirmedRental.getStartDate(),
+                confirmedRental.getEndDate(),
+                confirmedRental.getId()
+        );
 
+        for (Rental conflictingRental : conflictingRentals) {
+            conflictingRental.setState(RentalState.RESTRAINED);
+            rentalRepository.save(conflictingRental);
+        }
     }
-
 }
 
 

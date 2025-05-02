@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,42 +68,43 @@ class CreateRentalServiceTest {
 
     @BeforeEach
     void setup() {
-        tenant = new User(
-                UUID.fromString("e924925c-2a7b-4cab-b938-0d6398ecc78a"),
-                "Hindley",
-                "Earnshaw",
-                "hindleyearnshaw@outlook.com",
-                "bGV0c2dvZ2FtYmxpbmc=",
-                Role.USER,
-                new ArrayList<>()
-        );
+        tenant = User.builder()
+                .id(UUID.fromString("e924925c-2a7b-4cab-b938-0d6398ecc78a"))
+                .name("Hindley")
+                .lastname("Earnshaw")
+                .email("hindleyearnshaw@outlook.com")
+                .password("bGV0c2dvZ2FtYmxpbmc=")
+                .role(Role.USER)
+                .ownedProperties(new ArrayList<>())
+                .build();
 
-        owner = new User(
-                UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
-                "Catherine",
-                "Earnshaw",
-                "cathy_earnshaw@outlook.com",
-                "ZGVsZXRlYWxsY2F0aHk=",
-                Role.USER,
-                new ArrayList<>()
-        );
+        owner = User.builder()
+                .id(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))
+                .name("Catherine")
+                .lastname("Earnshaw")
+                .email("cathy_earnshaw@outlook.com")
+                .password("ZGVsZXRlYWxsY2F0aHk=")
+                .role(Role.USER)
+                .ownedProperties(new ArrayList<>())
+                .build();
 
-        property = new Property(
-                UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
-                "Wuthering Heights",
-                "An isolated farmhouse on the Yorkshire moors.",
-                new Price(new BigDecimal("250.00")),
-                new Address(
-                        "1",
-                        "Moor Lane",
-                        "Haworth",
-                        "West Yorkshire",
-                        "BD22"
-                ),
-                owner,
-                new ArrayList<>()
-        );
+        property = Property.builder()
+                .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .name("Wuthering Heights")
+                .description("An isolated farmhouse on the Yorkshire moors.")
+                .dailyRate(new Price(new BigDecimal("250.00")))
+                .address(Address.builder()
+                        .number("1")
+                        .street("Moor Lane")
+                        .city("Haworth")
+                        .state("West Yorkshire")
+                        .postalCode("BD22")
+                        .build())
+                .owner(owner)
+                .rentals(new ArrayList<>())
+                .build();
     }
+
 
     @Nested
     @DisplayName("Testing valid equivalent classes")
@@ -134,6 +136,31 @@ class CreateRentalServiceTest {
             assertThat(rental).isNotNull();
         }
 
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
+        @CsvSource({
+                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-02-23, ",
+                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1802-02-22",
+        })
+        @DisplayName("Should calculate rental total value")
+        void shouldCalculateRentalTotalValue(
+                UUID userId,
+                UUID propertyId,
+                LocalDate startDate,
+                LocalDate endDate
+        ) {
+            when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
+            when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            long daysRented = ChronoUnit.DAYS.between(startDate, endDate);
+            BigDecimal totalPrice = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
+
+            Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
+
+            assertThat(rental.getValue().getAmount()).isEqualTo(totalPrice);
+        }
     }
 
     @Nested
@@ -157,14 +184,15 @@ class CreateRentalServiceTest {
                 LocalDate startDateOfRentRequest,
                 LocalDate endDateOfRentRequest
         ) {
-             var currentRental = new Rental(
-                    UUID.fromString("607a3cdc-19b4-450f-8a70-cb135b2cf26f"),
-                    tenant,
-                    property,
-                    startOfRentedPeriod,
-                    endOfRentedPeriod,
-                    RentalState.CONFIRMED
-            );
+             var currentRental = Rental.builder()
+                    .id(UUID.fromString("607a3cdc-19b4-450f-8a70-cb135b2cf26f"))
+                    .user(tenant)
+                    .property(property)
+                    .startDate(startOfRentedPeriod)
+                    .endDate(endOfRentedPeriod)
+                    .state(RentalState.CONFIRMED)
+                     .value(new Price(BigDecimal.valueOf(5000)))
+                    .build();
 
              property.addRental(currentRental);
 

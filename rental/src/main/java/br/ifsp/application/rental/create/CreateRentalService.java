@@ -42,7 +42,13 @@ public class CreateRentalService implements ICreateRentalService {
 
         CheckForOverlappingDates(startDate, endDate, property);
 
-        Rental rental = new Rental(UUID.randomUUID(), user, property, startDate, endDate, RentalState.PENDING);
+        Rental rental = Rental.builder()
+                .id(UUID.randomUUID()).user(user)
+                .property(property)
+                .startDate(startDate)
+                .endDate(endDate)
+                .state(RentalState.PENDING)
+                .build();
 
         return rentalRepository.save(rental);
     }

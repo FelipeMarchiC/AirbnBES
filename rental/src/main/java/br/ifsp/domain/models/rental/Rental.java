@@ -2,6 +2,7 @@ package br.ifsp.domain.models.rental;
 
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.shared.valueobjects.Price;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -39,6 +40,10 @@ public class Rental {
     @NotNull
     @Column(nullable = false)
     private LocalDate endDate;
+
+    @NotNull
+    @Embedded
+    private Price value;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

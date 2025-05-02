@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,7 +37,6 @@ class CreateRentalServiceTest {
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks private CreateRentalService sut;
 
-    private Clock fixedClock;
     private AutoCloseable closeable;
 
     private User owner;
@@ -47,7 +47,7 @@ class CreateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        fixedClock = Clock.fixed(
+        Clock fixedClock = Clock.fixed(
                 LocalDate.of(1801, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant(),
                 ZoneOffset.UTC
         );
@@ -77,16 +77,6 @@ class CreateRentalServiceTest {
                 .ownedProperties(new ArrayList<>())
                 .build();
 
-        owner = User.builder()
-                .id(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))
-                .name("Catherine")
-                .lastname("Earnshaw")
-                .email("cathy_earnshaw@outlook.com")
-                .password("ZGVsZXRlYWxsY2F0aHk=")
-                .role(Role.USER)
-                .ownedProperties(new ArrayList<>())
-                .build();
-
         property = Property.builder()
                 .id(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
                 .name("Wuthering Heights")
@@ -102,14 +92,24 @@ class CreateRentalServiceTest {
                 .owner(owner)
                 .rentals(new ArrayList<>())
                 .build();
+
+        owner = User.builder()
+                .id(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))
+                .name("Catherine")
+                .lastname("Earnshaw")
+                .email("cathy_earnshaw@outlook.com")
+                .password("ZGVsZXRlYWxsY2F0aHk=")
+                .role(Role.USER)
+                .ownedProperties(List.of(property))
+                .build();
     }
 
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Testing valid equivalent classes")
     class TestingValidEquivalentClasses {
         @Tag("TDD")
-        @Tag("UnitTest")
         @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
         @CsvSource({
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
@@ -137,7 +137,6 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
-        @Tag("UnitTest")
         @ParameterizedTest(name = "[{index}]: should calculate rental total value from {2} to {3}")
         @CsvSource({
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-02-23, ",
@@ -156,7 +155,6 @@ class CreateRentalServiceTest {
 
             long daysRented = ChronoUnit.DAYS.between(startDate, endDate);
             BigDecimal totalPrice = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
-            System.out.println(totalPrice);
 
             Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
 
@@ -165,12 +163,12 @@ class CreateRentalServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Testing invalid equivalent classes")
     class TestingInvalidEquivalentClasses {
         @Tag("TDD")
-        @Tag("UnitTest")
         @ParameterizedTest(
-                name = "[{index}]: should throw exception when property has rental from {2} to {3} and is requested from {4} to {5}"
+                name = "[{index}]: has rental from {2} to {3} and is requested from {4} to {5}"
         )
         @CsvSource({
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22, 1801-02-22, 1801-03-22",
@@ -211,7 +209,6 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
-        @Tag("UnitTest")
         @Test()
         @DisplayName("Should throw exception when rental duration is bigger than one year")
         void shouldThrowExceptionWhenRentalDurationIsBiggerThanOneYear() {
@@ -224,12 +221,11 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
-        @Tag("UnitTest")
         @Test()
         @DisplayName("Should throw exception when start date is after end date")
         void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
             var startDate = LocalDate.parse("1801-03-22");
-            var endDate = LocalDate.parse("1802-02-22");
+            var endDate = LocalDate.parse("1801-02-22");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
@@ -237,7 +233,6 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
-        @Tag("UnitTest")
         @Test()
         @DisplayName("Should throw exception when start date is in the past")
         void shouldThrowExceptionWhenStartDateIsInThePast() {

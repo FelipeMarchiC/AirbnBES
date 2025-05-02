@@ -7,9 +7,13 @@ import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.shared.valueobjects.Price;
 
+import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class CreateRentalService implements ICreateRentalService {
@@ -42,15 +46,23 @@ public class CreateRentalService implements ICreateRentalService {
 
         CheckForOverlappingDates(startDate, endDate, property);
 
-        Rental rental = Rental.builder()
+        Rental rental = buildRental(startDate, endDate, user, property);
+
+        return rentalRepository.save(rental);
+    }
+
+    private static Rental buildRental(LocalDate startDate, LocalDate endDate, User user, Property property) {
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
+        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+
+        return Rental.builder()
                 .id(UUID.randomUUID()).user(user)
                 .property(property)
                 .startDate(startDate)
                 .endDate(endDate)
+                .value(new Price(totalCost))
                 .state(RentalState.PENDING)
                 .build();
-
-        return rentalRepository.save(rental);
     }
 
     private void CheckForRequestedDatesValidity(LocalDate startDate, LocalDate endDate) {

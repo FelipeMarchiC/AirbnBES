@@ -10,7 +10,6 @@ import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -138,7 +137,7 @@ class CreateRentalServiceTest {
 
         @Tag("TDD")
         @Tag("UnitTest")
-        @ParameterizedTest(name = "[{index}]: should create rental from {2} to {3}")
+        @ParameterizedTest(name = "[{index}]: should calculate rental total value from {2} to {3}")
         @CsvSource({
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-02-23, ",
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1802-02-22",
@@ -156,6 +155,7 @@ class CreateRentalServiceTest {
 
             long daysRented = ChronoUnit.DAYS.between(startDate, endDate);
             BigDecimal totalPrice = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
+            System.out.println(totalPrice);
 
             Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
 

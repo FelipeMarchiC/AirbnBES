@@ -29,6 +29,6 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
         rental.setState(RentalState.CANCELLED);
 
-        return rental;
+        return rentalRepository.save(rental);
     }
 }

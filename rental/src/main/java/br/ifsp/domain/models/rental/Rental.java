@@ -3,6 +3,7 @@ package br.ifsp.domain.models.rental;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 
@@ -20,7 +21,7 @@ public class Rental {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
-    @NonNull @Column(nullable = false)
+    @NotNull @Column(nullable = false)
     private UUID id;
 
     @ManyToOne
@@ -31,11 +32,11 @@ public class Rental {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @NonNull
+    @NotNull
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @NonNull
+    @NotNull
     @Column(nullable = false)
     private LocalDate endDate;
 

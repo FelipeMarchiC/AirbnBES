@@ -65,7 +65,7 @@ public class UpdateRentalServiceTest {
         );
     }
 
-/*    @Nested
+    @Nested
     @DisplayName("Rental Denial Tests")
     class DenyRentalServiceTest{
         @Tag("UnitTest")
@@ -75,7 +75,6 @@ public class UpdateRentalServiceTest {
         void shouldSetAPendingRentalAsDeniedIfPropertyOwnerDeniesIt(){
             Rental rental = new Rental();
             rental.setState(RentalState.PENDING);
-            UpdateRentalService sut = new UpdateRentalService();
             sut.deny(rental);
             assertThat(rental.getState()).isEqualTo(RentalState.DENIED);
         }
@@ -87,12 +86,10 @@ public class UpdateRentalServiceTest {
         void shouldNotPermitDenialToARentalWithStateDifferentThanPendingOrRestrained(RentalState state){
             Rental rental = new Rental();
             rental.setState(state);
-            UpdateRentalService sut = new UpdateRentalService();
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental));
         }
     }
-ATUALIZAR POIS AGORA TEM RENTALREPOSITORY
- */
+
 
     @Nested
     @DisplayName("Confirm Rental Tests")

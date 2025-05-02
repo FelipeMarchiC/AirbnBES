@@ -64,28 +64,6 @@ class DeleteRentalServiceTest {
             verify(rentalRepositoryMock).deleteById(rental.getId());
             assertThat(deletedId).isEqualTo(rental.getId());
         }
-        @Nested
-        @DisplayName("property owner canceling a rental tests")
-        class OwnerRentalCancelTests{
 
-            @Tag("UnitTest")
-            @Tag("TDD")
-            @DisplayName("Should not permit the owner to cancel a rental that is not confirmed")
-            @ParameterizedTest
-            @EnumSource(names = {"PENDING","DENIED","EXPIRED","RESTRAINED"} , value = RentalState.class)
-            void shouldNotPermitTheOwnerToCancelARentalThatIsNotConfirmed(RentalState state){
-                rental = Rental.builder().
-                        id(UUID.randomUUID()).
-                        state(state).
-                        build();
-
-                assertThatExceptionOfType(IllegalArgumentException.class).
-                        isThrownBy(()->sut.cancel(rental));
-
-            }
-
-
-
-        }
     }
 }

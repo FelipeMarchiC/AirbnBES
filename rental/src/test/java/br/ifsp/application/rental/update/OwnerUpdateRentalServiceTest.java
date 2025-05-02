@@ -16,10 +16,7 @@ import org.mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -89,6 +86,22 @@ public class OwnerUpdateRentalServiceTest {
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental));
         }
 
+
+    }
+    @DisplayName("Cancel Confirmed Rental")
+    @Nested
+    class CancelConfirmedRentalTests{
+        @DisplayName("Should not permit to cancel an unconfirmed rental")
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @ParameterizedTest
+        @EnumSource(value = RentalState.class, names = {"PENDING","DENIED","EXPIRED","RESTRAINED","CANCELLED"})
+        void shouldNotPermitToCancelAnUnconfirmedRental(RentalState state){
+            Rental rental = Rental.builder().
+                    id(UUID.randomUUID())
+                    .state(state).build();
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(sut.cancel(rental));
+        }
     }
 
 

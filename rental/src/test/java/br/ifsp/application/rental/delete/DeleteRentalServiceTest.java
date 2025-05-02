@@ -1,16 +1,19 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -60,6 +63,29 @@ class DeleteRentalServiceTest {
             UUID deletedId = sut.delete(rental);
             verify(rentalRepositoryMock).deleteById(rental.getId());
             assertThat(deletedId).isEqualTo(rental.getId());
+        }
+        @Nested
+        @DisplayName("property owner canceling a rental tests")
+        class OwnerRentalCancelTests{
+
+            @Tag("UnitTest")
+            @Tag("TDD")
+            @DisplayName("Should not permit the owner to cancel a rental that is not confirmed")
+            @ParameterizedTest
+            @EnumSource(names = {"PENDING","DENIED","EXPIRED","RESTRAINED"} , value = RentalState.class)
+            void shouldNotPermitTheOwnerToCancelARentalThatIsNotConfirmed(RentalState state){
+                rental = Rental.builder().
+                        id(UUID.randomUUID()).
+                        state(state).
+                        build();
+
+                assertThatExceptionOfType(IllegalArgumentException.class).
+                        isThrownBy(()->sut.cancel(rental));
+
+            }
+
+
+
         }
     }
 }

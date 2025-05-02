@@ -8,6 +8,7 @@ import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Price;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+@Service
 public class CreateRentalService implements ICreateRentalService {
     private final JpaUserRepository userRepository;
     private final JpaPropertyRepository propertyRepository;

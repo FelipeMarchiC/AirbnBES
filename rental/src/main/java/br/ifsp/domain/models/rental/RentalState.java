@@ -1,5 +1,10 @@
 package br.ifsp.domain.models.rental;
 
 public enum RentalState {
-    PENDING,DENIED,EXPIRED,CONFIRMED,RESTRAINED
+    CANCELLED,
+    CONFIRMED,
+    DENIED,
+    EXPIRED,
+    PENDING,
+    RESTRAINED
 }

@@ -28,6 +28,10 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
+        if (rental.getState() != RentalState.CONFIRMED) {
+            throw new IllegalArgumentException("Rental is not in a valid state to be cancelled");
+        }
+
         rental.setState(RentalState.CANCELLED);
 
         return rentalRepository.save(rental);

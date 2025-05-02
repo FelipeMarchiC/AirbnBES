@@ -132,6 +132,7 @@ class CreateRentalServiceTest {
             assertThat(rental.getStartDate()).isEqualTo(startDate);
             assertThat(rental.getEndDate()).isEqualTo(endDate);
             assertThat(rental.getStartDate()).isBefore(rental.getEndDate());
+            assertThat(rental.getState()).isEqualTo(RentalState.PENDING);
             assertThat(rental).isNotNull();
         }
 

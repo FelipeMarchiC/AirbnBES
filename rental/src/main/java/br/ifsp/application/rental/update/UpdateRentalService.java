@@ -20,6 +20,7 @@ public class UpdateRentalService {
             throw new UnsupportedOperationException(String.format("it´s not possible to deny a rental that is %s",rental.getState()));
         }
         rental.setState(RentalState.DENIED);
+
     }
 
 

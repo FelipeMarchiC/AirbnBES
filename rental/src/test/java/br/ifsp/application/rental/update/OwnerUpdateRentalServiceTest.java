@@ -25,12 +25,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-public class UpdateRentalServiceTest {
+public class OwnerUpdateRentalServiceTest {
 
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks
-    private UpdateRentalService sut;
+    private OwnerUpdateRentalService sut;
 
     private User tenant;
     private Property property;
@@ -213,4 +213,33 @@ public class UpdateRentalServiceTest {
                 .withMessage("Rental is not in a PENDING state and cannot be confirmed.");
     }
 
+    @Nested
+    @DisplayName("Null Input Validation Tests")
+    class NullInputValidationTests {
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when rental is null on deny")
+        @Test
+        void shouldThrowExceptionWhenRentalIsNullOnDeny() {
+            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).deny(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when rental ID is null on confirm")
+        @Test
+        void shouldThrowExceptionWhenRentalIdIsNullOnConfirm() {
+            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).confirmRental(null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rental not found");
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when rental is null on restrain conflict")
+        @Test
+        void shouldThrowExceptionWhenRentalIsNullOnRestrainConflict() {
+            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).restrainPendingRentalsInConflict(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+    }
 }

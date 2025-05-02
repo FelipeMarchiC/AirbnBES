@@ -25,12 +25,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-public class UpdateRentalServiceTest {
+public class OwnerUpdateRentalServiceTest {
 
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks
-    private UpdateRentalService sut;
+    private OwnerUpdateRentalService sut;
 
     private User tenant;
     private Property property;

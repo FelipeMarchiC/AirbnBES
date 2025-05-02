@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class TenantUpdateRentalServiceTest {
+public class TenantOwnerUpdateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks private TenantUpdateRentalService sut;

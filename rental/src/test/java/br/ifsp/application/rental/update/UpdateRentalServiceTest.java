@@ -189,4 +189,28 @@ public class UpdateRentalServiceTest {
         }
     }
 
+    @Tag("UnitTest")
+    @Tag("TDD")
+    @DisplayName("Should not allow confirming a rental that is not in PENDING state")
+    @ParameterizedTest
+    @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED", "RESTRAINED"})
+    void shouldNotAllowConfirmingRentalNotInPendingState(RentalState state) {
+        UUID rentalId = UUID.randomUUID();
+
+        Rental rental = Rental.builder()
+                .id(rentalId)
+                .user(tenant)
+                .property(property)
+                .startDate(LocalDate.of(1801, 2, 1))
+                .endDate(LocalDate.of(1801, 2, 10))
+                .state(state)
+                .build();
+
+        when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+                .isThrownBy(() -> sut.confirmRental(rentalId))
+                .withMessage("Rental is not in a PENDING state and cannot be confirmed.");
+    }
+
 }

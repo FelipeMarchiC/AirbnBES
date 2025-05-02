@@ -126,6 +126,7 @@ public class TenantUpdateRentalServiceTest {
 
             Rental rental = sut.cancelRental(tenantId, rentalId);
 
+            verify(userRepositoryMock, times(1)).findById(tenantId);
             verify(rentalRepositoryMock, times(1)).save(rental);
 
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);

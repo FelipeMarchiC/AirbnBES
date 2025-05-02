@@ -127,13 +127,13 @@ class CreateRentalServiceTest {
 
             Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
 
+            assertThat(rental).isNotNull();
             assertThat(rental.getUser()).isEqualTo(tenant);
             assertThat(rental.getProperty()).isEqualTo(property);
             assertThat(rental.getStartDate()).isEqualTo(startDate);
             assertThat(rental.getEndDate()).isEqualTo(endDate);
             assertThat(rental.getStartDate()).isBefore(rental.getEndDate());
             assertThat(rental.getState()).isEqualTo(RentalState.PENDING);
-            assertThat(rental).isNotNull();
         }
 
         @Tag("TDD")

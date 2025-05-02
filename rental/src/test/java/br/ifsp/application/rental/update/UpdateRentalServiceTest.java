@@ -88,6 +88,24 @@ public class UpdateRentalServiceTest {
             rental.setState(state);
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental));
         }
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should disassociate Rental from property if the Rental was denied")
+        @Test
+        void shouldDisassociateRentalFromPropertyIfRentalWasDenied(){
+            Property property1 = new Property();
+            Rental rental = Rental.builder().
+                    id(UUID.randomUUID())
+                    .state(RentalState.PENDING)
+                    .property(property1)
+                    .build();
+
+            property1.addRental(rental);
+
+            sut.deny(rental);
+
+            assertThat(rental).isNotIn(property1.getRentals());
+        }
     }
 
 

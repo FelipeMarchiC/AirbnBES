@@ -1,9 +1,6 @@
 package br.ifsp.application.rental.update;
 
-import br.ifsp.application.property.JpaPropertyRepository;
-import br.ifsp.application.rental.create.CreateRentalService;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
@@ -12,11 +9,9 @@ import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import java.math.BigDecimal;
@@ -29,10 +24,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+
 public class UpdateRentalServiceTest {
-
-
 
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
@@ -95,7 +88,24 @@ public class UpdateRentalServiceTest {
             rental.setState(state);
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental));
         }
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should disassociate Rental from property if the Rental was denied")
+        @Test
+        void shouldDisassociateRentalFromPropertyIfRentalWasDenied(){
+            Property property1 = new Property();
+            Rental rental = Rental.builder().
+                    id(UUID.randomUUID())
+                    .state(RentalState.PENDING)
+                    .property(property1)
+                    .build();
 
+            property1.addRental(rental);
+
+            sut.deny(rental);
+
+            assertThat(rental).isNotIn(property1.getRentals());
+        }
     }
 
 

@@ -6,11 +6,11 @@ import br.ifsp.domain.models.rental.RentalState;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-public class UpdateRentalService {
+public class OwnerUpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;
 
-    public UpdateRentalService(JpaRentalRepository rentalRepository) {
+    public OwnerUpdateRentalService(JpaRentalRepository rentalRepository) {
         this.rentalRepository = rentalRepository;
     }
 

@@ -100,7 +100,7 @@ public class OwnerUpdateRentalServiceTest {
             Rental rental = Rental.builder().
                     id(UUID.randomUUID())
                     .state(state).build();
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(sut.cancel(rental));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental));
         }
     }
 
@@ -217,7 +217,7 @@ public class OwnerUpdateRentalServiceTest {
         @DisplayName("Should throw exception when rental is null on deny")
         @Test
         void shouldThrowExceptionWhenRentalIsNullOnDeny() {
-            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).deny(null))
+            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).deny(null))
                     .isInstanceOf(NullPointerException.class);
         }
 
@@ -225,7 +225,7 @@ public class OwnerUpdateRentalServiceTest {
         @DisplayName("Should throw exception when rental ID is null on confirm")
         @Test
         void shouldThrowExceptionWhenRentalIdIsNullOnConfirm() {
-            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).confirmRental(null))
+            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).confirmRental(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Rental not found");
         }
@@ -234,7 +234,7 @@ public class OwnerUpdateRentalServiceTest {
         @DisplayName("Should throw exception when rental is null on restrain conflict")
         @Test
         void shouldThrowExceptionWhenRentalIsNullOnRestrainConflict() {
-            assertThatThrownBy(() -> new UpdateRentalService(rentalRepositoryMock).restrainPendingRentalsInConflict(null))
+            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).restrainPendingRentalsInConflict(null))
                     .isInstanceOf(NullPointerException.class);
         }
     }

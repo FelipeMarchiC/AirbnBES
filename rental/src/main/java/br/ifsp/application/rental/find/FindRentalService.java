@@ -12,11 +12,16 @@ public class FindRentalService {
     public FindRentalService(JpaRentalRepository jpaRentalRepository) {
         this.jpaRentalRepository = jpaRentalRepository;
     }
+
     public List<Rental> getRentalHistoryByProperty(UUID propertyId) {
+        if (propertyId == null)
+            throw new IllegalArgumentException("propertyId cannot be null");
         return jpaRentalRepository.findByPropertyId(propertyId);
     }
-    public List<Rental> getRentalHistoryByTenant(UUID tenantId) {
-        return jpaRentalRepository.findByUserId(tenantId);
 
+    public List<Rental> getRentalHistoryByTenant(UUID tenantId) {
+        if (tenantId == null)
+            throw new IllegalArgumentException("tenantId cannot be null");
+        return jpaRentalRepository.findByUserId(tenantId);
     }
 }

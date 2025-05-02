@@ -1,7 +1,6 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.property.JpaPropertyRepository;
-import br.ifsp.application.rental.create.CreateRentalService;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.when;
 
 public class TenantUpdateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
-    @Mock private JpaPropertyRepository propertyRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @InjectMocks private TenantUpdateRentalService sut;
 
@@ -51,7 +49,7 @@ public class TenantUpdateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        sut = new TenantUpdateRentalService();
+        sut = new TenantUpdateRentalService(rentalRepositoryMock);
     }
 
     @AfterEach

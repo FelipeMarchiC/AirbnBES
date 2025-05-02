@@ -1,31 +1,32 @@
 package br.ifsp.application.rental.update;
 
-import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.user.JpaUserRepository;
-import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
 
-import java.time.Clock;
-import java.time.LocalDate;
 import java.util.UUID;
 
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
     private final JpaRentalRepository rentalRepository;
+    private final JpaUserRepository userRepository;
 
     public TenantUpdateRentalService(
-            JpaRentalRepository rentalRepository
+            JpaRentalRepository rentalRepository,
+            JpaUserRepository userRepository
     ) {
         this.rentalRepository = rentalRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public Rental cancelRental(UUID tenantId, UUID rentalId) {
 
+        userRepository.findById(tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
         rental.setState(RentalState.CANCELLED);
 

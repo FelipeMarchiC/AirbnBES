@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"br.ifsp"})
 @EntityScan(basePackages = "br.ifsp")
 @EnableJpaRepositories(basePackages = "br.ifsp")
 public class AirBnbesApplication {

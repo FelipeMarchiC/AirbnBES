@@ -2,10 +2,12 @@ package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class FindRentalService {
     private final JpaRentalRepository jpaRentalRepository;
 

@@ -26,10 +26,10 @@ public class UpdateRentalService {
 
     public void confirmRental(UUID rentalId) {
         Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
 
-        if (rental.getState() != RentalState.PENDING) {
-            throw new IllegalStateException("Rental is not in pending state");
+        if (!rental.getState().equals(RentalState.PENDING)) {
+            throw new UnsupportedOperationException("Rental is not in a PENDING state and cannot be confirmed.");
         }
 
         var conflictingRentals = rentalRepository.findRentalsByOverlapAndState(

@@ -60,4 +60,22 @@ class FindRentalServiceTest {
         }
     }
 
+    @Tag("UnitTest")
+    @DisplayName("Should throw exception when property ID is null")
+    @Test
+    void shouldThrowExceptionWhenPropertyIdIsNull_explicitEquivalenceClass() {
+        assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("propertyId cannot be null");
+    }
+
+    @Tag("UnitTest")
+    @DisplayName("Should throw exception when tenant ID is null")
+    @Test
+    void shouldThrowExceptionWhenTenantIdIsNull_explicitEquivalenceClass() {
+        assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("tenantId cannot be null");
+    }
+
 }

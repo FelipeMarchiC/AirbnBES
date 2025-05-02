@@ -16,7 +16,7 @@ public class FindRentalService {
         return jpaRentalRepository.findByPropertyId(propertyId);
     }
     public List<Rental> getRentalHistoryByTenant(UUID tenantId) {
-        return jpaRentalRepository.findByTenantId(tenantId);
+        return jpaRentalRepository.findByUserId(tenantId);
 
     }
 }

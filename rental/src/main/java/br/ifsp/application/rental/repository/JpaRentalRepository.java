@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface JpaRentalRepository extends JpaRepository<Rental, UUID> {
     List<Rental> findByPropertyId(UUID propertyId);
 
-    List<Rental> findByTenantId(UUID tenantId);
+    List<Rental> findByUserId(UUID tenantId);
 
     @Query("SELECT r FROM Rental r WHERE r.property.id = :propertyId " +
             "AND r.state = :state " +

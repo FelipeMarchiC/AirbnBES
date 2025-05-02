@@ -1,6 +1,5 @@
 package br.ifsp.application.rental.update;
 
-import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
@@ -10,19 +9,13 @@ import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
-import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +42,7 @@ public class TenantUpdateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        sut = new TenantUpdateRentalService(rentalRepositoryMock);
+        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock);
     }
 
     @AfterEach
@@ -120,16 +113,43 @@ public class TenantUpdateRentalServiceTest {
             UUID tenantId = tenant.getId();
             UUID rentalId = rental.getId();
 
-            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            setupFindByIdMocks(tenantId, rentalId);
             when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             Rental rental = sut.cancelRental(tenantId, rentalId);
 
             verify(userRepositoryMock, times(1)).findById(tenantId);
+            verify(rentalRepositoryMock, times(1)).findById(rentalId);
             verify(rentalRepositoryMock, times(1)).save(rental);
 
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
         }
+    }
+
+    @Nested
+    @Tag("UnitTest")
+    @DisplayName("Testing invalid equivalent classes")
+    class TestingInvalidEquivalentClasses {
+        @Tag("TDD")
+        @Test()
+        @DisplayName("Should throw exception when rental state is different from confirmed")
+        void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed(
+        ) {
+            UUID tenantId = tenant.getId();
+            UUID rentalId = rental.getId();
+
+            rental.setState(RentalState.PENDING);
+
+            setupFindByIdMocks(tenantId, rentalId);
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                    .isThrownBy(() -> sut.cancelRental(tenantId, rentalId))
+                    .withMessageContaining("Rental is not in a valid state to be cancelled");
+        }
+    }
+
+    private void setupFindByIdMocks(UUID tenantId, UUID rentalId) {
+        when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+        when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
     }
 }

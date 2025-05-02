@@ -10,6 +10,7 @@ import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -112,7 +113,7 @@ class CreateRentalServiceTest {
         @CsvSource({
                 "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22"
         })
-        @DisplayName("Should create when rental start date is before endDate")
+        @DisplayName("Should create rental when start date is before endDate")
         void shouldCreateRentalWhenStartDateIsBeforeEndDate(
                 UUID userId,
                 UUID propertyId,
@@ -125,6 +126,11 @@ class CreateRentalServiceTest {
 
             Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
 
+            assertThat(rental.getUser()).isEqualTo(tenant);
+            assertThat(rental.getProperty()).isEqualTo(property);
+            assertThat(rental.getStartDate()).isEqualTo(startDate);
+            assertThat(rental.getEndDate()).isEqualTo(endDate);
+            assertThat(rental.getStartDate()).isBefore(rental.getEndDate());
             assertThat(rental).isNotNull();
         }
 

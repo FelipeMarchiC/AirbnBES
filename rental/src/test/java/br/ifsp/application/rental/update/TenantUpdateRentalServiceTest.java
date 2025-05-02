@@ -31,7 +31,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TenantUpdateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
@@ -125,6 +125,8 @@ public class TenantUpdateRentalServiceTest {
             when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             Rental rental = sut.cancelRental(tenantId, rentalId);
+
+            verify(rentalRepositoryMock, times(1)).save(rental);
 
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
         }

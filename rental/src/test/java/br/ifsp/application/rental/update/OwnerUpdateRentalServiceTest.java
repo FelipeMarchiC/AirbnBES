@@ -132,6 +132,44 @@ public class OwnerUpdateRentalServiceTest {
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
 
         }
+        
+        @DisplayName("Should change Restrained rentals that conflicts to Pending")
+        @Test
+        @Tag("UnitTest")
+        @Tag("TDD")
+        void shouldChangeRestrainedRentalsThatConflictsToPending(){
+            property = new Property();
+            property.setId(UUID.randomUUID());
+            Rental rental = Rental.builder().
+                    startDate(LocalDate.now().plusDays(1)).
+                    endDate(LocalDate.now().plusDays(10)).
+                    id(UUID.randomUUID()).
+                    property(property).
+                    state(RentalState.CONFIRMED).
+                    build();
+
+            Rental restrainedRental = Rental.builder().
+                    startDate(LocalDate.now().plusDays(1)).
+                    endDate(LocalDate.now().plusDays(10)).
+                    id(UUID.randomUUID()).
+                    property(property).
+                    state(RentalState.RESTRAINED).
+                    build();
+
+            Rental restrainedRental1 = Rental.builder().
+                    startDate(LocalDate.now().plusDays(1)).
+                    endDate(LocalDate.now().plusDays(10)).
+                    id(UUID.randomUUID()).
+                    property(property).
+                    state(RentalState.RESTRAINED).
+                    build();
+            List<Rental> rentals = List.of(restrainedRental, restrainedRental1);
+
+            when(rentalRepositoryMock.findRentalsByOverlapAndState(property.getId(),RentalState.RESTRAINED,rental.getStartDate(),rental.getEndDate(),rental.getId())).thenReturn(rentals);
+            sut.cancel(rental,null);
+            assertThat(rentals).allMatch(rental1 -> rental1.getState().equals(RentalState.PENDING));
+
+        }
     }
 
 

@@ -3,9 +3,12 @@ package br.ifsp.application.rental.delete;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
+import org.springframework.stereotype.Service;
+
 
 import java.util.UUID;
 
+@Service
 public class DeleteRentalService {
 
     private final JpaRentalRepository JpaRentalRepository;

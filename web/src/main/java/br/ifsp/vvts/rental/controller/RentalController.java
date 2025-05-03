@@ -1,5 +1,6 @@
 package br.ifsp.vvts.rental.controller;
 
+import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.OwnerUpdateRentalService;
 import br.ifsp.domain.models.rental.Rental;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class RentalController {
     private final AuthenticationInfoService authService;
     private final OwnerUpdateRentalService ownerUpdateRentalService;
+    private final DeleteRentalService deleteRentalService;
 
     private final FindRentalService findRentalService;
 
@@ -53,6 +55,13 @@ public class RentalController {
         LocalDate parsedDate = cancelDate != null ? LocalDate.parse(cancelDate) : null;
         ownerUpdateRentalService.cancel(rental, parsedDate);
         return ResponseEntity.ok("Rental cancelled successfully.");
+    }
+
+    @DeleteMapping("/{rentalId}")
+    public ResponseEntity<?> deleteRental(@PathVariable UUID rentalId) {
+        Rental rental = deleteRentalService.getRentalById(rentalId);
+        UUID deletedId = deleteRentalService.delete(rental);
+        return ResponseEntity.ok("Rental deleted successfully: " + deletedId);
     }
 
 }

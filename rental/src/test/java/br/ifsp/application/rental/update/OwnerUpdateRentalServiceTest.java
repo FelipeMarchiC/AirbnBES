@@ -126,8 +126,9 @@ public class OwnerUpdateRentalServiceTest {
             Rental rental = Rental.builder()
                     .id(UUID.randomUUID())
                     .startDate(LocalDate.now())
+                    .state(RentalState.CONFIRMED)
                     .build();
-            sut.cancel(rental, LocalDate.now().plusDays(1));
+            sut.cancel(rental, LocalDate.now().minusDays(1));
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
 
         }

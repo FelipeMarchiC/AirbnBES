@@ -76,8 +76,12 @@ public class OwnerUpdateRentalService {
 
     public void cancel(Rental rental, LocalDate cancelDate) {
         if(cancelDate == null) cancelDate = LocalDate.now();
-        if(!rental.getState().equals(RentalState.CONFIRMED) || cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
+        if(cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
+        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
 
+
+
+        rental.setState(RentalState.CANCELLED);
     }
 }
 

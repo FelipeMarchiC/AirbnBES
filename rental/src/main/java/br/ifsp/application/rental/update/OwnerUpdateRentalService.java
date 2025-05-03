@@ -76,6 +76,7 @@ public class OwnerUpdateRentalService {
 
     public void cancel(Rental rental) {
         if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
+
     }
 }
 

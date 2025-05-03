@@ -24,9 +24,14 @@ public class OwnerUpdateRentalService {
     }
 
 
-    public void confirmRental(UUID rentalId) {
+    public void confirmRental(UUID rentalId, UUID userId) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+
+        UUID ownerId = rental.getProperty().getOwner().getId();
+        if (!ownerId.equals(userId)) {
+            throw new SecurityException("Only the property owner can confirm the rental.");
+        }
 
         if (!rental.getState().equals(RentalState.PENDING)) {
             throw new UnsupportedOperationException("Rental is not in a PENDING state and cannot be confirmed.");

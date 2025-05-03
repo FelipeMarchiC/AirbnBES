@@ -1,8 +1,11 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
+import jakarta.persistence.EntityNotFoundException;
+import jdk.jfr.Label;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -17,11 +20,18 @@ public class OwnerUpdateRentalService {
     }
 
 
-    public void deny(Rental rental){
+    public void deny(UUID rentalId){
+        Rental rental;
+        if(rentalRepository.findById(rentalId).isEmpty()) throw new EntityNotFoundException("o Aluguel não existe");
+        else{
+            rental= rentalRepository.findById(rentalId).get();
+        }
+
         if(!rental.getState().equals(RentalState.PENDING) && !rental.getState().equals(RentalState.RESTRAINED)){
             throw new UnsupportedOperationException(String.format("it´s not possible to deny a rental that is %s",rental.getState()));
         }
         rental.setState(RentalState.DENIED);
+        rentalRepository.save(rental);
 
     }
 
@@ -81,7 +91,12 @@ public class OwnerUpdateRentalService {
         rentalRepository.save(rental);
     }
 
-    public void cancel(Rental rental, LocalDate cancelDate) {
+    public void cancel(UUID rentalId, LocalDate cancelDate) {
+        Rental rental;
+        if(rentalRepository.findById(rentalId).isPresent()){
+            rental = rentalRepository.findById(rentalId).get();
+        }
+        else throw new EntityNotFoundException("Não existe esse aluguel");
         if(cancelDate == null) cancelDate = LocalDate.now();
         if(cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
         if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
@@ -90,14 +105,22 @@ public class OwnerUpdateRentalService {
         List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
         conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
 
+
+
     }
-    public void cancel(Rental rental) {
+    public void cancel(UUID rentalId) {
+        Rental rental;
+        if(rentalRepository.findById(rentalId).isPresent()){
+            rental = rentalRepository.findById(rentalId).get();
+        }
+        else throw new EntityNotFoundException("Não existe esse aluguel");
         if(LocalDate.now().isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
         if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
 
         rental.setState(RentalState.CANCELLED);
         List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
         conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
+
 
     }
 

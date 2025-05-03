@@ -72,7 +72,8 @@ public class OwnerUpdateRentalServiceTest {
         void shouldSetAPendingRentalAsDeniedIfPropertyOwnerDeniesIt(){
             Rental rental = new Rental();
             rental.setState(RentalState.PENDING);
-            sut.deny(rental);
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            sut.deny(rental.getId());
             assertThat(rental.getState()).isEqualTo(RentalState.DENIED);
         }
         @Tag("UnitTest")
@@ -82,8 +83,10 @@ public class OwnerUpdateRentalServiceTest {
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED"})
         void shouldNotPermitDenialToARentalWithStateDifferentThanPendingOrRestrained(RentalState state){
             Rental rental = new Rental();
+
             rental.setState(state);
-            assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental));
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(()->sut.deny(rental.getId()));
         }
 
 
@@ -101,7 +104,8 @@ public class OwnerUpdateRentalServiceTest {
                     id(UUID.randomUUID())
                     .startDate(LocalDate.now().plusDays(10))
                     .state(state).build();
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental,null));
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental.getId()));
         }
 
         @DisplayName("Should not allow a cancel date after the Start date of rental")
@@ -116,7 +120,8 @@ public class OwnerUpdateRentalServiceTest {
                     .state(RentalState.CONFIRMED)
                     .startDate(startDate)
                     .build();
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental,cancelDate));
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental.getId(),cancelDate));
         }
 
         @DisplayName("Should change rental state to canceled")
@@ -132,7 +137,8 @@ public class OwnerUpdateRentalServiceTest {
                     .startDate(LocalDate.now())
                     .state(RentalState.CONFIRMED)
                     .build();
-            sut.cancel(rental, LocalDate.now().minusDays(1));
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            sut.cancel(rental.getId(), LocalDate.now().minusDays(1));
             assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
 
         }
@@ -168,12 +174,16 @@ public class OwnerUpdateRentalServiceTest {
                     state(RentalState.RESTRAINED).
                     build();
             List<Rental> rentals = List.of(restrainedRental, restrainedRental1);
-
+            mockReturnSetups(rental);
             when(rentalRepositoryMock.findRentalsByOverlapAndState(property.getId(),RentalState.RESTRAINED,rental.getStartDate(),rental.getEndDate(),rental.getId())).thenReturn(rentals);
-            sut.cancel(rental);
+            sut.cancel(rental.getId());
             assertThat(rentals).allMatch(rental1 -> rental1.getState().equals(RentalState.PENDING));
 
         }
+    }
+
+    private void mockReturnSetups(Rental rental) {
+        when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
     }
 
 

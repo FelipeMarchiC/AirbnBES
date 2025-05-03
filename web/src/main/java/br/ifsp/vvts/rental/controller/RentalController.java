@@ -44,7 +44,7 @@ public class RentalController {
     @PutMapping("/{rentalId}/deny")
     public ResponseEntity<?> denyRental(@PathVariable UUID rentalId) {
         Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
-        ownerUpdateRentalService.deny(rental);
+        ownerUpdateRentalService.deny(rental.getId());
         return ResponseEntity.ok("Rental denied successfully.");
     }
 
@@ -53,7 +53,7 @@ public class RentalController {
                                           @RequestParam(required = false) String cancelDate) {
         Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
         LocalDate parsedDate = cancelDate != null ? LocalDate.parse(cancelDate) : null;
-        ownerUpdateRentalService.cancel(rental, parsedDate);
+        ownerUpdateRentalService.cancel(rental.getId(), parsedDate);
         return ResponseEntity.ok("Rental cancelled successfully.");
     }
 

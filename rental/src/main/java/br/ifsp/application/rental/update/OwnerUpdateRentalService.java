@@ -89,6 +89,15 @@ public class OwnerUpdateRentalService {
         conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
 
     }
+    public void cancel(Rental rental) {
+        if(LocalDate.now().isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
+        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
+
+        rental.setState(RentalState.CANCELLED);
+        List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
+        conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
+
+    }
 
     private List<Rental> findRestrainedConflictingRentals(Rental rental) {
         return rentalRepository.findRentalsByOverlapAndState(

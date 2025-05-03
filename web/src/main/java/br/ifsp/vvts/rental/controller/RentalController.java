@@ -34,21 +34,21 @@ public class RentalController {
         return ResponseEntity.ok("Hello: " + userId.toString());
     }
 
-    @PostMapping("/{rentalId}/confirm")
+    @PutMapping("/{rentalId}/confirm")
     public ResponseEntity<?> confirmRental(@PathVariable UUID rentalId) {
         UUID ownerId = authService.getAuthenticatedUserId();
         ownerUpdateRentalService.confirmRental(rentalId, ownerId);
         return ResponseEntity.ok("Rental confirmed successfully.");
     }
 
-    @PostMapping("/{rentalId}/deny")
+    @PutMapping("/{rentalId}/deny")
     public ResponseEntity<?> denyRental(@PathVariable UUID rentalId) {
         Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
         ownerUpdateRentalService.deny(rental);
         return ResponseEntity.ok("Rental denied successfully.");
     }
 
-    @PostMapping("/{rentalId}/cancel")
+    @PutMapping("/{rentalId}/cancel")
     public ResponseEntity<?> cancelRental(@PathVariable UUID rentalId,
                                           @RequestParam(required = false) String cancelDate) {
         Rental rental = ownerUpdateRentalService.getRentalById(rentalId);

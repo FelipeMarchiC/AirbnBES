@@ -206,7 +206,7 @@ public class OwnerUpdateRentalServiceTest {
                     rental.getId()
             )).thenReturn(List.of());
 
-            sut.confirmRental(rentalId);
+            sut.confirmRental(rentalId, property.getOwner().getId());
 
             assertThat(rental.getState()).isEqualTo(RentalState.CONFIRMED);
             verify(rentalRepositoryMock).save(rental);
@@ -277,7 +277,7 @@ public class OwnerUpdateRentalServiceTest {
         when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
-                .isThrownBy(() -> sut.confirmRental(rentalId))
+                .isThrownBy(() -> sut.confirmRental(rentalId, property.getOwner().getId()))
                 .withMessage("Rental is not in a PENDING state and cannot be confirmed.");
     }
 
@@ -297,7 +297,7 @@ public class OwnerUpdateRentalServiceTest {
         @DisplayName("Should throw exception when rental ID is null on confirm")
         @Test
         void shouldThrowExceptionWhenRentalIdIsNullOnConfirm() {
-            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).confirmRental(null))
+            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).confirmRental(null, UUID.randomUUID()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Rental not found");
         }

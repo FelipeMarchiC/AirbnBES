@@ -100,7 +100,7 @@ public class OwnerUpdateRentalServiceTest {
             Rental rental = Rental.builder().
                     id(UUID.randomUUID())
                     .state(state).build();
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental,null));
         }
         @DisplayName("Should not allow a cancel date after the Start date of rental")
         @Test
@@ -108,13 +108,13 @@ public class OwnerUpdateRentalServiceTest {
         @Tag("UnitTest")
         void shouldNotAllowACancelDateAfterTheStartDateOfRental(){
             LocalDate startDate = LocalDate.now();
-            LocalDate cancelingDate = LocalDate.now().plusDays(10);
+            LocalDate cancelDate = LocalDate.now().plusDays(10);
             Rental rental= Rental.builder()
                     .id(UUID.randomUUID())
                     .state(RentalState.CONFIRMED)
                     .startDate(startDate)
                     .build();
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental));
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental,cancelDate));
         }
     }
 

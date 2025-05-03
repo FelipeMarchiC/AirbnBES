@@ -74,8 +74,9 @@ public class OwnerUpdateRentalService {
         rentalRepository.save(rental);
     }
 
-    public void cancel(Rental rental) {
-        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
+    public void cancel(Rental rental, LocalDate cancelDate) {
+        if(cancelDate == null) cancelDate = LocalDate.now();
+        if(!rental.getState().equals(RentalState.CONFIRMED) || cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
 
     }
 }

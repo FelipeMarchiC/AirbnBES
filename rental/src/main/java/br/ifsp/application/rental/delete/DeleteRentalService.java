@@ -22,4 +22,9 @@ public class DeleteRentalService {
         JpaRentalRepository.deleteById(rental.getId());
         return rental.getId();
     }
+
+    public Rental getRentalById(UUID id) {
+        return JpaRentalRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+    }
 }

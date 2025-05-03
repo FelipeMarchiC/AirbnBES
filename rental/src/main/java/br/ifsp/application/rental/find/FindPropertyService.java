@@ -6,10 +6,16 @@ import br.ifsp.domain.models.property.Property;
 import java.util.List;
 
 public class FindPropertyService {
+    private final JpaPropertyRepository jpaPropertyRepository;
+
     public FindPropertyService(JpaPropertyRepository jpaPropertyRepository) {
+        this.jpaPropertyRepository = jpaPropertyRepository;
     }
 
     public List<Property> findByLocation(String location) {
-        return null;
+        if (location == null || location.isBlank()) {
+            throw new IllegalArgumentException("location cannot be null or blank");
+        }
+        return jpaPropertyRepository.findByLocation(location);
     }
 }

@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -45,5 +46,13 @@ public class RentalController {
         return ResponseEntity.ok("Rental denied successfully.");
     }
 
+    @PostMapping("/{rentalId}/cancel")
+    public ResponseEntity<?> cancelRental(@PathVariable UUID rentalId,
+                                          @RequestParam(required = false) String cancelDate) {
+        Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
+        LocalDate parsedDate = cancelDate != null ? LocalDate.parse(cancelDate) : null;
+        ownerUpdateRentalService.cancel(rental, parsedDate);
+        return ResponseEntity.ok("Rental cancelled successfully.");
+    }
 
 }

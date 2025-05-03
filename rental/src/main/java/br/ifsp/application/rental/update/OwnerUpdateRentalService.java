@@ -1,16 +1,13 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
-
+import org.springframework.stereotype.Service;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
-
+@Service
 public class OwnerUpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;

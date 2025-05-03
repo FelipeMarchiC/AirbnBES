@@ -99,6 +99,7 @@ public class OwnerUpdateRentalServiceTest {
         void shouldNotPermitToCancelAnUnconfirmedRental(RentalState state){
             Rental rental = Rental.builder().
                     id(UUID.randomUUID())
+                    .startDate(LocalDate.now().plusDays(10))
                     .state(state).build();
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(()->sut.cancel(rental,null));
         }
@@ -123,8 +124,11 @@ public class OwnerUpdateRentalServiceTest {
         @Tag("UnitTest")
         @Tag("TDD")
         void shouldChangeRentalStateToCanceled(){
+            property= new Property();
+            property.setId(UUID.randomUUID());
             Rental rental = Rental.builder()
                     .id(UUID.randomUUID())
+                    .property(property)
                     .startDate(LocalDate.now())
                     .state(RentalState.CONFIRMED)
                     .build();
@@ -166,7 +170,7 @@ public class OwnerUpdateRentalServiceTest {
             List<Rental> rentals = List.of(restrainedRental, restrainedRental1);
 
             when(rentalRepositoryMock.findRentalsByOverlapAndState(property.getId(),RentalState.RESTRAINED,rental.getStartDate(),rental.getEndDate(),rental.getId())).thenReturn(rentals);
-            sut.cancel(rental,null);
+            sut.cancel(rental);
             assertThat(rentals).allMatch(rental1 -> rental1.getState().equals(RentalState.PENDING));
 
         }

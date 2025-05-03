@@ -37,4 +37,26 @@ class FindPropertyServiceTest {
             verify(jpaPropertyRepository).findByLocation(location);
         }
     }
+    @Nested
+    @DisplayName("Null or Blank Input Validation Tests")
+    class NullOrBlankInputValidationTests {
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when location is null")
+        @Test
+        void shouldThrowExceptionWhenLocationIsNull() {
+            assertThatThrownBy(() -> findPropertyService.findByLocation(null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("location cannot be null or blank");
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when location is blank")
+        @Test
+        void shouldThrowExceptionWhenLocationIsBlank() {
+            assertThatThrownBy(() -> findPropertyService.findByLocation("  "))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("location cannot be null or blank");
+        }
+    }
 }

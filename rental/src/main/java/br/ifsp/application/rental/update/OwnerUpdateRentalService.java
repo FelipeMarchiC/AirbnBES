@@ -104,6 +104,11 @@ public class OwnerUpdateRentalService {
                 rental.getId()
         );
     }
+
+    public Rental getRentalById(UUID id) {
+        return rentalRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+    }
 }
 
 

@@ -1,11 +1,16 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
+
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
+
 public class OwnerUpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;
@@ -84,9 +89,20 @@ public class OwnerUpdateRentalService {
         if(cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
         if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
 
-
-
         rental.setState(RentalState.CANCELLED);
+        List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
+        conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
+
+    }
+
+    private List<Rental> findRestrainedConflictingRentals(Rental rental) {
+        return rentalRepository.findRentalsByOverlapAndState(
+                rental.getProperty().getId(),
+                RentalState.RESTRAINED,
+                rental.getStartDate(),
+                rental.getEndDate(),
+                rental.getId()
+        );
     }
 }
 

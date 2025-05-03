@@ -86,7 +86,6 @@ public class OwnerUpdateRentalService {
 
         rental.setState(RentalState.CANCELLED);
         List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
-        System.out.println(conflictingRentals);
         conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
 
     }

@@ -2,6 +2,7 @@ package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.OwnerUpdateRentalService;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.security.auth.AuthenticationInfoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +36,13 @@ public class RentalController {
         UUID ownerId = authService.getAuthenticatedUserId();
         ownerUpdateRentalService.confirmRental(rentalId, ownerId);
         return ResponseEntity.ok("Rental confirmed successfully.");
+    }
+
+    @PostMapping("/{rentalId}/deny")
+    public ResponseEntity<?> denyRental(@PathVariable UUID rentalId) {
+        Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
+        ownerUpdateRentalService.deny(rental);
+        return ResponseEntity.ok("Rental denied successfully.");
     }
 
 

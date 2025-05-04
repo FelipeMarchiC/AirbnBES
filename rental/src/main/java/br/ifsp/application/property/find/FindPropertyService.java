@@ -28,4 +28,8 @@ public class FindPropertyService {
         }
         return jpaPropertyRepository.findByDailyRateBetween(min, max);
     }
+
+    public List<Property> findAll() {
+        return null;
+    }
 }

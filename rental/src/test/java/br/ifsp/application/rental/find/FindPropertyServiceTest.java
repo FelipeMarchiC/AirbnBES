@@ -66,6 +66,7 @@ class FindPropertyServiceTest {
     class PropertySearchByPriceRangeTests {
 
         @Tag("UnitTest")
+        @Tag("TDD")
         @DisplayName("Should return properties within given price range")
         @Test
         void shouldReturnPropertiesWithinGivenPriceRange() {
@@ -95,4 +96,22 @@ class FindPropertyServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Property FindAll Tests")
+    class PropertyFindAllTests {
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should return all properties from repository")
+        @Test
+        void shouldReturnAllProperties() {
+            List<Property> mockProperties = List.of(
+                    mock(Property.class),
+                    mock(Property.class)
+            );
+            when(jpaPropertyRepository.findAll()).thenReturn(mockProperties);
+            List<Property> result = findPropertyService.findAll();
+            assertThat(result).isEqualTo(mockProperties);
+            verify(jpaPropertyRepository).findAll();
+        }
+    }
 }

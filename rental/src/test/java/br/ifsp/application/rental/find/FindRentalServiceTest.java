@@ -83,6 +83,8 @@ class FindRentalServiceTest {
         }
     }
 
+
+
     @Nested
     @DisplayName("Rental FindAll Tests")
     class RentalFindAllTests {

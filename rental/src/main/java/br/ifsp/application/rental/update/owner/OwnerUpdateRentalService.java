@@ -98,12 +98,7 @@ public class OwnerUpdateRentalService {
         else throw new EntityNotFoundException("Não existe esse aluguel");
         if(cancelDate == null) cancelDate = LocalDate.now();
         if(cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
-        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
-
-        rental.setState(RentalState.CANCELLED);
-        List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
-        conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
-
+        isConfirmedRental(rental);
 
 
     }
@@ -114,13 +109,18 @@ public class OwnerUpdateRentalService {
         }
         else throw new EntityNotFoundException("Não existe esse aluguel");
         if(LocalDate.now().isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
+        isConfirmedRental(rental);
+
+
+    }
+
+    private void isConfirmedRental(Rental rental) {
         if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
 
         rental.setState(RentalState.CANCELLED);
         List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
         conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
-
-
+        rentalRepository.saveAll(conflictingRentals);
     }
 
     private List<Rental> findRestrainedConflictingRentals(Rental rental) {

@@ -24,7 +24,6 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -161,9 +160,8 @@ class CreateRentalServiceTest {
                 LocalDate startDateOfRentRequest,
                 LocalDate endDateOfRentRequest
         ) {
-             val existingRental = factory.generateRental(
-                     UUID.randomUUID(),
-                     factory.generateTenant(),
+             factory.generateRental(
+                     owner,
                      property,
                      startDateOfRentRequest,
                      endDateOfRentRequest,
@@ -190,36 +188,66 @@ class CreateRentalServiceTest {
         @Test()
         @DisplayName("Should throw exception when rental duration is bigger than one year")
         void shouldThrowExceptionWhenRentalDurationIsBiggerThanOneYear() {
-            var startDate = LocalDate.parse("1801-02-22");
-            var endDate = LocalDate.parse("1802-02-23");
+            var startDate = LocalDate.parse("2025-02-22");
+            var endDate = LocalDate.parse("2026-02-23");
 
-//            assertThatExceptionOfType(IllegalArgumentException.class)
-//                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
-//                    .withMessageContaining("Rental duration must be 1 year or less");
+            val request = factory.createRequestModel(startDate, endDate);
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rental duration must be 1 year or less");
         }
 
         @Tag("TDD")
         @Test()
         @DisplayName("Should throw exception when start date is after end date")
         void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
-            var startDate = LocalDate.parse("1801-03-22");
-            var endDate = LocalDate.parse("1801-02-22");
+            var startDate = LocalDate.parse("2025-03-22");
+            var endDate = LocalDate.parse("2025-02-22");
 
-//            assertThatExceptionOfType(IllegalArgumentException.class)
-//                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
-//                    .withMessageContaining("Start date must be before end date");
+            val request = factory.createRequestModel(startDate, endDate);
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Start date must be before end date");
         }
 
         @Tag("TDD")
         @Test()
         @DisplayName("Should throw exception when start date is in the past")
         void shouldThrowExceptionWhenStartDateIsInThePast() {
-            var startDate = LocalDate.parse("1800-02-22");
-            var endDate = LocalDate.parse("1802-03-22");
+            var startDate = LocalDate.parse("2024-02-22");
+            var endDate = LocalDate.parse("2025-03-22");
 
-//            assertThatExceptionOfType(IllegalArgumentException.class)
-//                    .isThrownBy(() -> sut.registerRental(tenant.getId(), property.getId(), startDate, endDate))
-//                    .withMessageContaining("Rental cannot start in the past");
+            val request = factory.createRequestModel(startDate, endDate);
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rental cannot start in the past");
         }
     }
 }

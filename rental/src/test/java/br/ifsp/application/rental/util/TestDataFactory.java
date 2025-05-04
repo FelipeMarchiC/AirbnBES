@@ -104,7 +104,6 @@ public class TestDataFactory {
     }
 
     public Rental generateRental(
-            UUID thisRentalId,
             User tenant,
             Property property,
             LocalDate startDate,
@@ -112,7 +111,7 @@ public class TestDataFactory {
             RentalState state
     ) {
         val rental = Rental.builder()
-                .id(thisRentalId)
+                .id(UUID.randomUUID())
                 .user(tenant)
                 .property(property)
                 .startDate(startDate)

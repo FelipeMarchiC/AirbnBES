@@ -6,7 +6,9 @@ import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
+import org.springframework.stereotype.Service;
 
+@Service
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
     private final JpaRentalRepository rentalRepository;
     private final JpaUserRepository userRepository;

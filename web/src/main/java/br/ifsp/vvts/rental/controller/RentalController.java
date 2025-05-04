@@ -4,9 +4,12 @@ import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.OwnerUpdateRentalService;
+import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
+import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;
 import br.ifsp.vvts.rental.requests.PostRequest;
+import br.ifsp.vvts.rental.requests.PutRequest;
 import br.ifsp.vvts.security.auth.AuthenticationInfoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +33,7 @@ public class RentalController {
     private final DeleteRentalService deleteRentalService;
     private final FindRentalService findRentalService;
     private final OwnerUpdateRentalService ownerUpdateRentalService;
+    private final ITenantUpdateRentalService tenantUpdateRentalService;
 
     @GetMapping
     public ResponseEntity<String> FindRental() {
@@ -73,6 +77,18 @@ public class RentalController {
         LocalDate parsedDate = cancelDate != null ? LocalDate.parse(cancelDate) : null;
         ownerUpdateRentalService.cancel(rental.getId(), parsedDate);
         return ResponseEntity.ok("Rental cancelled successfully.");
+    }
+
+    @PutMapping("/{rentalId}/tenant/cancel")
+    public ResponseEntity<?> tenantCancelRental(@PathVariable UUID rentalId, @RequestBody PutRequest request) {
+        var presenter = new RestTenantUpdateRentalPresenter();
+        var userId = authService.getAuthenticatedUserId();
+        var requestModel = request.toTenantUpdateRequestModel(userId, rentalId);
+
+        tenantUpdateRentalService.cancelRental(presenter, requestModel);
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     @DeleteMapping("/{rentalId}")

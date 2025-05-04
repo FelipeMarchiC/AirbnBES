@@ -1,4 +1,4 @@
-package br.ifsp.application.rental.find;
+package br.ifsp.application.property.find;
 
 import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.domain.models.property.Property;

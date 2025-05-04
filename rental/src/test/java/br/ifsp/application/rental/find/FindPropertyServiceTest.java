@@ -1,6 +1,7 @@
 package br.ifsp.application.rental.find;
 
 import br.ifsp.application.property.JpaPropertyRepository;
+import br.ifsp.application.property.find.FindPropertyService;
 import br.ifsp.domain.models.property.Property;
 import org.junit.jupiter.api.*;
 import java.util.List;

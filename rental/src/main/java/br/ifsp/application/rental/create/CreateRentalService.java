@@ -11,14 +11,12 @@ import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.services.IUuidGeneratorService;
-import br.ifsp.infrastructure.shared.UuidGeneratorService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
 
 @Service
 public class CreateRentalService implements ICreateRentalService {
@@ -45,7 +43,7 @@ public class CreateRentalService implements ICreateRentalService {
     @Override
     public void registerRental(CreateRentalPresenter presenter, RequestModel request) {
         User user = userRepository.findById(request.userId()).orElse(null);
-        PreconditionChecker.prepareIfUnauthorized(presenter, user);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
         if (presenter.isDone()) return;
 
         try {

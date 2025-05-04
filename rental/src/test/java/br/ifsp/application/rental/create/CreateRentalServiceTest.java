@@ -3,6 +3,7 @@ package br.ifsp.application.rental.create;
 import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
@@ -248,6 +249,25 @@ class CreateRentalServiceTest {
             assertThat(captured)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Rental cannot start in the past");
+        }
+
+        @Test()
+        @DisplayName("Should throw exception when user is null")
+        void shouldThrowExceptionWhenUserIsNull() {
+            val request = factory.createRequestModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.empty());
+            when(presenter.isDone()).thenReturn(true);
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("User does not exist");
         }
     }
 }

@@ -20,6 +20,9 @@ public class FindPropertyService {
     }
 
     public List<Property> findByPriceRange(double min, double max) {
-        return null;
+        if (min > max) {
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+        }
+        return jpaPropertyRepository.findByDailyRateBetween(min, max);
     }
 }

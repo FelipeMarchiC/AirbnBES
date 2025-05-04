@@ -4,18 +4,17 @@ import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.user.JpaUserRepository;
-import br.ifsp.application.util.PreconditionCheckerMock;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.services.IUuidGeneratorService;
-import br.ifsp.domain.shared.valueobjects.Price;
 import lombok.val;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -30,6 +29,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
 class CreateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
@@ -39,7 +39,6 @@ class CreateRentalServiceTest {
     @Mock private IUuidGeneratorService uuidGeneratorService;
     @InjectMocks private CreateRentalService sut;
     private TestDataFactory factory;
-    private PreconditionCheckerMock preconditionCheckerMock;
 
     private AutoCloseable closeable;
 
@@ -65,19 +64,9 @@ class CreateRentalServiceTest {
         );
 
         factory = new TestDataFactory();
-        preconditionCheckerMock = new PreconditionCheckerMock(
-                presenter,
-                rentalRepositoryMock,
-                userRepositoryMock,
-                propertyRepositoryMock,
-                factory.rentalId,
-                factory.tenantId,
-                factory.ownerId,
-                factory.propertyId
-        );
-
         tenant = factory.generateTenant();
-        property = factory.generateProperty();
+        owner = factory.generateOwner();
+        property = factory.generateProperty(owner);
     }
 
     @AfterEach
@@ -87,8 +76,8 @@ class CreateRentalServiceTest {
 
     @Nested
     @Tag("UnitTest")
-    @DisplayName("Testing valid equivalent classes")
-    class TestingValidEquivalentClasses {
+    @DisplayName("Testing valid classes")
+    class TestingValidClasses {
         @Tag("TDD")
         @Test
         @DisplayName("Should successfully create rental")
@@ -101,86 +90,100 @@ class CreateRentalServiceTest {
             when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(presenter.isDone()).thenReturn(false);
             when(uuidGeneratorService.generate()).thenReturn(rental.getId());
-            when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            when(rentalRepositoryMock.save(rentalCaptor.capture()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             sut.registerRental(presenter, request);
+            Rental savedRental = rentalCaptor.getValue();
+            assertThat(savedRental.getUser()).isEqualTo(tenant);
+            assertThat(savedRental.getProperty()).isEqualTo(property);
+            assertThat(savedRental.getStartDate()).isEqualTo(request.startDate());
+            assertThat(savedRental.getEndDate()).isEqualTo(request.endDate());
 
             verify(userRepositoryMock, times(1)).findById(tenant.getId());
             verify(propertyRepositoryMock, times(1)).findById(property.getId());
-            verify(rentalRepositoryMock, times(1)).save(rental);
+            verify(rentalRepositoryMock, times(1)).save(any(Rental.class));
             verify(presenter, times(1)).prepareSuccessView(response);
         }
 
         @Tag("TDD")
-        @ParameterizedTest(name = "[{index}]: should calculate rental total value from {2} to {3}")
+        @ParameterizedTest(name = "[{index}]: should calculate rental total value from {0} to {1}")
         @CsvSource({
-                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-02-23, ",
-                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1802-02-22",
+                "2025-02-22, 2025-02-23",
+                "2025-02-22, 2026-02-22",
         })
         @DisplayName("Should calculate rental total value")
-        void shouldCalculateRentalTotalValue(
-                UUID userId,
-                UUID propertyId,
+        void shouldSuccessfullyCalculateRentalTotalValue(
                 LocalDate startDate,
                 LocalDate endDate
         ) {
-            when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
-            when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
-            when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            val request = factory.createRequestModel(startDate, endDate);
+            val response = factory.createResponseModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
+            when(presenter.isDone()).thenReturn(false);
+            when(uuidGeneratorService.generate()).thenReturn(factory.rentalId);
+
+            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            when(rentalRepositoryMock.save(rentalCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
 
             long daysRented = ChronoUnit.DAYS.between(startDate, endDate);
-            BigDecimal totalPrice = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
+            BigDecimal expectedTotal = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
 
-//            Rental rental = sut.registerRental(userId, propertyId, startDate, endDate);
+            sut.registerRental(presenter, request);
 
-//            assertThat(rental.getValue().getAmount()).isEqualTo(totalPrice);
+            Rental savedRental = rentalCaptor.getValue();
+            assertThat(savedRental.getValue().getAmount()).isEqualByComparingTo(expectedTotal);
+
+            verify(userRepositoryMock, times(1)).findById(tenant.getId());
+            verify(propertyRepositoryMock, times(1)).findById(property.getId());
+            verify(rentalRepositoryMock, times(1)).save(any(Rental.class));
+            verify(presenter, times(1)).prepareSuccessView(response);
         }
     }
 
     @Nested
-    @Tag("UnitTest")
-    @DisplayName("Testing invalid equivalent classes")
-    class TestingInvalidEquivalentClasses {
+    @DisplayName("Testing invalid classes")
+    class TestingInvalidClasses {
         @Tag("TDD")
-        @ParameterizedTest(
-                name = "[{index}]: has rental from {2} to {3} and is requested from {4} to {5}"
-        )
+        @ParameterizedTest(name = "[{index}]: has rental from {0} to {1} and is requested from {2} to {3}")
         @CsvSource({
-                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-03-22, 1801-02-22, 1801-03-22",
-                "e924925c-2a7b-4cab-b938-0d6398ecc78a, 123e4567-e89b-12d3-a456-426614174000, 1801-02-22, 1801-04-30, 1801-04-30, 1801-05-10",
+                "2025-02-22, 2025-03-22, 2025-02-22, 2025-03-22",
+                "2025-02-22, 2025-04-30, 2025-04-30, 2025-05-10",
         })
         @DisplayName("Should throw exception when property is already rented in any period between start and end dates")
         void shouldThrowExceptionWhenPropertyIsAlreadyRentedInAnyPeriodBetweenStartAndEndDates(
-                UUID userId,
-                UUID propertyId,
                 LocalDate startOfRentedPeriod,
                 LocalDate endOfRentedPeriod,
                 LocalDate startDateOfRentRequest,
                 LocalDate endDateOfRentRequest
         ) {
-             var currentRental = Rental.builder()
-                    .id(UUID.fromString("607a3cdc-19b4-450f-8a70-cb135b2cf26f"))
-                    .user(tenant)
-                    .property(property)
-                    .startDate(startOfRentedPeriod)
-                    .endDate(endOfRentedPeriod)
-                    .state(RentalState.CONFIRMED)
-                     .value(new Price(BigDecimal.valueOf(5000)))
-                    .build();
+             val existingRental = factory.generateRental(
+                     UUID.randomUUID(),
+                     factory.generateTenant(),
+                     property,
+                     startDateOfRentRequest,
+                     endDateOfRentRequest,
+                     RentalState.CONFIRMED
+             );
 
-             property.addRental(currentRental);
+            val request = factory.createRequestModel(startOfRentedPeriod, endOfRentedPeriod);
 
-            when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(tenant));
-            when(propertyRepositoryMock.findById(propertyId)).thenReturn(Optional.of(property));
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
 
-//            assertThatExceptionOfType(IllegalArgumentException.class)
-//                    .isThrownBy(() ->
-//                            sut.registerRental(
-//                                    userId,
-//                                    propertyId,
-//                                    startDateOfRentRequest,
-//                                    endDateOfRentRequest))
-//                    .withMessageContaining("Property is already rented during the requested period");
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Property is already rented during the requested period");
         }
 
         @Tag("TDD")

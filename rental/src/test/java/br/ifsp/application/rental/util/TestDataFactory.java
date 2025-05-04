@@ -20,6 +20,7 @@ import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.create.ICreateRentalService.ResponseModel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.val;
 
 @NoArgsConstructor
 public class TestDataFactory {
@@ -72,6 +73,24 @@ public class TestDataFactory {
                 .build();
     }
 
+    public Property generateProperty(User owner) {
+        return Property.builder()
+                .id(propertyId)
+                .name(faker.address().streetName())
+                .description(faker.lorem().sentence())
+                .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
+                .address(Address.builder()
+                        .number(faker.address().buildingNumber())
+                        .street(faker.address().streetAddress())
+                        .city(faker.address().city())
+                        .state(faker.address().state())
+                        .postalCode(faker.address().zipCode())
+                        .build())
+                .owner(owner)
+                .rentals(new ArrayList<>())
+                .build();
+    }
+
     public Rental generateRental() {
         return Rental.builder()
                 .id(rentalId)
@@ -84,12 +103,44 @@ public class TestDataFactory {
                 .build();
     }
 
+    public Rental generateRental(
+            UUID thisRentalId,
+            User tenant,
+            Property property,
+            LocalDate startDate,
+            LocalDate endDate,
+            RentalState state
+    ) {
+        val rental = Rental.builder()
+                .id(thisRentalId)
+                .user(tenant)
+                .property(property)
+                .startDate(startDate)
+                .endDate(endDate)
+                .value(new Price(calculateRentalCost(startDate, endDate, property)))
+                .state(state)
+                .build();
+
+        property.addRental(rental);
+
+        return rental;
+    }
+
     public ICreateRentalService.RequestModel createRequestModel() {
         return new ICreateRentalService.RequestModel(
                 tenantId,
                 propertyId,
                 LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2025-01-01").plusDays(7)
+        );
+    }
+
+    public ICreateRentalService.RequestModel createRequestModel(LocalDate startDate, LocalDate endDate) {
+        return new ICreateRentalService.RequestModel(
+                tenantId,
+                propertyId,
+                startDate,
+                endDate
         );
     }
 
@@ -102,9 +153,13 @@ public class TestDataFactory {
             User tenant,
             Property property
     ) {
-        long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate());
-        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+        BigDecimal totalCost = calculateRentalCost(request.startDate(), request.endDate(), property);
 
         return RentalMapper.fromCreateRequestModel(rentalId, request, tenant, property, totalCost);
+    }
+
+    private static BigDecimal calculateRentalCost(LocalDate start, LocalDate end, Property property) {
+        long days = ChronoUnit.DAYS.between(start, end);
+        return property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
     }
 }

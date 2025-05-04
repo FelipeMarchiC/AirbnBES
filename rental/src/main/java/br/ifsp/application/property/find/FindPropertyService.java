@@ -2,34 +2,57 @@ package br.ifsp.application.property.find;
 
 import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.domain.models.property.Property;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class FindPropertyService {
-    private final JpaPropertyRepository jpaPropertyRepository;
+@Service
+public class FindPropertyService implements IFindPropertyService {
+    private final JpaPropertyRepository propertyRepository;
 
-    public FindPropertyService(JpaPropertyRepository jpaPropertyRepository) {
-        this.jpaPropertyRepository = jpaPropertyRepository;
+    public FindPropertyService(JpaPropertyRepository propertyRepository) {
+        this.propertyRepository = propertyRepository;
     }
 
-    public List<Property> findByLocation(String location) {
-        if (location == null || location.isBlank()) {
-            throw new IllegalArgumentException("location cannot be null or blank");
+    @Override
+    public void findByLocation(FindPropertyPresenter presenter, LocationRequestModel request) {
+        try {
+            if (request.location() == null || request.location().isBlank()) {
+                throw new IllegalArgumentException("Location cannot be null or blank");
+            }
+
+            List<Property> properties = propertyRepository.findByLocation(request.location());
+            presenter.prepareSuccessView(new PropertyListResponseModel(properties));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
-        return jpaPropertyRepository.findByLocation(location);
     }
 
-    public List<Property> findByPriceRange(double min, double max) {
-        if (min < 0 || max < 0) {
-            throw new IllegalArgumentException("Prices must be non-negative");
+    @Override
+    public void findByPriceRange(FindPropertyPresenter presenter, PriceRangeRequestModel request) {
+        try {
+            if (request.min() < 0 || request.max() < 0) {
+                throw new IllegalArgumentException("Prices must be non-negative");
+            }
+
+            if (request.min() > request.max()) {
+                throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
+            }
+
+            List<Property> properties = propertyRepository.findByDailyRateBetween(request.min(), request.max());
+            presenter.prepareSuccessView(new PropertyListResponseModel(properties));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
-        if (min > max) {
-            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
-        }
-        return jpaPropertyRepository.findByDailyRateBetween(min, max);
     }
 
-    public List<Property> findAll() {
-        return jpaPropertyRepository.findAll();
+    @Override
+    public void findAll(FindPropertyPresenter presenter) {
+        try {
+            List<Property> properties = propertyRepository.findAll();
+            presenter.prepareSuccessView(new PropertyListResponseModel(properties));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
+        }
     }
 }

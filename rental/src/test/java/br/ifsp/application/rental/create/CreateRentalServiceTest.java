@@ -252,6 +252,26 @@ class CreateRentalServiceTest {
         }
 
         @Test()
+        @DisplayName("Should throw exception when property is null")
+        void shouldThrowExceptionWhenPropertyIsNull() {
+            val request = factory.createRequestModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.empty());
+            when(presenter.isDone()).thenReturn(false);
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Property not found");
+        }
+
+        @Test()
         @DisplayName("Should throw exception when user is null")
         void shouldThrowExceptionWhenUserIsNull() {
             val request = factory.createRequestModel();

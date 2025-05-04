@@ -30,6 +30,6 @@ public class FindPropertyService {
     }
 
     public List<Property> findAll() {
-        return null;
+        return jpaPropertyRepository.findAll();
     }
 }

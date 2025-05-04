@@ -9,6 +9,7 @@ import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.services.IUuidGeneratorService;
 import br.ifsp.domain.shared.valueobjects.Price;
 import lombok.val;
 import org.junit.jupiter.api.*;
@@ -35,6 +36,7 @@ class CreateRentalServiceTest {
     @Mock private JpaPropertyRepository propertyRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @Mock private CreateRentalPresenter presenter;
+    @Mock private IUuidGeneratorService uuidGeneratorService;
     @InjectMocks private CreateRentalService sut;
     private TestDataFactory factory;
     private PreconditionCheckerMock preconditionCheckerMock;
@@ -58,6 +60,7 @@ class CreateRentalServiceTest {
                 userRepositoryMock,
                 propertyRepositoryMock,
                 rentalRepositoryMock,
+                uuidGeneratorService,
                 fixedClock
         );
 
@@ -72,13 +75,15 @@ class CreateRentalServiceTest {
                 factory.ownerId,
                 factory.propertyId
         );
+
+        tenant = factory.generateTenant();
+        property = factory.generateProperty();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         closeable.close();
     }
-
 
     @Nested
     @Tag("UnitTest")
@@ -88,19 +93,21 @@ class CreateRentalServiceTest {
         @Test
         @DisplayName("Should successfully create rental")
         void shouldSuccessfullyCreateRental() {
-
             val request = factory.createRequestModel();
             val response = factory.createResponseModel();
+            val rental = factory.entityFromCreateRequest(request, tenant, property);
 
-            preconditionCheckerMock.allMocksWorksAsExpected();
-
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
+            when(presenter.isDone()).thenReturn(false);
+            when(uuidGeneratorService.generate()).thenReturn(rental.getId());
             when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             sut.registerRental(presenter, request);
 
-            verify(userRepositoryMock, times(1)).findById(factory.tenantId);
-            verify(propertyRepositoryMock, times(1)).findById(factory.propertyId);
-            verify(rentalRepositoryMock, times(1)).save(null);
+            verify(userRepositoryMock, times(1)).findById(tenant.getId());
+            verify(propertyRepositoryMock, times(1)).findById(property.getId());
+            verify(rentalRepositoryMock, times(1)).save(rental);
             verify(presenter, times(1)).prepareSuccessView(response);
         }
 

@@ -1,5 +1,6 @@
 package br.ifsp.application.rental.util;
 
+import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
@@ -11,6 +12,7 @@ import com.github.javafaker.Faker;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -93,5 +95,16 @@ public class TestDataFactory {
 
     public ICreateRentalService.ResponseModel createResponseModel() {
         return new ICreateRentalService.ResponseModel(rentalId, tenantId);
+    }
+
+    public Rental entityFromCreateRequest(
+            ICreateRentalService.RequestModel request,
+            User tenant,
+            Property property
+    ) {
+        long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate());
+        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+
+        return RentalMapper.fromCreateRequestModel(rentalId, request, tenant, property, totalCost);
     }
 }

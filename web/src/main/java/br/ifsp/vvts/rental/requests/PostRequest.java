@@ -1,7 +1,5 @@
 package br.ifsp.vvts.rental.requests;
 
-import br.ifsp.application.rental.create.ICreateRentalService;
-import jakarta.validation.constraints.NotNull;
 import br.ifsp.application.rental.create.ICreateRentalService.RequestModel;
 
 import java.time.LocalDate;

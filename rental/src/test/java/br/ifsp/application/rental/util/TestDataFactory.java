@@ -1,6 +1,7 @@
 package br.ifsp.application.rental.util;
 
 import br.ifsp.application.rental.repository.RentalMapper;
+import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
@@ -190,5 +191,12 @@ public class TestDataFactory {
 
     public ITenantUpdateRentalService.ResponseModel tenantUpdateResponseModel() {
         return new ITenantUpdateRentalService.ResponseModel(rentalId, tenantId);
+    }
+
+    public IOwnerUpdateRentalService.RequestModel ownerUpdateRequestModel(){
+        return new IOwnerUpdateRentalService.RequestModel(ownerId,rentalId);
+    }
+    public IOwnerUpdateRentalService.ResponseModel ownerUpdateResponseModel(){
+        return new IOwnerUpdateRentalService.ResponseModel(ownerId,rentalId);
     }
 }

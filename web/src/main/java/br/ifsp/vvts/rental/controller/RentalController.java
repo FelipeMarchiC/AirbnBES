@@ -98,4 +98,5 @@ public class RentalController {
         return ResponseEntity.ok("Rental deleted successfully: " + deletedId);
     }
 
+
 }

@@ -81,11 +81,6 @@ class FindPropertyServiceTest {
             assertThat(capturedException).isNull();
             verify(jpaPropertyRepository).findAvailablePropertiesByPeriod(startDate,endDate);
 
-
-
-
-
-
         }
 
     }

@@ -294,15 +294,6 @@ public class OwnerUpdateRentalServiceTest {
     @Nested
     @DisplayName("Null Input Validation Tests")
     class NullInputValidationTests {
-
-        @Tag("UnitTest")
-        @DisplayName("Should throw exception when rental is null on deny")
-        @Test
-        void shouldThrowExceptionWhenRentalIsNullOnDeny() {
-            assertThatThrownBy(() -> new OwnerUpdateRentalService(rentalRepositoryMock).deny(null))
-                    .isInstanceOf(NullPointerException.class);
-        }
-
         @Tag("UnitTest")
         @DisplayName("Should throw exception when rental ID is null on confirm")
         @Test

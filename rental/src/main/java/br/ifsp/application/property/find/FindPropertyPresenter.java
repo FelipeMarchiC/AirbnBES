@@ -1,6 +1,6 @@
 package br.ifsp.application.property.find;
 
-public interface FindPropertyPresenter {
-    void prepareSuccessView(IFindPropertyService.PropertyListResponseModel responseModel);
-    void prepareFailView(Exception e);
-}
+import br.ifsp.application.property.find.IFindPropertyService.PropertyListResponseModel;
+import br.ifsp.application.shared.presenter.GenericPresenter;
+
+public interface FindPropertyPresenter extends GenericPresenter<PropertyListResponseModel> {}

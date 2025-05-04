@@ -27,7 +27,7 @@ public class FindRentalService {
         return jpaRentalRepository.findByUserId(tenantId);
     }
     public List<Rental> findAll() {
-        return null;
+        return jpaRentalRepository.findAll();
     }
 
 }

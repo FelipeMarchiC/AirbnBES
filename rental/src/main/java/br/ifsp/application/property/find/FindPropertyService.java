@@ -1,6 +1,7 @@
 package br.ifsp.application.property.find;
 
 import br.ifsp.application.property.JpaPropertyRepository;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.Property;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class FindPropertyService implements IFindPropertyService {
         }
     }
 
+
     @Override
     public void findByPriceRange(FindPropertyPresenter presenter, PriceRangeRequestModel request) {
         try {
@@ -42,6 +44,16 @@ public class FindPropertyService implements IFindPropertyService {
             List<Property> properties = propertyRepository.findByDailyRateBetween(request.min(), request.max());
             presenter.prepareSuccessView(new PropertyListResponseModel(properties));
         } catch (Exception e) {
+            presenter.prepareFailView(e);
+        }
+    }
+    @Override
+    public void findByPeriod(FindPropertyPresenter presenter, PeriodRequestModel request){
+        try{
+            List<Property> properties = propertyRepository.findAvailablePropertiesByPeriod(request.startDate(), request.endDate());
+            if(properties.isEmpty()) throw new EntityNotFoundException();
+            presenter.prepareSuccessView(new PropertyListResponseModel(properties));
+        }catch(Exception e){
             presenter.prepareFailView(e);
         }
     }

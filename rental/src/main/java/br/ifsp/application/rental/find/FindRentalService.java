@@ -26,4 +26,8 @@ public class FindRentalService {
             throw new IllegalArgumentException("tenantId cannot be null");
         return jpaRentalRepository.findByUserId(tenantId);
     }
+    public List<Rental> findAll() {
+        return null;
+    }
+
 }

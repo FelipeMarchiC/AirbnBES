@@ -83,4 +83,23 @@ class FindRentalServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Rental FindAll Tests")
+    class RentalFindAllTests {
+        @Tag("UnitTest")
+        @Tag("TDD")
+        @DisplayName("Should return all rentals from repository")
+        @Test
+        void shouldReturnAllRentals() {
+            List<Rental> mockRentals = List.of(
+                    mock(Rental.class),
+                    mock(Rental.class)
+            );
+            when(jpaRentalRepository.findAll()).thenReturn(mockRentals);
+            List<Rental> result = findRentalService.findAll();
+            assertThat(result).isEqualTo(mockRentals);
+            verify(jpaRentalRepository).findAll();
+        }
+    }
+
 }

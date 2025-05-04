@@ -18,4 +18,8 @@ public class FindPropertyService {
         }
         return jpaPropertyRepository.findByLocation(location);
     }
+
+    public List<Property> findByPriceRange(double min, double max) {
+        return null;
+    }
 }

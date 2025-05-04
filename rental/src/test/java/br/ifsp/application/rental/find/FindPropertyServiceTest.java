@@ -59,4 +59,39 @@ class FindPropertyServiceTest {
                     .hasMessageContaining("location cannot be null or blank");
         }
     }
+
+    @Nested
+    @DisplayName("Property Search By Price Range Tests")
+    class PropertySearchByPriceRangeTests {
+
+        @Tag("UnitTest")
+        @DisplayName("Should return properties within given price range")
+        @Test
+        void shouldReturnPropertiesWithinGivenPriceRange() {
+            double min = 100.0;
+            double max = 300.0;
+
+            List<Property> mockProperties = List.of(
+                    mock(Property.class),
+                    mock(Property.class)
+            );
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            List<Property> result = findPropertyService.findByPriceRange(min, max);
+
+            assertThat(result).isEqualTo(mockProperties);
+            verify(jpaPropertyRepository).findByDailyRateBetween(min, max);
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception if min is greater than max")
+        @Test
+        void shouldThrowExceptionIfMinGreaterThanMax() {
+            assertThatThrownBy(() -> findPropertyService.findByPriceRange(500.0, 100.0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Minimum price cannot be greater than maximum price");
+        }
+    }
+
 }

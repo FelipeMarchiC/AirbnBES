@@ -92,8 +92,7 @@ class CreateRentalServiceTest {
             when(uuidGeneratorService.generate()).thenReturn(rental.getId());
 
             ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
-            when(rentalRepositoryMock.save(rentalCaptor.capture()))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(rentalRepositoryMock.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
             sut.registerRental(presenter, request);
             Rental savedRental = rentalCaptor.getValue();
@@ -101,11 +100,12 @@ class CreateRentalServiceTest {
             assertThat(savedRental.getProperty()).isEqualTo(property);
             assertThat(savedRental.getStartDate()).isEqualTo(request.startDate());
             assertThat(savedRental.getEndDate()).isEqualTo(request.endDate());
+            assertThat(savedRental.getState()).isEqualTo(RentalState.PENDING);
 
-            verify(userRepositoryMock, times(1)).findById(tenant.getId());
-            verify(propertyRepositoryMock, times(1)).findById(property.getId());
-            verify(rentalRepositoryMock, times(1)).save(any(Rental.class));
-            verify(presenter, times(1)).prepareSuccessView(response);
+            verify(userRepositoryMock).findById(tenant.getId());
+            verify(propertyRepositoryMock).findById(property.getId());
+            verify(rentalRepositoryMock).save(any(Rental.class));
+            verify(presenter).prepareSuccessView(response);
         }
 
         @Tag("TDD")
@@ -138,10 +138,10 @@ class CreateRentalServiceTest {
             Rental savedRental = rentalCaptor.getValue();
             assertThat(savedRental.getValue().getAmount()).isEqualByComparingTo(expectedTotal);
 
-            verify(userRepositoryMock, times(1)).findById(tenant.getId());
-            verify(propertyRepositoryMock, times(1)).findById(property.getId());
-            verify(rentalRepositoryMock, times(1)).save(any(Rental.class));
-            verify(presenter, times(1)).prepareSuccessView(response);
+            verify(userRepositoryMock).findById(tenant.getId());
+            verify(propertyRepositoryMock).findById(property.getId());
+            verify(rentalRepositoryMock).save(any(Rental.class));
+            verify(presenter).prepareSuccessView(response);
         }
     }
 

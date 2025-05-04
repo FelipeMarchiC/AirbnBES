@@ -1,6 +1,7 @@
 package br.ifsp.application.rental.util;
 
 import br.ifsp.application.rental.repository.RentalMapper;
+import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
@@ -17,8 +18,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import br.ifsp.application.rental.create.ICreateRentalService;
-import br.ifsp.application.rental.create.ICreateRentalService.ResponseModel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.val;
 
@@ -104,6 +103,29 @@ public class TestDataFactory {
     }
 
     public Rental generateRental(
+            UUID thisRentalId,
+            User tenant,
+            Property property,
+            LocalDate startDate,
+            LocalDate endDate,
+            RentalState state
+    ) {
+        val rental = Rental.builder()
+                .id(thisRentalId)
+                .user(tenant)
+                .property(property)
+                .startDate(startDate)
+                .endDate(endDate)
+                .value(new Price(calculateRentalCost(startDate, endDate, property)))
+                .state(state)
+                .build();
+
+        property.addRental(rental);
+
+        return rental;
+    }
+
+    public Rental generateRental(
             User tenant,
             Property property,
             LocalDate startDate,
@@ -160,5 +182,13 @@ public class TestDataFactory {
     private static BigDecimal calculateRentalCost(LocalDate start, LocalDate end, Property property) {
         long days = ChronoUnit.DAYS.between(start, end);
         return property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+    }
+
+    public ITenantUpdateRentalService.RequestModel tenantUpdateRequestModel() {
+        return new ITenantUpdateRentalService.RequestModel(tenantId, rentalId);
+    }
+
+    public ITenantUpdateRentalService.ResponseModel tenantUpdateResponseModel() {
+        return new ITenantUpdateRentalService.ResponseModel(rentalId, tenantId);
     }
 }

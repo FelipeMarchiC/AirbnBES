@@ -1,37 +1,38 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.update.tenant.TenantUpdateRentalPresenter;
+import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
+import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
-import br.ifsp.domain.shared.valueobjects.Address;
-import br.ifsp.domain.shared.valueobjects.Price;
+import lombok.val;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Tag("UnitTest")
+@ExtendWith(MockitoExtension.class)
 public class TenantUpdateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
+    @Mock private TenantUpdateRentalPresenter presenter;
     @InjectMocks private TenantUpdateRentalService sut;
-
-    private AutoCloseable closeable;
+    private TestDataFactory factory;
 
     private User owner;
     private User tenant;
@@ -40,116 +41,86 @@ public class TenantUpdateRentalServiceTest {
 
     @BeforeEach
     void setupService() {
-        closeable = MockitoAnnotations.openMocks(this);
-
-        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        closeable.close();
-    }
-
-    @BeforeEach
-    void setup() {
-        tenant = User.builder()
-                .id(UUID.fromString("cce0262c-5acc-4669-99bd-2ad504f08421"))
-                .name("Federico")
-                .lastname("Giallo")
-                .email("federico_giallo@gmail.com")
-                .password("YUtsODIxw4djaUVkcDg5MWF2ZElF")
-                .role(Role.USER)
-                .ownedProperties(new ArrayList<>())
-                .build();
-
-        property = Property.builder()
-                .id(UUID.fromString("2c67b2e4-0ff2-44bb-851f-3ff0b5223b00"))
-                .name("Basilisca Ambrosius")
-                .description("An concert hall somewhere in France.")
-                .dailyRate(new Price(new BigDecimal("250.00")))
-                .address(Address.builder()
-                        .number("92")
-                        .street("Via Theodoros")
-                        .city("Landen")
-                        .state("Laterano")
-                        .postalCode("LD22")
-                        .build())
-                .owner(owner)
-                .rentals(new ArrayList<>())
-                .build();
-
-        rental = Rental.builder()
-                .id(UUID.fromString("a13f29e7-7399-431d-b429-f28a4090dc4e"))
-                .user(tenant)
-                .property(property)
-                .startDate(LocalDate.parse("2025-01-01"))
-                .endDate(LocalDate.parse("2025-04-30"))
-                .value(new Price(BigDecimal.valueOf(187934.87)))
-                .state(RentalState.CONFIRMED)
-                .build();
-
-        property.addRental(rental);
-
-        owner = User.builder()
-                .id(UUID.fromString("5215e4da-50ff-42fb-9f55-b8e04a6ff82a"))
-                .name("Arturia")
-                .lastname("Giallo")
-                .email("decrescendo@gmail.com")
-                .password("dGhlYmxhY2tzaWxlbmNl")
-                .role(Role.USER)
-                .ownedProperties(List.of(property))
-                .build();
+        factory = new TestDataFactory();
+        tenant = factory.generateTenant();
+        owner = factory.generateOwner();
+        property = factory.generateProperty(owner);
+        rental = factory.generateRental(
+                factory.rentalId,
+                tenant,
+                property,
+                LocalDate.parse("2025-01-01"),
+                LocalDate.parse("2025-04-30"),
+                RentalState.CONFIRMED
+        );
     }
 
     @Nested
     @Tag("UnitTest")
-    @DisplayName("Testing valid equivalent classes")
-    class TestingValidEquivalentClasses {
+    @DisplayName("Testing valid classes")
+    class TestingValidClasses {
         @Tag("TDD")
         @Test()
-        @DisplayName("Should cancel rental")
-        void shouldCancelRental(
+        @DisplayName("Should successfully cancel rental")
+        void shouldSuccessfullyCancelRental(
         ) {
+            val request = factory.tenantUpdateRequestModel();
+            val response = factory.tenantUpdateResponseModel();
+
             UUID tenantId = tenant.getId();
             UUID rentalId = rental.getId();
 
-            setupFindByIdMocks(tenantId, rentalId);
-            when(rentalRepositoryMock.save(any(Rental.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            when(presenter.isDone()).thenReturn(false);
+            when(rentalRepositoryMock.save(any(Rental.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
-            Rental rental = sut.cancelRental(tenantId, rentalId);
+            sut.cancelRental(presenter, request);
 
-            verify(userRepositoryMock, times(1)).findById(tenantId);
-            verify(rentalRepositoryMock, times(1)).findById(rentalId);
-            verify(rentalRepositoryMock, times(1)).save(rental);
+            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            verify(rentalRepositoryMock).save(rentalCaptor.capture());
 
-            assertThat(rental.getState()).isEqualTo(RentalState.CANCELLED);
+            Rental savedRental = rentalCaptor.getValue();
+            assertThat(savedRental.getState()).isEqualTo(RentalState.CANCELLED);
+
+            verify(userRepositoryMock).findById(tenantId);
+            verify(rentalRepositoryMock).findById(rentalId);
+            verify(rentalRepositoryMock).save(any(Rental.class));
+            verify(presenter).prepareSuccessView(response);
         }
     }
 
     @Nested
     @Tag("UnitTest")
-    @DisplayName("Testing invalid equivalent classes")
-    class TestingInvalidEquivalentClasses {
+    @DisplayName("Testing invalid classes")
+    class TestingInvalidClasses {
         @Tag("TDD")
         @Test()
         @DisplayName("Should throw exception when rental state is different from confirmed")
         void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed(
         ) {
+            val request = factory.tenantUpdateRequestModel();
+
             UUID tenantId = tenant.getId();
             UUID rentalId = rental.getId();
 
             rental.setState(RentalState.PENDING);
 
-            setupFindByIdMocks(tenantId, rentalId);
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            when(presenter.isDone()).thenReturn(false);
 
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() -> sut.cancelRental(tenantId, rentalId))
-                    .withMessageContaining("Rental is not in a valid state to be cancelled");
+            sut.cancelRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rental is not in a valid state to be cancelled");
+
         }
-    }
-
-    private void setupFindByIdMocks(UUID tenantId, UUID rentalId) {
-        when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
-        when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
     }
 }

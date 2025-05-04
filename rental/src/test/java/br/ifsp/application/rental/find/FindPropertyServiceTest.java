@@ -3,10 +3,17 @@ import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.property.find.FindPropertyPresenter;
 import br.ifsp.application.property.find.FindPropertyService;
 import br.ifsp.application.property.find.IFindPropertyService;
+import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.shared.valueobjects.Address;
 import org.junit.jupiter.api.*;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,6 +23,7 @@ class FindPropertyServiceTest {
     private JpaPropertyRepository jpaPropertyRepository;
     private FindPropertyService findPropertyService;
     private FindPropertyPresenter presenter;
+    private TestDataFactory factory;
 
     private IFindPropertyService.PropertyListResponseModel capturedResponse;
     private Exception capturedException;
@@ -36,6 +44,48 @@ class FindPropertyServiceTest {
         findPropertyService = new FindPropertyService(jpaPropertyRepository);
         capturedResponse = null;
         capturedException = null;
+    }
+    @Nested
+    @DisplayName("Property search by period tests")
+    class PropertySearchByPeriod{
+        @Tag("TDD")
+        @Tag("UnitTest")
+        @Test
+        @DisplayName("Should find properties available in Period")
+        void shouldReturnAvailablePropertiesInPeriod(){
+            Property property = factory.generateProperty();
+            Property property2 = factory.generateProperty();
+
+            Rental rental = factory.generateRental();
+            LocalDate startDate = LocalDate.of(2025, 5, 4);
+            rental.setStartDate(startDate);
+            LocalDate endDate = startDate.plusDays(7);
+            rental.setEndDate(endDate);
+
+            Rental rental2 = factory.generateRental();
+            rental.setStartDate(LocalDate.of(2025,5,8));
+            rental.setEndDate(LocalDate.of(2025,5,11));
+
+            property.addRental(rental);
+            property2.addRental(rental2);
+
+            rental.setProperty(property);
+            rental2.setProperty(property2);
+
+            when(jpaPropertyRepository.findAll()).thenReturn(List.of(property,property2));
+            var request =new IFindPropertyService.PeriodRequestModel(startDate,endDate);
+            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate)).thenReturn(List.of(property));
+            findPropertyService.findByPeriod(presenter,request);
+            assertThat(capturedResponse).isNotNull();
+            verify(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate));
+
+
+
+
+
+
+        }
+
     }
 
     @Nested

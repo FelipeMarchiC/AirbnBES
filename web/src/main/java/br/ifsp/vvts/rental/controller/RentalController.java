@@ -5,7 +5,6 @@ import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
-import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;

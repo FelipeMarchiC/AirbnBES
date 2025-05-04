@@ -10,6 +10,8 @@ public interface IFindPropertyService {
     void findByPriceRange(FindPropertyPresenter presenter, PriceRangeRequestModel request);
     void findAll(FindPropertyPresenter presenter);
 
+    void findByPeriod(FindPropertyPresenter presenter, PeriodRequestModel request);
+
     record LocationRequestModel(String location) {}
     record PriceRangeRequestModel(double min, double max) {}
     record PropertyListResponseModel(List<Property> properties) {}

@@ -20,6 +20,9 @@ public class FindPropertyService {
     }
 
     public List<Property> findByPriceRange(double min, double max) {
+        if (min < 0 || max < 0) {
+            throw new IllegalArgumentException("Prices must be non-negative");
+        }
         if (min > max) {
             throw new IllegalArgumentException("Minimum price cannot be greater than maximum price");
         }

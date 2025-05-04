@@ -3,10 +3,12 @@ package br.ifsp.vvts.rental.controller;
 import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
+import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
+import br.ifsp.vvts.rental.presenter.RestOwnerUpdateRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.rental.requests.PutRequest;
@@ -59,24 +61,42 @@ public class RentalController {
     @PutMapping("/{rentalId}/confirm")
     public ResponseEntity<?> confirmRental(@PathVariable UUID rentalId) {
         UUID ownerId = authService.getAuthenticatedUserId();
-        ownerUpdateRentalService.confirmRental(rentalId, ownerId);
-        return ResponseEntity.ok("Rental confirmed successfully.");
+        var presenter = new RestOwnerUpdateRentalPresenter();
+        var requestModel = new IOwnerUpdateRentalService.RequestModel(ownerId, rentalId);
+
+        ownerUpdateRentalService.confirmRental(presenter, requestModel);
+
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     @PutMapping("/{rentalId}/deny")
     public ResponseEntity<?> denyRental(@PathVariable UUID rentalId) {
-        Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
-        ownerUpdateRentalService.deny(rental.getId());
-        return ResponseEntity.ok("Rental denied successfully.");
+        UUID ownerId = authService.getAuthenticatedUserId();
+        var presenter = new RestOwnerUpdateRentalPresenter();
+        var requestModel = new IOwnerUpdateRentalService.RequestModel(ownerId, rentalId);
+
+        ownerUpdateRentalService.denyRental(presenter, requestModel);
+
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     @PutMapping("/{rentalId}/cancel")
     public ResponseEntity<?> cancelRental(@PathVariable UUID rentalId,
                                           @RequestParam(required = false) String cancelDate) {
-        Rental rental = ownerUpdateRentalService.getRentalById(rentalId);
+        UUID ownerId = authService.getAuthenticatedUserId();
         LocalDate parsedDate = cancelDate != null ? LocalDate.parse(cancelDate) : null;
-        ownerUpdateRentalService.cancel(rental.getId(), parsedDate);
-        return ResponseEntity.ok("Rental cancelled successfully.");
+        var presenter = new RestOwnerUpdateRentalPresenter();
+        var requestModel = new IOwnerUpdateRentalService.RequestModel(ownerId, rentalId);
+
+        ownerUpdateRentalService.cancelRental(presenter, requestModel, parsedDate);
+
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     @PutMapping("/{rentalId}/tenant/cancel")

@@ -1,0 +1,97 @@
+package br.ifsp.application.rental.util;
+
+import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalState;
+import br.ifsp.domain.models.user.Role;
+import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.shared.valueobjects.Address;
+import br.ifsp.domain.shared.valueobjects.Price;
+import com.github.javafaker.Faker;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import br.ifsp.application.rental.create.ICreateRentalService;
+import br.ifsp.application.rental.create.ICreateRentalService.ResponseModel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class TestDataFactory {
+    private final Faker faker = new Faker();
+
+    public final UUID rentalId = UUID.randomUUID();
+    public final UUID tenantId = UUID.randomUUID();
+    public final UUID ownerId = UUID.randomUUID();
+    public final UUID propertyId = UUID.randomUUID();
+
+    public User generateTenant() {
+        return User.builder()
+                .id(tenantId)
+                .name(faker.name().firstName())
+                .lastname(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .password(faker.internet().password())
+                .role(Role.USER)
+                .ownedProperties(new ArrayList<>())
+                .build();
+    }
+
+    public User generateOwner() {
+        return User.builder()
+                .id(ownerId)
+                .name(faker.name().firstName())
+                .lastname(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .password(faker.internet().password())
+                .role(Role.USER)
+                .ownedProperties(new ArrayList<>())
+                .build();
+    }
+
+    public Property generateProperty() {
+        return Property.builder()
+                .id(propertyId)
+                .name(faker.address().streetName())
+                .description(faker.lorem().sentence())
+                .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
+                .address(Address.builder()
+                        .number(faker.address().buildingNumber())
+                        .street(faker.address().streetAddress())
+                        .city(faker.address().city())
+                        .state(faker.address().state())
+                        .postalCode(faker.address().zipCode())
+                        .build())
+                .owner(generateOwner())
+                .rentals(new ArrayList<>())
+                .build();
+    }
+
+    public Rental generateRental() {
+        return Rental.builder()
+                .id(rentalId)
+                .user(generateTenant())
+                .property(generateProperty())
+                .startDate(LocalDate.parse("2025-01-01"))
+                .endDate(LocalDate.parse("2025-01-01").plusDays(7))
+                .value(new Price(BigDecimal.valueOf(1500.00)))
+                .state(RentalState.CONFIRMED)
+                .build();
+    }
+
+    public ICreateRentalService.RequestModel createRequestModel() {
+        return new ICreateRentalService.RequestModel(
+                tenantId,
+                propertyId,
+                LocalDate.parse("2025-01-01"),
+                LocalDate.parse("2025-01-01").plusDays(7)
+        );
+    }
+
+    public ICreateRentalService.ResponseModel createResponseModel() {
+        return new ICreateRentalService.ResponseModel(rentalId, tenantId);
+    }
+}

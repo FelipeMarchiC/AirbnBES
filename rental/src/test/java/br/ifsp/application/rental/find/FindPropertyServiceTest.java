@@ -4,6 +4,7 @@ import br.ifsp.application.property.find.FindPropertyPresenter;
 import br.ifsp.application.property.find.FindPropertyService;
 import br.ifsp.application.property.find.IFindPropertyService;
 import br.ifsp.application.rental.util.TestDataFactory;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.user.User;
@@ -41,6 +42,7 @@ class FindPropertyServiceTest {
                 capturedException = e;
             }
         };
+        factory = new TestDataFactory();
         findPropertyService = new FindPropertyService(jpaPropertyRepository);
         capturedResponse = null;
         capturedException = null;
@@ -72,12 +74,12 @@ class FindPropertyServiceTest {
             rental.setProperty(property);
             rental2.setProperty(property2);
 
-            when(jpaPropertyRepository.findAll()).thenReturn(List.of(property,property2));
             var request =new IFindPropertyService.PeriodRequestModel(startDate,endDate);
             when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate)).thenReturn(List.of(property));
             findPropertyService.findByPeriod(presenter,request);
             assertThat(capturedResponse).isNotNull();
-            verify(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate));
+            assertThat(capturedException).isNull();
+            verify(jpaPropertyRepository).findAvailablePropertiesByPeriod(startDate,endDate);
 
 
 

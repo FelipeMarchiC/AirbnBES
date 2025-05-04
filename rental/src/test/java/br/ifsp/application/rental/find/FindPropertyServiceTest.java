@@ -37,10 +37,18 @@ class FindPropertyServiceTest {
             public void prepareSuccessView(IFindPropertyService.PropertyListResponseModel responseModel) {
                 capturedResponse = responseModel;
             }
+
             @Override
-            public void prepareFailView(Exception e) {
-                capturedException = e;
+            public void prepareFailView(Throwable throwable) {
+                capturedException = (Exception) throwable;
+
             }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
         };
         factory = new TestDataFactory();
         findPropertyService = new FindPropertyService(jpaPropertyRepository);

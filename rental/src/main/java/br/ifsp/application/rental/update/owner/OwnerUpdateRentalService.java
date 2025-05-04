@@ -1,16 +1,17 @@
 package br.ifsp.application.rental.update.owner;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
+
 
 @Service
-public class OwnerUpdateRentalService {
+public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;
 
@@ -18,113 +19,104 @@ public class OwnerUpdateRentalService {
         this.rentalRepository = rentalRepository;
     }
 
+    @Override
+    public void confirmRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
+        try {
+            Rental rental = rentalRepository.findById(request.rentalId())
+                    .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-    public void deny(UUID rentalId){
-        Rental rental;
-        if(rentalRepository.findById(rentalId).isEmpty()) throw new EntityNotFoundException("o Aluguel não existe");
-        else{
-            rental= rentalRepository.findById(rentalId).get();
+            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+                throw new SecurityException("Only the property owner can confirm the rental.");
+            }
+
+            if (!rental.getState().equals(RentalState.PENDING)) {
+                throw new UnsupportedOperationException("Rental must be in a PENDING state to be confirmed.");
+            }
+
+            var conflicts = rentalRepository.findRentalsByOverlapAndState(
+                    rental.getProperty().getId(),
+                    RentalState.CONFIRMED,
+                    rental.getStartDate(),
+                    rental.getEndDate(),
+                    rental.getId()
+            );
+
+            if (!conflicts.isEmpty()) {
+                throw new IllegalStateException("Cannot confirm rental due to conflict with another confirmed rental.");
+            }
+
+            rental.setState(RentalState.CONFIRMED);
+            rentalRepository.save(rental);
+            restrainPendingRentalsInConflict(rental);
+
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
-
-        if(!rental.getState().equals(RentalState.PENDING) && !rental.getState().equals(RentalState.RESTRAINED)){
-            throw new UnsupportedOperationException(String.format("it´s not possible to deny a rental that is %s",rental.getState()));
-        }
-        rental.setState(RentalState.DENIED);
-        rentalRepository.save(rental);
-
     }
 
+    @Override
+    public void denyRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
+        try {
+            Rental rental = rentalRepository.findById(request.rentalId())
+                    .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-    public void confirmRental(UUID rentalId, UUID userId) {
-        Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+            if (!List.of(RentalState.PENDING, RentalState.RESTRAINED).contains(rental.getState())) {
+                throw new UnsupportedOperationException(
+                        String.format("Cannot deny a rental that is %s.", rental.getState())
+                );
+            }
 
-        UUID ownerId = rental.getProperty().getOwner().getId();
-        if (!ownerId.equals(userId)) {
-            throw new SecurityException("Only the property owner can confirm the rental.");
+            rental.setState(RentalState.DENIED);
+            rentalRepository.save(rental);
+
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
+    }
 
-        if (!rental.getState().equals(RentalState.PENDING)) {
-            throw new UnsupportedOperationException("Rental is not in a PENDING state and cannot be confirmed.");
+    @Override
+    public void cancelRental(OwnerUpdateRentalPresenter presenter, RequestModel request, LocalDate cancelDate) {
+        try {
+            Rental rental = rentalRepository.findById(request.rentalId())
+                    .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
+
+            if (cancelDate == null) cancelDate = LocalDate.now();
+            if (cancelDate.isAfter(rental.getStartDate())) {
+                throw new IllegalArgumentException("Rental has already started and cannot be cancelled.");
+            }
+            if (!rental.getState().equals(RentalState.CONFIRMED)) {
+                throw new IllegalArgumentException("Only confirmed rentals can be cancelled.");
+            }
+
+            rental.setState(RentalState.CANCELLED);
+
+            List<Rental> restrainedConflicts = findRestrainedConflictingRentals(rental);
+            restrainedConflicts.forEach(r -> r.setState(RentalState.PENDING));
+
+            rentalRepository.save(rental);
+            rentalRepository.saveAll(restrainedConflicts);
+
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
-
-        var conflictingRentals = rentalRepository.findRentalsByOverlapAndState(
-                rental.getProperty().getId(),
-                RentalState.CONFIRMED,
-                rental.getStartDate(),
-                rental.getEndDate(),
-                rental.getId()
-        );
-
-        if (!conflictingRentals.isEmpty()) {
-            throw new IllegalStateException("Cannot confirm rental due to conflict with an already confirmed rental");
-        }
-
-        rental.setState(RentalState.CONFIRMED);
-        rentalRepository.save(rental);
     }
 
     public void restrainPendingRentalsInConflict(Rental confirmedRental) {
-        UUID propertyId = confirmedRental.getProperty().getId();
-        UUID confirmedRentalId = confirmedRental.getId();
-        LocalDate confirmedStart = confirmedRental.getStartDate();
-        LocalDate confirmedEnd = confirmedRental.getEndDate();
-
-        List<Rental> conflictingRentals = findPendingRentalsInConflict(propertyId, confirmedStart, confirmedEnd, confirmedRentalId);
-
-        conflictingRentals.forEach(this::restrainRental);
-    }
-
-    private List<Rental> findPendingRentalsInConflict(UUID propertyId, LocalDate startDate, LocalDate endDate, UUID excludedRentalId) {
-        return rentalRepository.findRentalsByOverlapAndState(
-                propertyId,
+        List<Rental> pendingConflicts = rentalRepository.findRentalsByOverlapAndState(
+                confirmedRental.getProperty().getId(),
                 RentalState.PENDING,
-                startDate,
-                endDate,
-                excludedRentalId
+                confirmedRental.getStartDate(),
+                confirmedRental.getEndDate(),
+                confirmedRental.getId()
         );
+        pendingConflicts.forEach(r -> {
+            r.setState(RentalState.RESTRAINED);
+            rentalRepository.save(r);
+        });
     }
-
-    private void restrainRental(Rental rental) {
-        rental.setState(RentalState.RESTRAINED);
-        rentalRepository.save(rental);
-    }
-
-    public void cancel(UUID rentalId, LocalDate cancelDate) {
-        Rental rental;
-        if(rentalRepository.findById(rentalId).isPresent()){
-            rental = rentalRepository.findById(rentalId).get();
-        }
-        else throw new EntityNotFoundException("Não existe esse aluguel");
-        if(cancelDate == null) cancelDate = LocalDate.now();
-        if(cancelDate.isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
-        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
-
-        rental.setState(RentalState.CANCELLED);
-        List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
-        conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
-        rentalRepository.saveAll(conflictingRentals);
-
-
-    }
-    public void cancel(UUID rentalId) {
-        Rental rental;
-        if(rentalRepository.findById(rentalId).isPresent()){
-            rental = rentalRepository.findById(rentalId).get();
-        }
-        else throw new EntityNotFoundException("Não existe esse aluguel");
-        if(LocalDate.now().isAfter(rental.getStartDate())) throw new IllegalArgumentException("The Rental has already started and cannot be cancelled");
-        if(!rental.getState().equals(RentalState.CONFIRMED)) throw new IllegalArgumentException("The Rental is not confirmed to be canceled");
-
-        rental.setState(RentalState.CANCELLED);
-        List<Rental> conflictingRentals = findRestrainedConflictingRentals(rental);
-        conflictingRentals.forEach(r->r.setState(RentalState.PENDING));
-        rentalRepository.saveAll(conflictingRentals);
-
-
-    }
-
-
 
     private List<Rental> findRestrainedConflictingRentals(Rental rental) {
         return rentalRepository.findRentalsByOverlapAndState(
@@ -135,11 +127,4 @@ public class OwnerUpdateRentalService {
                 rental.getId()
         );
     }
-
-    public Rental getRentalById(UUID id) {
-        return rentalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
-    }
 }
-
-

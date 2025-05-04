@@ -1,8 +1,12 @@
 package br.ifsp.application.rental.update.owner;
 
-import java.util.UUID;
+import java.time.LocalDate;
 
 public interface IOwnerUpdateRentalService {
-    record RequestModel(UUID ownerId, UUID rentalId) {}
-    record ResponseModel(UUID ownerId, UUID tenantId) {}
+    void confirmRental(OwnerUpdateRentalPresenter presenter, RequestModel request);
+    void denyRental(OwnerUpdateRentalPresenter presenter, RequestModel request);
+    void cancelRental(OwnerUpdateRentalPresenter presenter, RequestModel request, LocalDate cancelDate);
+
+    record RequestModel(java.util.UUID ownerId, java.util.UUID rentalId) {}
+    record ResponseModel(java.util.UUID ownerId, java.util.UUID tenantId) {}
 }

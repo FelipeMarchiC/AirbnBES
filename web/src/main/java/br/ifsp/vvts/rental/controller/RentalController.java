@@ -3,7 +3,7 @@ package br.ifsp.vvts.rental.controller;
 import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
-import br.ifsp.application.rental.update.OwnerUpdateRentalService;
+import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;

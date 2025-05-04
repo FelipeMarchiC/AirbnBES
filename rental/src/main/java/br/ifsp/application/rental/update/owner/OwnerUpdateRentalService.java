@@ -1,11 +1,9 @@
-package br.ifsp.application.rental.update;
+package br.ifsp.application.rental.update.owner;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import jakarta.persistence.EntityNotFoundException;
-import jdk.jfr.Label;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;

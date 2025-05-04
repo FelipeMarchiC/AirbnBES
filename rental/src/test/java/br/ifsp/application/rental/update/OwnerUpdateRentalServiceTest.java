@@ -1,6 +1,7 @@
 package br.ifsp.application.rental.update;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;

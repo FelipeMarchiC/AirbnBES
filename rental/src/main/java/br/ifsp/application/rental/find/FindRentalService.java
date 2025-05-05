@@ -1,6 +1,7 @@
 package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.rental.Rental;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +41,15 @@ public class FindRentalService implements IFindRentalService{
 
         }
     }
-    public List<Rental> findAll() {
-        return jpaRentalRepository.findAll();
+    public void findAll(FindRentalPresenter presenter) {
+        try {
+            List<Rental> allRentals = jpaRentalRepository.findAll();
+            if(allRentals.isEmpty()) throw new EntityNotFoundException("There are no rentals registered");
+            presenter.prepareSuccessView(new ResponseModel(allRentals));
+        }catch (Exception e){
+            presenter.prepareFailView(e);
+
+        }
     }
 
 }

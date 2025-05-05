@@ -6,17 +6,19 @@ import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-
 
 @Service
 public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
 
     private final JpaRentalRepository rentalRepository;
+    private final Clock clock;
 
-    public OwnerUpdateRentalService(JpaRentalRepository rentalRepository) {
+    public OwnerUpdateRentalService(JpaRentalRepository rentalRepository, Clock clock) {
         this.rentalRepository = rentalRepository;
+        this.clock = clock;
     }
 
     @Override
@@ -61,6 +63,10 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             Rental rental = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
+            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+                throw new SecurityException("Only the property owner can deny the rental.");
+            }
+
             if (!List.of(RentalState.PENDING, RentalState.RESTRAINED).contains(rental.getState())) {
                 throw new UnsupportedOperationException(
                         String.format("Cannot deny a rental that is %s.", rental.getState())
@@ -82,7 +88,11 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             Rental rental = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-            if (cancelDate == null) cancelDate = LocalDate.now();
+            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+                throw new SecurityException("Only the property owner can cancel the rental.");
+            }
+
+            if (cancelDate == null) cancelDate = LocalDate.now(clock);
             if (cancelDate.isAfter(rental.getStartDate())) {
                 throw new IllegalArgumentException("Rental has already started and cannot be cancelled.");
             }

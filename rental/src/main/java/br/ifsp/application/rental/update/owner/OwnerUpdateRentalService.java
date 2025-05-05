@@ -2,6 +2,7 @@ package br.ifsp.application.rental.update.owner;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import org.springframework.stereotype.Service;
@@ -92,10 +93,10 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
                 throw new SecurityException("Only the property owner can cancel the rental.");
             }
 
-            if (cancelDate == null) cancelDate = LocalDate.now(clock);
-            if (cancelDate.isAfter(rental.getStartDate())) {
-                throw new IllegalArgumentException("Rental has already started and cannot be cancelled.");
-            }
+            if (cancelDate == null) LocalDate.now(clock);
+            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rental.getStartDate());
+            if (presenter.isDone()) return;
+
             if (!rental.getState().equals(RentalState.CONFIRMED)) {
                 throw new IllegalArgumentException("Only confirmed rentals can be cancelled.");
             }

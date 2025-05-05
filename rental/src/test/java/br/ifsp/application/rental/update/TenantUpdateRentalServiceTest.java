@@ -43,7 +43,6 @@ public class TenantUpdateRentalServiceTest {
 
     private AutoCloseable closeable;
 
-    private User owner;
     private User tenant;
     private Property property;
     private Rental rental;
@@ -52,11 +51,11 @@ public class TenantUpdateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
         Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneId.systemDefault());
-        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, propertyRepository, fixedClock);
+        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, fixedClock);
 
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
-        owner = factory.generateOwner();
+        User owner = factory.generateOwner();
         property = factory.generateProperty(owner);
         rental = factory.generateRental(
                 factory.rentalId,

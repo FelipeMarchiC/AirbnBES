@@ -1,14 +1,11 @@
 package br.ifsp.vvts.rental.presenter;
 
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import br.ifsp.application.rental.create.CreateRentalPresenter;
 import br.ifsp.application.rental.create.ICreateRentalService.ResponseModel;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponseFrom;

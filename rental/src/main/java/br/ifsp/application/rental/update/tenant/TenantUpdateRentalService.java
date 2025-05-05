@@ -1,6 +1,5 @@
 package br.ifsp.application.rental.update.tenant;
 
-import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.JpaUserRepository;
@@ -16,18 +15,15 @@ import java.util.List;
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
     private final JpaRentalRepository rentalRepository;
     private final JpaUserRepository userRepository;
-    private final JpaPropertyRepository propertyRepository;
     private final Clock clock;
 
     public TenantUpdateRentalService(
             JpaRentalRepository rentalRepository,
             JpaUserRepository userRepository,
-            JpaPropertyRepository propertyRepository,
             Clock clock
     ) {
         this.rentalRepository = rentalRepository;
         this.userRepository = userRepository;
-        this.propertyRepository = propertyRepository;
         this.clock = clock;
     }
 

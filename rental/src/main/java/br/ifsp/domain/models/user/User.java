@@ -50,7 +50,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
+    public @NonNull String getPassword() {
         return password;
     }
 

@@ -90,22 +90,23 @@ class CreateRentalServiceTest {
             when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(presenter.isDone()).thenReturn(false);
             when(uuidGeneratorService.generate()).thenReturn(rental.getId());
-
-            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
             when(rentalRepositoryMock.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
+            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+
             sut.registerRental(presenter, request);
+
+            verify(userRepositoryMock).findById(tenant.getId());
+            verify(propertyRepositoryMock).findById(property.getId());
+            verify(rentalRepositoryMock).save(rentalCaptor.capture());
+            verify(presenter).prepareSuccessView(response);
+
             Rental savedRental = rentalCaptor.getValue();
             assertThat(savedRental.getUser()).isEqualTo(tenant);
             assertThat(savedRental.getProperty()).isEqualTo(property);
             assertThat(savedRental.getStartDate()).isEqualTo(request.startDate());
             assertThat(savedRental.getEndDate()).isEqualTo(request.endDate());
             assertThat(savedRental.getState()).isEqualTo(RentalState.PENDING);
-
-            verify(userRepositoryMock).findById(tenant.getId());
-            verify(propertyRepositoryMock).findById(property.getId());
-            verify(rentalRepositoryMock).save(any(Rental.class));
-            verify(presenter).prepareSuccessView(response);
         }
 
         @Tag("TDD")

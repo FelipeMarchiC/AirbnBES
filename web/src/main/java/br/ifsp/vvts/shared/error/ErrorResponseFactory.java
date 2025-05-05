@@ -1,6 +1,7 @@
 package br.ifsp.vvts.shared.error;
 
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.application.shared.exceptions.ImmutablePastEntityException;
 import br.ifsp.application.shared.exceptions.UnauthenticatedUserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,8 @@ public class ErrorResponseFactory {
 
         if (throwable instanceof EntityNotFoundException) {
             status = HttpStatus.NOT_FOUND;
+        } else if (throwable instanceof ImmutablePastEntityException) {
+            status = HttpStatus.CONFLICT;
         } else if (throwable instanceof UnauthenticatedUserException) {
             status = HttpStatus.UNAUTHORIZED;
         } else {
@@ -21,3 +24,4 @@ public class ErrorResponseFactory {
         return ResponseEntity.status(status).body(errorMessage);
     }
 }
+

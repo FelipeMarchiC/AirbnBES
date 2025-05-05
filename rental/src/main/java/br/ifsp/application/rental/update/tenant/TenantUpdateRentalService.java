@@ -8,17 +8,22 @@ import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+
 @Service
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
     private final JpaRentalRepository rentalRepository;
     private final JpaUserRepository userRepository;
+    private final Clock clock;
 
     public TenantUpdateRentalService(
             JpaRentalRepository rentalRepository,
-            JpaUserRepository userRepository
+            JpaUserRepository userRepository,
+            Clock clock
     ) {
         this.rentalRepository = rentalRepository;
         this.userRepository = userRepository;
+        this.clock = clock;
     }
 
     @Override
@@ -30,6 +35,9 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
         try {
             Rental rental = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
+
+            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rental.getStartDate());
+            if (presenter.isDone()) return;
 
             if (rental.getState() != RentalState.CONFIRMED) {
                 throw new IllegalArgumentException("Rental is not in a valid state to be cancelled");

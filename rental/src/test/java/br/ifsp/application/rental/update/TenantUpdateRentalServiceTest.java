@@ -15,9 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +38,8 @@ public class TenantUpdateRentalServiceTest {
     @InjectMocks private TenantUpdateRentalService sut;
     private TestDataFactory factory;
 
+    private AutoCloseable closeable;
+
     private User owner;
     private User tenant;
     private Property property;
@@ -41,6 +47,10 @@ public class TenantUpdateRentalServiceTest {
 
     @BeforeEach
     void setupService() {
+        closeable = MockitoAnnotations.openMocks(this);
+        Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneId.systemDefault());
+        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, fixedClock);
+
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
         owner = factory.generateOwner();
@@ -53,6 +63,11 @@ public class TenantUpdateRentalServiceTest {
                 LocalDate.parse("2025-04-30"),
                 RentalState.CONFIRMED
         );
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Nested
@@ -72,7 +87,7 @@ public class TenantUpdateRentalServiceTest {
 
             when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
-            when(presenter.isDone()).thenReturn(false);
+            when(presenter.isDone()).thenReturn(false, false);
             when(rentalRepositoryMock.save(any(Rental.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -89,6 +104,8 @@ public class TenantUpdateRentalServiceTest {
             verify(rentalRepositoryMock).save(any(Rental.class));
             verify(presenter).prepareSuccessView(response);
         }
+
+
     }
 
     @Nested

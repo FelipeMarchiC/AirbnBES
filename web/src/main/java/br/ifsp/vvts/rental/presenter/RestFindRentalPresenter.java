@@ -2,7 +2,7 @@ package br.ifsp.vvts.rental.presenter;
 
 import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.IFindRentalService;
-import lombok.NoArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponseFrom;
-@NoArgsConstructor
+
 public class RestFindRentalPresenter implements FindRentalPresenter {
     private ResponseEntity<?> responseEntity;
 

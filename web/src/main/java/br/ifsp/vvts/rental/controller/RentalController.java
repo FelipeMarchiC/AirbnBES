@@ -38,13 +38,6 @@ public class RentalController {
     private final DeleteRentalService deleteRentalService;
     private final ITenantUpdateRentalService tenantUpdateRentalService;
 
-    @GetMapping
-    public ResponseEntity<String> FindRental() {
-        final UUID userId = authService.getAuthenticatedUserId();
-        findRentalService.getRentalHistoryByTenant(userId);
-
-        return ResponseEntity.ok("Hello: " + userId.toString());
-    }
 
     @PostMapping
     public ResponseEntity<?> createRental(@RequestBody PostRequest request) {

@@ -51,7 +51,7 @@ public class RentalController {
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @PutMapping("/{rentalId}/confirm")
+    @PutMapping("/{rentalId}/owner/confirm")
     public ResponseEntity<?> confirmRental(@PathVariable UUID rentalId) {
         UUID ownerId = authService.getAuthenticatedUserId();
         var presenter = new RestOwnerUpdateRentalPresenter();
@@ -64,7 +64,7 @@ public class RentalController {
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @PutMapping("/{rentalId}/deny")
+    @PutMapping("/{rentalId}/owner/deny")
     public ResponseEntity<?> denyRental(@PathVariable UUID rentalId) {
         UUID ownerId = authService.getAuthenticatedUserId();
         var presenter = new RestOwnerUpdateRentalPresenter();
@@ -77,7 +77,7 @@ public class RentalController {
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @PutMapping("/{rentalId}/cancel")
+    @PutMapping("/{rentalId}/owner/cancel")
     public ResponseEntity<?> cancelRental(@PathVariable UUID rentalId,
                                           @RequestParam(required = false) String cancelDate) {
         UUID ownerId = authService.getAuthenticatedUserId();

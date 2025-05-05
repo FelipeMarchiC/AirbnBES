@@ -125,6 +125,16 @@ public class RentalController {
         return presenter.responseEntity() !=null?
                 presenter.responseEntity():ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+    @GetMapping("/{tenantId}")
+    public ResponseEntity<?> findRentalHistoryByTenantId(@PathVariable UUID tenantId){
+        val presenter = new RestFindRentalPresenter();
+        val requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
+
+        findRentalService.getRentalHistoryByTenant(requestModel,presenter);
+        return presenter.responseEntity() != null?
+                presenter.responseEntity(): ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+    }
 
 
 

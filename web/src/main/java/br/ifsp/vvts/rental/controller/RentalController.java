@@ -3,20 +3,22 @@ package br.ifsp.vvts.rental.controller;
 import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.delete.IDeleteRentalService;
+import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.FindRentalService;
+import br.ifsp.application.rental.find.IFindRentalService;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
-import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
-import br.ifsp.vvts.rental.presenter.RestDeleteRentalPresenter;
-import br.ifsp.vvts.rental.presenter.RestOwnerUpdateRentalPresenter;
-import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;
+import br.ifsp.vvts.property.presenter.RestFindPropertyPresenter;
+import br.ifsp.vvts.rental.presenter.*;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.rental.requests.PutRequest;
 import br.ifsp.vvts.security.auth.AuthenticationInfoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.val;
+import org.hibernate.annotations.processing.Find;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +40,15 @@ public class RentalController {
     private final DeleteRentalService deleteRentalService;
     private final ITenantUpdateRentalService tenantUpdateRentalService;
 
-    @GetMapping
-    public ResponseEntity<String> FindRental() {
-        final UUID userId = authService.getAuthenticatedUserId();
-        findRentalService.getRentalHistoryByTenant(userId);
 
-        return ResponseEntity.ok("Hello: " + userId.toString());
+    @GetMapping("/{propertyId}")
+    public ResponseEntity<?> findRentalByPropertyId(@PathVariable UUID propertyId){
+
+        val presenter =new RestFindRentalPresenter();
+        val requestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
+        findRentalService.getRentalHistoryByProperty(requestModel,presenter);
+        return presenter.responseEntity()!=null?
+                presenter.responseEntity() : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     @PostMapping

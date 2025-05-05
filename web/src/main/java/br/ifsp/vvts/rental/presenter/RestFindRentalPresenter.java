@@ -2,8 +2,10 @@ package br.ifsp.vvts.rental.presenter;
 
 import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.IFindRentalService;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import pitest.fasterxml.jackson.core.JsonFactory;
 
 import java.time.LocalDate;
 import java.util.List;

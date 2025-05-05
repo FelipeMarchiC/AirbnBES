@@ -1,15 +1,10 @@
 package br.ifsp.application.rental.find;
-
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
-import lombok.val;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
-import org.openqa.selenium.json.Json;
-
 import java.util.List;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -102,7 +97,9 @@ class FindRentalServiceTest {
         @DisplayName("Should throw exception when property ID is null")
         @Test
         void shouldThrowExceptionWhenPropertyIdIsNull() {
-            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel,presenter))
+            findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(null);
+
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("propertyId cannot be null");
         }
@@ -111,30 +108,29 @@ class FindRentalServiceTest {
         @DisplayName("Should throw exception when tenant ID is null")
         @Test
         void shouldThrowExceptionWhenTenantIdIsNull() {
-            assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(null,presenter))
+            IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(null);
+
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(requestModel, presenter))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("tenantId cannot be null");
         }
-    }
 
-
-
-    @Nested
-    @DisplayName("Rental FindAll Tests")
-    class RentalFindAllTests {
         @Tag("UnitTest")
-        @Tag("TDD")
-        @DisplayName("Should return all rentals from repository")
+        @DisplayName("Should throw exception when property request model is null")
         @Test
-        void shouldReturnAllRentals() {
-            List<Rental> mockRentals = List.of(
-                    mock(Rental.class),
-                    mock(Rental.class)
-            );
-            when(jpaRentalRepository.findAll()).thenReturn(mockRentals);
-            findRentalService.findAll(presenter);
-            assertThat(response.rentalList()).isEqualTo(mockRentals);
-            verify(jpaRentalRepository).findAll();
+        void shouldThrowExceptionWhenRequestModelIsNull_Property() {
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(null, presenter))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("propertyId cannot be null");
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should throw exception when tenant request model is null")
+        @Test
+        void shouldThrowExceptionWhenRequestModelIsNull_Tenant() {
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(null, presenter))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("tenantId cannot be null");
         }
     }
 

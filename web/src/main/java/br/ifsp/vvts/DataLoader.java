@@ -11,6 +11,7 @@ import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -25,15 +26,18 @@ public class DataLoader implements CommandLineRunner {
     private final JpaUserRepository userRepository;
     private final JpaPropertyRepository propertyRepository;
     private final JpaRentalRepository rentalRepository;
+    private final PasswordEncoder encoder;
 
     public DataLoader(
             JpaUserRepository userRepository,
             JpaPropertyRepository propertyRepository,
-            JpaRentalRepository rentalRepository
+            JpaRentalRepository rentalRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.propertyRepository = propertyRepository;
         this.rentalRepository = rentalRepository;
+        this.encoder = passwordEncoder;
     }
 
     @Override
@@ -42,7 +46,8 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("9b96aa7e-4f1b-4c2f-b273-3b9f7c9b1a01"))
                 .name("Amiya").lastname("Rhodes")
                 .email("amiya@rhodesisland.com")
-                .password("pass1").role(Role.ADMIN)
+                .password(encoder.encode("bes"))
+                .role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
 
@@ -51,7 +56,8 @@ public class DataLoader implements CommandLineRunner {
                 .name("Catherine")
                 .lastname("Earnshaw")
                 .email("cathy@wuthering-heights.com")
-                .password("pass2").role(Role.USER)
+                .password(encoder.encode("bes"))
+                .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
 
@@ -59,7 +65,7 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("8dfc6c64-1e7b-4ec1-8450-d20e160c7092"))
                 .name("Coragem").lastname("o Cão Covarde")
                 .email("uriel@eustacio.com")
-                .password("pass3")
+                .password(encoder.encode("bes"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -69,7 +75,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Roberto")
                 .lastname("Abadia")
                 .email("roberto-abadia@gmail.com")
-                .password("pass4").role(Role.ADMIN)
+                .password(encoder.encode("bes")).role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
 
@@ -77,7 +83,7 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("1a8a419c-4d84-4a7a-9c18-282df27819d3"))
                 .name("Vin").lastname("Diesel")
                 .email("familia@outlook.com")
-                .password("pass5")
+                .password(encoder.encode("bes"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -87,7 +93,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Pedro")
                 .lastname("Bosta")
                 .email("barro@gmail.com")
-                .password("pass6")
+                .password(encoder.encode("bes"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -97,7 +103,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Goleiro")
                 .lastname("Bruno")
                 .email("macarrao@penguinlogistics.com")
-                .password("pass7")
+                .password(encoder.encode("bes"))
                 .ownedProperties(emptyList())
                 .role(Role.USER)
                 .build();
@@ -107,7 +113,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Rock")
                 .lastname("Roll")
                 .email("rock@roll.com")
-                .password("pass8")
+                .password(encoder.encode("bes"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -117,7 +123,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Lazaro")
                 .lastname("Assassino")
                 .email("lazaromanhunter@realoficial.com")
-                .password("pass9")
+                .password(encoder.encode("bes"))
                 .ownedProperties(emptyList())
                 .role(Role.USER)
                 .build();
@@ -127,7 +133,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Nickel")
                 .lastname("Back")
                 .email("photograph@faraway.com")
-                .password("pass10")
+                .password(encoder.encode("bes"))
                 .ownedProperties(emptyList())
                 .role(Role.USER)
                 .build();

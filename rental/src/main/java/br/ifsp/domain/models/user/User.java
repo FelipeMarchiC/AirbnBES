@@ -1,6 +1,7 @@
 package br.ifsp.domain.models.user;
 
 import br.ifsp.domain.models.property.Property;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -24,13 +25,17 @@ public class User implements UserDetails {
     @JdbcTypeCode(Types.VARCHAR)
     @NonNull @Column(nullable = false)
     private UUID id;
+
     @NonNull @Column(nullable = false)
     private String name;
+
     @NonNull @Column(nullable = false)
     private String lastname;
+
     @NonNull @Column(nullable = false)
     private String email;
-    @NonNull @Column(nullable = false)
+
+    @NonNull @JsonIgnore @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

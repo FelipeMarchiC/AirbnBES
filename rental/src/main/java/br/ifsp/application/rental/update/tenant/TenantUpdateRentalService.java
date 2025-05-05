@@ -10,6 +10,7 @@ import br.ifsp.domain.models.user.User;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.util.List;
 
 @Service
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
@@ -48,7 +49,9 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
             }
 
             rental.setState(RentalState.CANCELLED);
-            rentalRepository.save(rental);
+            Rental updatedRental = rentalRepository.save(rental);
+
+            unrestrainConflitingRentals(updatedRental);
 
             assert user != null;
             presenter.prepareSuccessView(
@@ -57,5 +60,20 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
+    }
+
+    private void unrestrainConflitingRentals(Rental confirmedRental) {
+        List<Rental> pendingConflicts = rentalRepository.findRentalsByOverlapAndState(
+                confirmedRental.getProperty().getId(),
+                RentalState.RESTRAINED,
+                confirmedRental.getStartDate(),
+                confirmedRental.getEndDate(),
+                confirmedRental.getId()
+        );
+
+        pendingConflicts.forEach(r -> {
+            r.setState(RentalState.PENDING);
+            rentalRepository.save(r);
+        });
     }
 }

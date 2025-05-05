@@ -112,6 +112,7 @@ public class TenantUpdateRentalServiceTest {
         @Test()
         @DisplayName("Should successfully change restrained rentals in range to pending")
         void shouldSuccessfullyChangeRestrainedRentalsInRangeToPending() {
+            // ---------- Arrange ----------
             val request = factory.tenantUpdateRequestModel();
             val response = factory.tenantUpdateResponseModel();
 
@@ -147,16 +148,30 @@ public class TenantUpdateRentalServiceTest {
             when(rentalRepositoryMock.save(any(Rental.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
+            // ---------- Act ----------
             sut.cancelRental(presenter, request);
 
-            assertThat(RentalState.RESTRAINED).isEqualTo(existingRental1.getState());
-            assertThat(RentalState.RESTRAINED).isEqualTo(existingRental2.getState());
+            // ---------- Assert ----------
+            assertThat(existingRental1.getState()).isEqualTo(RentalState.PENDING);
+            assertThat(existingRental2.getState()).isEqualTo(RentalState.PENDING);
 
             ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
-            verify(rentalRepositoryMock).save(rentalCaptor.capture());
+            verify(rentalRepositoryMock, times(3)).save(rentalCaptor.capture());
 
-            Rental savedRental = rentalCaptor.getValue();
-            assertThat(savedRental.getState()).isEqualTo(RentalState.CANCELLED);
+            List<Rental> savedRentals = rentalCaptor.getAllValues();
+
+            Rental cancelledRental = savedRentals.stream()
+                    .filter(r -> r.getId().equals(rental.getId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            assertThat(cancelledRental.getState()).isEqualTo(RentalState.CANCELLED);
+
+            List<Rental> restrainedToPending = savedRentals.stream()
+                    .filter(r -> !r.getId().equals(rental.getId()))
+                    .toList();
+
+            restrainedToPending.forEach(r -> assertThat(r.getState()).isEqualTo(RentalState.PENDING));
 
             verify(userRepositoryMock).findById(tenantId);
             verify(rentalRepositoryMock).findById(rentalId);
@@ -167,9 +182,6 @@ public class TenantUpdateRentalServiceTest {
                     rental.getEndDate(),
                     rentalId
             );
-            verify(rentalRepositoryMock).save(existingRental1);
-            verify(rentalRepositoryMock).save(existingRental1);
-            verify(rentalRepositoryMock).save(any(Rental.class));
             verify(presenter).prepareSuccessView(response);
         }
     }

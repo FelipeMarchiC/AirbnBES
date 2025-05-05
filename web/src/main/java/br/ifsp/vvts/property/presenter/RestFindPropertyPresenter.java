@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponseFrom;
 
@@ -16,10 +17,12 @@ public class RestFindPropertyPresenter implements FindPropertyPresenter {
     public void prepareSuccessView(IFindPropertyService.PropertyListResponseModel response) {
         List<PropertyViewModel> viewModelList = response.properties().stream()
                 .map(property -> new PropertyViewModel(
+                        property.getId(),
                         property.getName(),
                         property.getDescription(),
                         property.getDailyRate().getAmount().doubleValue(),
-                        property.getOwner().getUsername()
+                        property.getOwner().getUsername(),
+                        property.getOwner().getId()
                 ))
                 .toList();
 
@@ -41,9 +44,11 @@ public class RestFindPropertyPresenter implements FindPropertyPresenter {
     }
 
     private record PropertyViewModel(
+            UUID id,
             String name,
             String description,
             Double dailyRate,
-            String owner
+            String ownerName,
+            UUID ownerId
     ) {}
 }

@@ -5,6 +5,7 @@ import br.ifsp.domain.models.rental.Rental;
 import lombok.val;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
+import org.openqa.selenium.json.Json;
 
 import java.util.List;
 import java.util.UUID;
@@ -92,6 +93,7 @@ class FindRentalServiceTest {
         }
     }
 
+
     @Nested
     @DisplayName("Null Input Validation Tests")
     class NullInputValidationTests {
@@ -130,8 +132,8 @@ class FindRentalServiceTest {
                     mock(Rental.class)
             );
             when(jpaRentalRepository.findAll()).thenReturn(mockRentals);
-            List<Rental> result = findRentalService.findAll();
-            assertThat(result).isEqualTo(mockRentals);
+            findRentalService.findAll(presenter);
+            assertThat(response.rentalList()).isEqualTo(mockRentals);
             verify(jpaRentalRepository).findAll();
         }
     }

@@ -2,6 +2,7 @@ package br.ifsp.vvts.rental.presenter;
 
 import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.IFindRentalService;
+import br.ifsp.domain.models.rental.RentalState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -23,7 +24,8 @@ public class RestFindRentalPresenter implements FindRentalPresenter {
                         rental.getProperty().getName(),
                         rental.getStartDate(),
                         rental.getEndDate(),
-                        rental.getValue().getAmount().doubleValue()
+                        rental.getValue().getAmount().doubleValue(),
+                        rental.getState()
                 ))
                 .toList();
 
@@ -50,6 +52,7 @@ public class RestFindRentalPresenter implements FindRentalPresenter {
             String propertyName,
             LocalDate startDate,
             LocalDate endDate,
-            Double price
+            Double price,
+            RentalState state
     ) {}
 }

@@ -2,26 +2,27 @@ package br.ifsp.vvts.rental.presenter;
 
 import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.IFindRentalService;
-import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
-import br.ifsp.domain.models.rental.Rental;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponseFrom;
-
+@NoArgsConstructor
 public class RestFindRentalPresenter implements FindRentalPresenter {
     private ResponseEntity<?> responseEntity;
 
-    private List<UUID> rentalIdList;
-    private List<String> userNameList;
-    private List<String> propertyNameList;
-    private List<LocalDate> startDateList;
-    private List<LocalDate> endDateList;
-    private List<Double> prices;
+    private final List<UUID> rentalIdList = new ArrayList<>();
+    private final List<String> userNameList = new ArrayList<>();
+    private final List<String> propertyNameList = new ArrayList<>();
+    private final List<LocalDate> startDateList = new ArrayList<>();
+    private final List<LocalDate> endDateList = new ArrayList<>();
+    private final List<Double> prices = new ArrayList<>();
+
 
     @Override
     public void prepareSuccessView(IFindRentalService.ResponseModel response) {

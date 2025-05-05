@@ -3,6 +3,7 @@ package br.ifsp.application.rental.find;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
 import org.junit.jupiter.api.*;
+import org.mockito.Mock;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,11 +15,34 @@ class FindRentalServiceTest {
 
     private JpaRentalRepository jpaRentalRepository;
     private FindRentalService findRentalService;
+    @Mock
+    private FindRentalPresenter presenter;
+    private IFindRentalService.RequestModel requestModel;
+    private IFindRentalService.ResponseModel response;
+    private Exception exceptionResponse;
+
 
     @BeforeEach
     void setup() {
         jpaRentalRepository = mock(JpaRentalRepository.class);
         findRentalService = new FindRentalService(jpaRentalRepository);
+        presenter = new FindRentalPresenter() {
+            @Override
+            public void prepareSuccessView(IFindRentalService.ResponseModel response) {
+                FindRentalServiceTest.this.response = response;
+            }
+
+            @Override
+            public void prepareFailView(Throwable exception) {
+                exceptionResponse =(Exception) exception;
+
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+        };
     }
 
     @Nested
@@ -34,9 +58,14 @@ class FindRentalServiceTest {
                     mock(Rental.class),
                     mock(Rental.class)
             );
+            response = new IFindRentalService.ResponseModel(mockRentals);
+            requestModel = new IFindRentalService.RequestModel(propertyId);
+
             when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentals);
-            List<Rental> result = findRentalService.getRentalHistoryByProperty(propertyId);
-            assertThat(result).isEqualTo(mockRentals);
+            findRentalService.getRentalHistoryByProperty(requestModel,presenter);
+            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(exceptionResponse).isNull();
+            assertThat(response).isNotNull();
             verify(jpaRentalRepository).findByPropertyId(propertyId);
         }
     }
@@ -68,7 +97,7 @@ class FindRentalServiceTest {
         @DisplayName("Should throw exception when property ID is null")
         @Test
         void shouldThrowExceptionWhenPropertyIdIsNull() {
-            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(null))
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(requestModel,presenter))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("propertyId cannot be null");
         }

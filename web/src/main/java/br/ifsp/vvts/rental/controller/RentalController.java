@@ -1,12 +1,10 @@
 package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.application.rental.create.ICreateRentalService;
-import br.ifsp.application.rental.delete.DeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
-import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestOwnerUpdateRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;
@@ -32,7 +30,6 @@ public class RentalController {
     private final AuthenticationInfoService authService;
 
     private final ICreateRentalService createRentalService;
-    private final DeleteRentalService deleteRentalService;
     private final FindRentalService findRentalService;
     private final OwnerUpdateRentalService ownerUpdateRentalService;
     private final ITenantUpdateRentalService tenantUpdateRentalService;
@@ -111,12 +108,12 @@ public class RentalController {
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @DeleteMapping("/{rentalId}")
+/*    @DeleteMapping("/{rentalId}")
     public ResponseEntity<?> deleteRental(@PathVariable UUID rentalId) {
         Rental rental = deleteRentalService.getRentalById(rentalId);
         UUID deletedId = deleteRentalService.delete(rental);
         return ResponseEntity.ok("Rental deleted successfully: " + deletedId);
     }
-
+*/
 
 }

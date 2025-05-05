@@ -6,28 +6,31 @@ import br.ifsp.domain.models.rental.RentalState;
 import org.springframework.stereotype.Service;
 
 
-import java.util.UUID;
-
 @Service
-public class DeleteRentalService {
+public class DeleteRentalService implements IDeleteRentalService {
 
-    private final JpaRentalRepository JpaRentalRepository;
+    private final JpaRentalRepository repository;
 
-    public DeleteRentalService(JpaRentalRepository JpaRentalRepository) {
-        this.JpaRentalRepository = JpaRentalRepository;
+    public DeleteRentalService(JpaRentalRepository repository) {
+        this.repository = repository;
     }
 
-    public UUID delete(Rental rental){
-        if (rental.getState() != RentalState.PENDING && rental.getState() != RentalState.DENIED) {
-            throw new IllegalArgumentException("State must be PENDING or DENIED");
+    @Override
+    public void delete(DeleteRentalPresenter presenter, RequestModel request) {
+        try {
+            Rental rental = repository.findById(request.rentalId())
+                    .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+
+            if (rental.getState() != RentalState.PENDING && rental.getState() != RentalState.DENIED) {
+                throw new IllegalArgumentException("Rental state must be PENDING or DENIED");
+            }
+
+            repository.deleteById(rental.getId());
+
+            var response = new ResponseModel(request.ownerId(), rental.getUser().getId());
+            presenter.prepareSuccessView(response);
+        } catch (Exception e) {
+            presenter.prepareFailView(e);
         }
-
-        JpaRentalRepository.deleteById(rental.getId());
-        return rental.getId();
-    }
-
-    public Rental getRentalById(UUID id) {
-        return JpaRentalRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
     }
 }

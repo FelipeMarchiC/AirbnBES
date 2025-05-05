@@ -1,19 +1,19 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
+import br.ifsp.domain.models.user.User;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,15 +25,30 @@ class DeleteRentalServiceTest {
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
 
+    @Mock
+    private DeleteRentalPresenter presenter;
+
     @InjectMocks
     private DeleteRentalService sut;
 
+    private UUID rentalId;
+    private UUID ownerId;
+    private UUID tenantId;
     private Rental rental;
+    private User tenant;
 
     @BeforeEach
     void setup() {
+        rentalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        ownerId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        tenantId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+
+        tenant = mock(User.class);
+        when(tenant.getId()).thenReturn(tenantId);
+
         rental = new Rental();
-        rental.setId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+        rental.setId(rentalId);
+        rental.setUser(tenant);
     }
 
     @Nested
@@ -46,24 +61,46 @@ class DeleteRentalServiceTest {
         @DisplayName("Should throw exception when state is not PENDING or DENIED")
         void shouldThrowWhenStateIsInvalid() {
             rental.setState(RentalState.CONFIRMED);
-            assertThatThrownBy(() -> sut.delete(rental))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("State must be PENDING or DENIED");
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
             verify(rentalRepositoryMock, never()).deleteById(any());
         }
 
         @ParameterizedTest(name = "[{index}]: should delete rental with state {0}")
-        @CsvSource({
-                "PENDING",
-                "DENIED"
-        })
+        @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED"})
         @DisplayName("Should delete rental and return ID when state is valid")
         void shouldDeleteWhenStateIsValid(RentalState state) {
             rental.setState(state);
-            UUID deletedId = sut.delete(rental);
-            verify(rentalRepositoryMock).deleteById(rental.getId());
-            assertThat(deletedId).isEqualTo(rental.getId());
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(rentalRepositoryMock).deleteById(rentalId);
+
+            ArgumentCaptor<IDeleteRentalService.ResponseModel> captor =
+                    ArgumentCaptor.forClass(IDeleteRentalService.ResponseModel.class);
+            verify(presenter).prepareSuccessView(captor.capture());
+
+            var response = captor.getValue();
+            assertThat(response.ownerId()).isEqualTo(ownerId);
+            assertThat(response.tenantId()).isEqualTo(tenantId);
         }
 
+        @Test
+        @DisplayName("Should handle rental not found")
+        void shouldHandleRentalNotFound() {
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.empty());
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+            verify(rentalRepositoryMock, never()).deleteById(any());
+        }
     }
 }

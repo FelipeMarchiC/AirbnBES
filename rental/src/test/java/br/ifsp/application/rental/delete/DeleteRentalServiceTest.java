@@ -35,7 +35,6 @@ class DeleteRentalServiceTest {
     private UUID ownerId;
     private UUID tenantId;
     private Rental rental;
-    private User tenant;
 
     @BeforeEach
     void setup() {
@@ -43,8 +42,8 @@ class DeleteRentalServiceTest {
         ownerId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         tenantId = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
-        tenant = mock(User.class);
-        when(tenant.getId()).thenReturn(tenantId);
+        User tenant = mock(User.class);
+        lenient().when(tenant.getId()).thenReturn(tenantId);
 
         rental = new Rental();
         rental.setId(rentalId);

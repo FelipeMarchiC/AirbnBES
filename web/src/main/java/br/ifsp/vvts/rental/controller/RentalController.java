@@ -1,11 +1,14 @@
 package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.application.rental.create.ICreateRentalService;
+import br.ifsp.application.rental.delete.DeleteRentalService;
+import br.ifsp.application.rental.delete.IDeleteRentalService;
 import br.ifsp.application.rental.find.FindRentalService;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
 import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
+import br.ifsp.vvts.rental.presenter.RestDeleteRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestOwnerUpdateRentalPresenter;
 import br.ifsp.vvts.rental.presenter.RestTenantUpdateRentalPresenter;
 import br.ifsp.vvts.rental.requests.PostRequest;
@@ -32,6 +35,7 @@ public class RentalController {
     private final ICreateRentalService createRentalService;
     private final FindRentalService findRentalService;
     private final OwnerUpdateRentalService ownerUpdateRentalService;
+    private final DeleteRentalService deleteRentalService;
     private final ITenantUpdateRentalService tenantUpdateRentalService;
 
     @GetMapping
@@ -108,12 +112,18 @@ public class RentalController {
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-/*    @DeleteMapping("/{rentalId}")
+    @DeleteMapping("/{rentalId}")
     public ResponseEntity<?> deleteRental(@PathVariable UUID rentalId) {
-        Rental rental = deleteRentalService.getRentalById(rentalId);
-        UUID deletedId = deleteRentalService.delete(rental);
-        return ResponseEntity.ok("Rental deleted successfully: " + deletedId);
+        var presenter = new RestDeleteRentalPresenter();
+        var ownerId = authService.getAuthenticatedUserId();
+        var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+
+        deleteRentalService.delete(presenter, request);
+
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-*/
+
 
 }

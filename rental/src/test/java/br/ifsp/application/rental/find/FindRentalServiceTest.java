@@ -2,6 +2,7 @@ package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.Rental;
+import lombok.val;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 
@@ -17,7 +18,7 @@ class FindRentalServiceTest {
     private FindRentalService findRentalService;
     @Mock
     private FindRentalPresenter presenter;
-    private IFindRentalService.RequestModel requestModel;
+    private IFindRentalService.FindByPropertyIdRequestModel findByPropertyIdRequestModel;
     private IFindRentalService.ResponseModel response;
     private Exception exceptionResponse;
 
@@ -59,10 +60,10 @@ class FindRentalServiceTest {
                     mock(Rental.class)
             );
             response = new IFindRentalService.ResponseModel(mockRentals);
-            requestModel = new IFindRentalService.RequestModel(propertyId);
+            findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
 
             when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentals);
-            findRentalService.getRentalHistoryByProperty(requestModel,presenter);
+            findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel,presenter);
             assertThat(response.rentalList()).isEqualTo(mockRentals);
             assertThat(exceptionResponse).isNull();
             assertThat(response).isNotNull();
@@ -82,9 +83,11 @@ class FindRentalServiceTest {
                     mock(Rental.class),
                     mock(Rental.class)
             );
+            IFindRentalService.FindByTenantIdRequestModel requestModel= new IFindRentalService.FindByTenantIdRequestModel(tenantId);
             when(jpaRentalRepository.findByUserId(tenantId)).thenReturn(mockRentals);
-            List<Rental> result = findRentalService.getRentalHistoryByTenant(tenantId);
-            assertThat(result).isEqualTo(mockRentals);
+            findRentalService.getRentalHistoryByTenant(requestModel,presenter);
+            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserId(tenantId);
         }
     }
@@ -97,7 +100,7 @@ class FindRentalServiceTest {
         @DisplayName("Should throw exception when property ID is null")
         @Test
         void shouldThrowExceptionWhenPropertyIdIsNull() {
-            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(requestModel,presenter))
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel,presenter))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("propertyId cannot be null");
         }
@@ -106,7 +109,7 @@ class FindRentalServiceTest {
         @DisplayName("Should throw exception when tenant ID is null")
         @Test
         void shouldThrowExceptionWhenTenantIdIsNull() {
-            assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(null))
+            assertThatThrownBy(() -> findRentalService.getRentalHistoryByTenant(null,presenter))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("tenantId cannot be null");
         }

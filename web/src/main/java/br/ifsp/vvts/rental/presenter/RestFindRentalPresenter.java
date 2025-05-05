@@ -2,12 +2,10 @@ package br.ifsp.vvts.rental.presenter;
 
 import br.ifsp.application.rental.find.FindRentalPresenter;
 import br.ifsp.application.rental.find.IFindRentalService;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,33 +14,20 @@ import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponse
 public class RestFindRentalPresenter implements FindRentalPresenter {
     private ResponseEntity<?> responseEntity;
 
-    private final List<UUID> rentalIdList = new ArrayList<>();
-    private final List<String> userNameList = new ArrayList<>();
-    private final List<String> propertyNameList = new ArrayList<>();
-    private final List<LocalDate> startDateList = new ArrayList<>();
-    private final List<LocalDate> endDateList = new ArrayList<>();
-    private final List<Double> prices = new ArrayList<>();
-
-
     @Override
     public void prepareSuccessView(IFindRentalService.ResponseModel response) {
-        response.rentalList().forEach(rental -> rentalIdList.add(rental.getId()));
-        response.rentalList().forEach(rental -> userNameList.add(rental.getUser().getUsername()));
-        response.rentalList().forEach(rental -> propertyNameList.add(rental.getProperty().getName()));
-        response.rentalList().forEach(rental -> startDateList.add(rental.getStartDate()));
-        response.rentalList().forEach(rental -> endDateList.add(rental.getEndDate()));
-        response.rentalList().forEach(rental -> prices.add(rental.getValue().getAmount().doubleValue()));
+        List<RentalViewModel> viewModelList = response.rentalList().stream()
+                .map(rental -> new RentalViewModel(
+                        rental.getId(),
+                        rental.getUser().getUsername(),
+                        rental.getProperty().getName(),
+                        rental.getStartDate(),
+                        rental.getEndDate(),
+                        rental.getValue().getAmount().doubleValue()
+                ))
+                .toList();
 
-        RestFindRentalPresenter.ViewModel viewModel = new RestFindRentalPresenter.ViewModel(
-                rentalIdList,
-                userNameList,
-                propertyNameList,
-                startDateList,
-                endDateList,
-                prices
-        );
-
-        this.responseEntity = ResponseEntity.status(HttpStatus.CREATED).body(viewModel);
+        this.responseEntity = ResponseEntity.status(HttpStatus.OK).body(viewModelList);
     }
 
     @Override
@@ -59,14 +44,12 @@ public class RestFindRentalPresenter implements FindRentalPresenter {
         return responseEntity;
     }
 
-    private record ViewModel(
-            List<UUID> rentalIdList,
-
-            List<String> userNameList,
-            List<String> propertyNameList,
-            List<LocalDate> startDateList,
-            List<LocalDate> endDateList,
-            List<Double> prices
-
+    private record RentalViewModel(
+            UUID id,
+            String username,
+            String propertyName,
+            LocalDate startDate,
+            LocalDate endDate,
+            Double price
     ) {}
 }

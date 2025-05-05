@@ -116,6 +116,7 @@ public class RentalController {
                 presenter.responseEntity()
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
     @GetMapping
     public ResponseEntity<?> findAll(){
         val presenter =new RestFindRentalPresenter();
@@ -123,7 +124,8 @@ public class RentalController {
         return presenter.responseEntity() !=null?
                 presenter.responseEntity():ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    @GetMapping("/{propertyId}")
+
+    @GetMapping("/properties/{propertyId}")
     public ResponseEntity<?> findRentalHistoryByPropertyId(@PathVariable UUID propertyId){
         val presenter = new RestFindRentalPresenter();
         val requestModel= new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
@@ -132,7 +134,7 @@ public class RentalController {
         return presenter.responseEntity() !=null?
                 presenter.responseEntity():ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    @GetMapping("/{tenantId}")
+    @GetMapping("/tenants/{tenantId}")
     public ResponseEntity<?> findRentalHistoryByTenantId(@PathVariable UUID tenantId){
         val presenter = new RestFindRentalPresenter();
         val requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);

@@ -1,5 +1,6 @@
 package br.ifsp.application.rental.update;
 
+import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalPresenter;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
@@ -22,6 +23,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.*;
 public class TenantUpdateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
+    @Mock private JpaPropertyRepository propertyRepository;
     @Mock private TenantUpdateRentalPresenter presenter;
     @InjectMocks private TenantUpdateRentalService sut;
     private TestDataFactory factory;
@@ -49,7 +52,7 @@ public class TenantUpdateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
         Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneId.systemDefault());
-        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, fixedClock);
+        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, propertyRepository, fixedClock);
 
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
@@ -105,7 +108,70 @@ public class TenantUpdateRentalServiceTest {
             verify(presenter).prepareSuccessView(response);
         }
 
+        @Tag("TDD")
+        @Test()
+        @DisplayName("Should successfully change restrained rentals in range to pending")
+        void shouldSuccessfullyChangeRestrainedRentalsInRangeToPending() {
+            val request = factory.tenantUpdateRequestModel();
+            val response = factory.tenantUpdateResponseModel();
 
+            val existingRental1 = factory.generateRental(
+                    factory.generateTenant(UUID.randomUUID()),
+                    property,
+                    LocalDate.parse("2025-01-02"),
+                    LocalDate.parse("2025-01-15"),
+                    RentalState.RESTRAINED
+            );
+
+            val existingRental2 = factory.generateRental(
+                    factory.generateTenant(UUID.randomUUID()),
+                    property,
+                    LocalDate.parse("2025-02-15"),
+                    LocalDate.parse("2025-03-27"),
+                    RentalState.RESTRAINED
+            );
+
+            UUID tenantId = tenant.getId();
+            UUID rentalId = rental.getId();
+
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            when(presenter.isDone()).thenReturn(false, false);
+            when(rentalRepositoryMock.findRentalsByOverlapAndState(
+                    property.getId(),
+                    RentalState.RESTRAINED,
+                    rental.getStartDate(),
+                    rental.getEndDate(),
+                    rentalId
+            )).thenReturn(List.of(existingRental1, existingRental2));
+            when(rentalRepositoryMock.save(any(Rental.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            sut.cancelRental(presenter, request);
+
+            assertThat(RentalState.RESTRAINED).isEqualTo(existingRental1.getState());
+            assertThat(RentalState.RESTRAINED).isEqualTo(existingRental2.getState());
+
+            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            verify(rentalRepositoryMock).save(rentalCaptor.capture());
+
+            Rental savedRental = rentalCaptor.getValue();
+            assertThat(savedRental.getState()).isEqualTo(RentalState.CANCELLED);
+
+            verify(userRepositoryMock).findById(tenantId);
+            verify(rentalRepositoryMock).findById(rentalId);
+            verify(rentalRepositoryMock).findRentalsByOverlapAndState(
+                    property.getId(),
+                    RentalState.RESTRAINED,
+                    rental.getStartDate(),
+                    rental.getEndDate(),
+                    rentalId
+            );
+            verify(rentalRepositoryMock).save(existingRental1);
+            verify(rentalRepositoryMock).save(existingRental1);
+            verify(rentalRepositoryMock).save(any(Rental.class));
+            verify(presenter).prepareSuccessView(response);
+        }
     }
 
     @Nested

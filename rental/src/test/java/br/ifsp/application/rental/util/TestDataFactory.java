@@ -43,6 +43,18 @@ public class TestDataFactory {
                 .build();
     }
 
+    public User generateTenant(UUID thisTenantId) {
+        return User.builder()
+                .id(thisTenantId)
+                .name(faker.name().firstName())
+                .lastname(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .password(faker.internet().password())
+                .role(Role.USER)
+                .ownedProperties(new ArrayList<>())
+                .build();
+    }
+
     public User generateOwner() {
         return User.builder()
                 .id(ownerId)
@@ -58,6 +70,24 @@ public class TestDataFactory {
     public Property generateProperty() {
         return Property.builder()
                 .id(propertyId)
+                .name(faker.address().streetName())
+                .description(faker.lorem().sentence())
+                .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
+                .address(Address.builder()
+                        .number(faker.address().buildingNumber())
+                        .street(faker.address().streetAddress())
+                        .city(faker.address().city())
+                        .state(faker.address().state())
+                        .postalCode(faker.address().zipCode())
+                        .build())
+                .owner(generateOwner())
+                .rentals(new ArrayList<>())
+                .build();
+    }
+
+    public Property generateProperty(UUID thisPropertyId) {
+        return Property.builder()
+                .id(thisPropertyId)
                 .name(faker.address().streetName())
                 .description(faker.lorem().sentence())
                 .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
@@ -94,6 +124,18 @@ public class TestDataFactory {
     public Rental generateRental() {
         return Rental.builder()
                 .id(rentalId)
+                .user(generateTenant())
+                .property(generateProperty())
+                .startDate(LocalDate.parse("2025-01-01"))
+                .endDate(LocalDate.parse("2025-01-01").plusDays(7))
+                .value(new Price(BigDecimal.valueOf(1500.00)))
+                .state(RentalState.CONFIRMED)
+                .build();
+    }
+
+    public Rental generateRental(UUID thisRentalId) {
+        return Rental.builder()
+                .id(thisRentalId)
                 .user(generateTenant())
                 .property(generateProperty())
                 .startDate(LocalDate.parse("2025-01-01"))

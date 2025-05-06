@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -85,10 +86,19 @@ class CreateRentalServiceTest {
             val request = factory.createRequestModel();
             val response = factory.createResponseModel();
             val rental = factory.entityFromCreateRequest(request, tenant, property);
+            property.addRental(
+                    factory.generateRental(
+                            factory.generateTenant(),
+                            property,
+                            rental.getStartDate(),
+                            rental.getEndDate(),
+                            RentalState.PENDING
+                    )
+            );
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(presenter.isDone()).thenReturn(false);
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(uuidGeneratorService.generate()).thenReturn(rental.getId());
             when(rentalRepositoryMock.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -124,8 +134,8 @@ class CreateRentalServiceTest {
             val response = factory.createResponseModel();
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(presenter.isDone()).thenReturn(false);
+            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
             when(uuidGeneratorService.generate()).thenReturn(factory.rentalId);
 
             ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
@@ -162,17 +172,36 @@ class CreateRentalServiceTest {
                 LocalDate startDateOfRentRequest,
                 LocalDate endDateOfRentRequest
         ) {
+            factory.generateRental(
+                    UUID.randomUUID(),
+                    owner,
+                    property,
+                    startDateOfRentRequest.minusDays(7),
+                    startDateOfRentRequest.minusDays(5),
+                    RentalState.CONFIRMED
+            );
+
+            factory.generateRental(
+                    UUID.randomUUID(),
+                    owner,
+                    property,
+                    endDateOfRentRequest.plusDays(5),
+                    endDateOfRentRequest.plusDays(7),
+                    RentalState.CONFIRMED
+            );
+
              factory.generateRental(
                      owner,
                      property,
-                     startDateOfRentRequest,
-                     endDateOfRentRequest,
+                     startOfRentedPeriod,
+                     endOfRentedPeriod,
                      RentalState.CONFIRMED
              );
 
-            val request = factory.createRequestModel(startOfRentedPeriod, endOfRentedPeriod);
+            val request = factory.createRequestModel(startDateOfRentRequest, endDateOfRentRequest);
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(false);
             when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
 
             sut.registerRental(presenter, request);
@@ -196,6 +225,7 @@ class CreateRentalServiceTest {
             val request = factory.createRequestModel(startDate, endDate);
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(false);
 
             sut.registerRental(presenter, request);
 
@@ -218,6 +248,7 @@ class CreateRentalServiceTest {
             val request = factory.createRequestModel(startDate, endDate);
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(false);
 
             sut.registerRental(presenter, request);
 
@@ -240,6 +271,7 @@ class CreateRentalServiceTest {
             val request = factory.createRequestModel(startDate, endDate);
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(false);
 
             sut.registerRental(presenter, request);
 
@@ -289,6 +321,21 @@ class CreateRentalServiceTest {
             assertThat(captured)
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("User does not exist");
+        }
+
+        @Test
+        @DisplayName("Should return early if presenter is already done after precondition check")
+        void shouldReturnEarlyIfPresenterIsAlreadyDone() {
+            val request = factory.createRequestModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(true);
+
+            sut.registerRental(presenter, request);
+
+            verify(propertyRepositoryMock, never()).findById(any());
+            verify(rentalRepositoryMock, never()).save(any());
+            verify(presenter, never()).prepareSuccessView(any());
         }
     }
 }

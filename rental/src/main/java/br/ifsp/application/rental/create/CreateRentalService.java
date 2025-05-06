@@ -56,7 +56,6 @@ public class CreateRentalService implements ICreateRentalService {
 
             Rental rental = rentalRepository.save(buildRental(request, user, property));
 
-            assert user != null;
             presenter.prepareSuccessView(
                     new ResponseModel(
                             rental.getId(),
@@ -102,7 +101,10 @@ public class CreateRentalService implements ICreateRentalService {
                 continue;
             }
 
-            boolean overlaps = !(endDate.isBefore(existingRental.getStartDate()) || startDate.isAfter(existingRental.getEndDate()));
+            boolean isBefore = endDate.isBefore(existingRental.getStartDate());
+            boolean isAfter = startDate.isAfter(existingRental.getEndDate());
+
+            boolean overlaps = !(isBefore || isAfter);
             if (overlaps) {
                 throw new IllegalArgumentException("Property is already rented during the requested period");
             }

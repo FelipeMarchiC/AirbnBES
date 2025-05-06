@@ -45,6 +45,28 @@ public class OwnerUpdateRentalServiceTest {
         owner = testDataFactory.generateOwner();
         property = testDataFactory.generateProperty(owner);
     }
+    @Test
+    @Tag("Should throw security exception when non owner tries to confirm rental")
+    void shouldThrowSecurityExceptionWhenNonOwnerTriesToConfirmRental() {
+        // Criando um aluguel com um proprietário
+        Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+
+        // Simulando o aluguel encontrado no repositório
+        when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+
+        // Criando um usuário que não é o proprietário do imóvel (um "non-owner")
+        User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+
+        // Criando o request com o ID de um "non-owner"
+        RequestModel request = new RequestModel(nonOwner.getId(), rental.getId());
+
+        // Chamando o método que deve lançar a exceção
+        sut.confirmRental(presenter, request);
+
+        // Verificando que o método `prepareFailView` foi chamado com uma `SecurityException`
+        verify(presenter).prepareFailView(any(SecurityException.class));
+    }
+
 
     @Nested
     @DisplayName("Rental Denial Tests")
@@ -61,6 +83,29 @@ public class OwnerUpdateRentalServiceTest {
             assertThat(rental.getState()).isEqualTo(RentalState.DENIED);
             verify(presenter).prepareSuccessView(any());
         }
+        @Test
+        @Tag("UnitTest")
+        @DisplayName("Should throw security exception when non owner tries to deny rental")
+        void shouldThrowSecurityExceptionWhenNonOwnerTriesToDenyRental() {
+            // Criando um aluguel com um proprietário
+            Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+
+            // Simulando o aluguel encontrado no repositório
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+
+            // Criando um usuário que não é o proprietário do imóvel (um "non-owner")
+            User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+
+            // Criando o request com o ID de um "non-owner"
+            RequestModel request = new RequestModel(nonOwner.getId(), rental.getId());
+
+            // Chamando o método que deve lançar a exceção
+            sut.denyRental(presenter, request);
+
+            // Verificando que o método `prepareFailView` foi chamado com uma `SecurityException`
+            verify(presenter).prepareFailView(any(SecurityException.class));
+        }
+
 
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED"})
@@ -147,6 +192,7 @@ public class OwnerUpdateRentalServiceTest {
             assertThat(r2.getState()).isEqualTo(RentalState.PENDING);
             verify(rentalRepositoryMock).saveAll(List.of(r1, r2));
         }
+
     }
 
     @Nested
@@ -175,6 +221,22 @@ public class OwnerUpdateRentalServiceTest {
 
             verify(presenter).prepareFailView(any(UnsupportedOperationException.class));
         }
+        @Test
+        @Tag("UnitTest")
+        @DisplayName("should throw IllegalState exception when conflicting rental exists")
+        void shouldThrowIllegalStateExceptionWhenConflictingRentalExists() {
+            Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+            Rental conflictingRental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.CONFIRMED);
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.CONFIRMED), any(), any(), any()))
+                    .thenReturn(List.of(conflictingRental));
+
+            RequestModel request = new RequestModel(owner.getId(), rental.getId());
+            sut.confirmRental(presenter, request);
+
+            verify(presenter).prepareFailView(any(IllegalStateException.class));
+        }
+
 
 
     }

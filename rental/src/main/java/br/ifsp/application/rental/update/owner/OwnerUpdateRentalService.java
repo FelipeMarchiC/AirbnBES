@@ -89,7 +89,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             Rental rental = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+                if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can cancel the rental.");
             }
 

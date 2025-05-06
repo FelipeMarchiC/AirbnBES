@@ -284,13 +284,32 @@ class CreateRentalServiceTest {
                     .hasMessageContaining("Rental cannot start in the past");
         }
 
+        @Test
+        @DisplayName("should throw exception when startDate and endDate are equals")
+        void shouldThrowExceptionWhenStartDateAndEndDateAreEquals() {
+            val date = LocalDate.of(2025, 2, 22);
+            val request = factory.createRequestModel(date, date);
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(false);
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Rental cannot have the same date to start and end");
+        }
+
         @Test()
         @DisplayName("Should throw exception when property is null")
         void shouldThrowExceptionWhenPropertyIsNull() {
             val request = factory.createRequestModel();
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.empty());
             when(presenter.isDone()).thenReturn(false);
 
             sut.registerRental(presenter, request);

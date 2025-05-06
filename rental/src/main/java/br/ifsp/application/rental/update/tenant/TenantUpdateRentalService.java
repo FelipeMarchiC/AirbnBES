@@ -49,7 +49,6 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
             unrestrainConflitingRentals(updatedRental);
 
-            assert user != null;
             presenter.prepareSuccessView(
                     new ITenantUpdateRentalService.ResponseModel(rental.getId(), user.getId())
             );

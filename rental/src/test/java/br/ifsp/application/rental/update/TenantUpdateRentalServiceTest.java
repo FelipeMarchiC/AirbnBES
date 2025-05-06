@@ -192,8 +192,7 @@ public class TenantUpdateRentalServiceTest {
         @Tag("TDD")
         @Test()
         @DisplayName("Should throw exception when rental state is different from confirmed")
-        void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed(
-        ) {
+        void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed() {
             val request = factory.tenantUpdateRequestModel();
 
             UUID tenantId = tenant.getId();
@@ -214,7 +213,35 @@ public class TenantUpdateRentalServiceTest {
             assertThat(captured)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Rental is not in a valid state to be cancelled");
+        }
 
+        @Test
+        @DisplayName("Should return early if presenter is already done after precondition check")
+        void shouldReturnEarlyIfPresenterIsAlreadyDone() {
+            val request = factory.tenantUpdateRequestModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(presenter.isDone()).thenReturn(true);
+
+            sut.cancelRental(presenter, request);
+
+            verify(rentalRepositoryMock, never()).save(any());
+            verify(presenter, never()).prepareSuccessView(any());
+        }
+
+        @Test
+        @DisplayName("Should return early if presenter is already done after precondition check")
+        void shouldReturnEarlyIfPresenterIsAlreadyDone2() {
+            val request = factory.tenantUpdateRequestModel();
+
+            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
+            when(presenter.isDone()).thenReturn(false, true);
+
+            sut.cancelRental(presenter, request);
+
+            verify(rentalRepositoryMock, never()).save(any());
+            verify(presenter, never()).prepareSuccessView(any());
         }
     }
 }

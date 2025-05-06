@@ -52,26 +52,12 @@ class DeleteRentalServiceTest {
 
     @Nested
     @Tag("UnitTest")
-    @Tag("TDD")
-    @DisplayName("Rental Deletion Tests")
-    class RentalDeletionTests {
-
-        @Test
-        @DisplayName("Should throw exception when state is not PENDING or DENIED")
-        void shouldThrowWhenStateIsInvalid() {
-            rental.setState(RentalState.CONFIRMED);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
-
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-            sut.delete(presenter, request);
-
-            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
-            verify(rentalRepositoryMock, never()).deleteById(any());
-        }
+    @DisplayName("Successful rental deletion")
+    class SuccessfulDeletion {
 
         @ParameterizedTest(name = "[{index}]: should delete rental with state {0}")
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED"})
-        @DisplayName("Should delete rental and return ID when state is valid")
+        @DisplayName("Should delete rental and notify presenter")
         void shouldDeleteWhenStateIsValid(RentalState state) {
             rental.setState(state);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
@@ -89,6 +75,25 @@ class DeleteRentalServiceTest {
             assertThat(response.ownerId()).isEqualTo(ownerId);
             assertThat(response.tenantId()).isEqualTo(tenantId);
         }
+    }
+
+    @Nested
+    @Tag("UnitTest")
+    @DisplayName("Failure scenarios")
+    class FailureCases {
+
+        @Test
+        @DisplayName("Should throw exception when state is not PENDING or DENIED")
+        void shouldThrowWhenStateIsInvalid() {
+            rental.setState(RentalState.CONFIRMED);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+            verify(rentalRepositoryMock, never()).deleteById(any());
+        }
 
         @Test
         @DisplayName("Should handle rental not found")
@@ -100,6 +105,42 @@ class DeleteRentalServiceTest {
 
             verify(presenter).prepareFailView(any(IllegalArgumentException.class));
             verify(rentalRepositoryMock, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("Should handle exception from repository when finding rental")
+        void shouldHandleExceptionFromRepository() {
+            when(rentalRepositoryMock.findById(rentalId)).thenThrow(new RuntimeException("DB error"));
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(RuntimeException.class));
+        }
+
+        @Test
+        @DisplayName("Should handle exception during deletion")
+        void shouldHandleExceptionDuringDeletion() {
+            rental.setState(RentalState.DENIED);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            doThrow(new RuntimeException("Delete failed")).when(rentalRepositoryMock).deleteById(rentalId);
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(RuntimeException.class));
+        }
+
+        @Test
+        @DisplayName("Should handle unexpected exception in presenter")
+        void shouldHandleUnexpectedPresenterException() {
+            rental.setState(RentalState.PENDING);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            doThrow(new RuntimeException("Presenter failure")).when(presenter).prepareSuccessView(any());
+
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+
+            assertThatCode(() -> sut.delete(presenter, request)).doesNotThrowAnyException();
         }
     }
 }

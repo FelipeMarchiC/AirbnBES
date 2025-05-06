@@ -1,10 +1,14 @@
 package br.ifsp.application.rental.find;
+
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.rental.Rental;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
+
 import java.util.List;
 import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -18,7 +22,6 @@ class FindRentalServiceTest {
     private IFindRentalService.ResponseModel response;
     private Exception exceptionResponse;
 
-
     @BeforeEach
     void setup() {
         jpaRentalRepository = mock(JpaRentalRepository.class);
@@ -31,8 +34,7 @@ class FindRentalServiceTest {
 
             @Override
             public void prepareFailView(Throwable exception) {
-                exceptionResponse =(Exception) exception;
-
+                exceptionResponse = (Exception) exception;
             }
 
             @Override
@@ -59,13 +61,14 @@ class FindRentalServiceTest {
             findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
 
             when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentals);
-            findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel,presenter);
+            findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter);
             assertThat(response.rentalList()).isEqualTo(mockRentals);
             assertThat(exceptionResponse).isNull();
             assertThat(response).isNotNull();
             verify(jpaRentalRepository).findByPropertyId(propertyId);
         }
     }
+
     @Nested
     @DisplayName("Tenant Rental History Retrieval Tests")
     class TenantRentalHistoryRetrievalTests {
@@ -79,15 +82,14 @@ class FindRentalServiceTest {
                     mock(Rental.class),
                     mock(Rental.class)
             );
-            IFindRentalService.FindByTenantIdRequestModel requestModel= new IFindRentalService.FindByTenantIdRequestModel(tenantId);
+            IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
             when(jpaRentalRepository.findByUserId(tenantId)).thenReturn(mockRentals);
-            findRentalService.getRentalHistoryByTenant(requestModel,presenter);
+            findRentalService.getRentalHistoryByTenant(requestModel, presenter);
             assertThat(response.rentalList()).isEqualTo(mockRentals);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserId(tenantId);
         }
     }
-
 
     @Nested
     @DisplayName("Null Input Validation Tests")
@@ -134,4 +136,41 @@ class FindRentalServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Find All Rentals Tests")
+    class FindAllRentalsTests {
+
+        @Tag("UnitTest")
+        @DisplayName("Should return all rentals when list is not empty")
+        @Test
+        void shouldReturnAllRentals() {
+            List<Rental> mockRentals = List.of(
+                    mock(Rental.class),
+                    mock(Rental.class)
+            );
+
+            when(jpaRentalRepository.findAll()).thenReturn(mockRentals);
+            findRentalService.findAll(presenter);
+
+            assertThat(response).isNotNull();
+            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(exceptionResponse).isNull();
+            verify(jpaRentalRepository).findAll();
+        }
+
+        @Tag("UnitTest")
+        @DisplayName("Should handle empty rental list with EntityNotFoundException")
+        @Test
+        void shouldHandleEmptyRentalList() {
+            when(jpaRentalRepository.findAll()).thenReturn(List.of());
+
+            findRentalService.findAll(presenter);
+
+            assertThat(response).isNull();
+            assertThat(exceptionResponse)
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("There are no rentals registered");
+            verify(jpaRentalRepository).findAll();
+        }
+    }
 }

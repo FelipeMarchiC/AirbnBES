@@ -46,24 +46,20 @@ public class OwnerUpdateRentalServiceTest {
         property = testDataFactory.generateProperty(owner);
     }
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @Tag("Should throw security exception when non owner tries to confirm rental")
     void shouldThrowSecurityExceptionWhenNonOwnerTriesToConfirmRental() {
-        // Criando um aluguel com um proprietário
         Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
 
-        // Simulando o aluguel encontrado no repositório
         when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
 
-        // Criando um usuário que não é o proprietário do imóvel (um "non-owner")
         User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
 
-        // Criando o request com o ID de um "non-owner"
         RequestModel request = new RequestModel(nonOwner.getId(), rental.getId());
 
-        // Chamando o método que deve lançar a exceção
         sut.confirmRental(presenter, request);
 
-        // Verificando que o método `prepareFailView` foi chamado com uma `SecurityException`
         verify(presenter).prepareFailView(any(SecurityException.class));
     }
 
@@ -85,24 +81,19 @@ public class OwnerUpdateRentalServiceTest {
         }
         @Test
         @Tag("UnitTest")
+        @Tag("TDD")
         @DisplayName("Should throw security exception when non owner tries to deny rental")
         void shouldThrowSecurityExceptionWhenNonOwnerTriesToDenyRental() {
-            // Criando um aluguel com um proprietário
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
 
-            // Simulando o aluguel encontrado no repositório
             when(rentalRepositoryMock.findById(rental.getId())).thenReturn(Optional.of(rental));
 
-            // Criando um usuário que não é o proprietário do imóvel (um "non-owner")
-            User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+            User nonOwner = testDataFactory.generateTenant();
 
-            // Criando o request com o ID de um "non-owner"
             RequestModel request = new RequestModel(nonOwner.getId(), rental.getId());
 
-            // Chamando o método que deve lançar a exceção
             sut.denyRental(presenter, request);
 
-            // Verificando que o método `prepareFailView` foi chamado com uma `SecurityException`
             verify(presenter).prepareFailView(any(SecurityException.class));
         }
 
@@ -141,6 +132,8 @@ public class OwnerUpdateRentalServiceTest {
         }
 
         @Test
+        @Tag("TDD")
+        @Tag("UnitTest")
         void shouldNotAllowCancelAfterStartDate() {
             Rental rental = testDataFactory.generateRental(
                     tenant,

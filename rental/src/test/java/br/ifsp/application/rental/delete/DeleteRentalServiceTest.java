@@ -52,6 +52,7 @@ class DeleteRentalServiceTest {
 
     @Nested
     @Tag("UnitTest")
+    @Tag("TDD")
     @DisplayName("Successful rental deletion")
     class SuccessfulDeletion {
 
@@ -79,6 +80,7 @@ class DeleteRentalServiceTest {
 
     @Nested
     @Tag("UnitTest")
+
     @DisplayName("Failure scenarios")
     class FailureCases {
 

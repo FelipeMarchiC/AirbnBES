@@ -175,6 +175,8 @@ public class OwnerUpdateRentalServiceTest {
 
             verify(presenter).prepareFailView(any(UnsupportedOperationException.class));
         }
+
+
     }
 
     @Nested
@@ -194,4 +196,16 @@ public class OwnerUpdateRentalServiceTest {
             verify(rentalRepositoryMock).save(conflict);
         }
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("Should throw entity not found exception when rental not found")
+    void shouldThrowEntityNotFoundExceptionWhenRentalNotFound() {
+        when(rentalRepositoryMock.findById(any())).thenReturn(Optional.empty());
+
+        RequestModel request = new RequestModel(owner.getId(), UUID.randomUUID());
+        sut.denyRental(presenter, request);
+
+        verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+    }
+
 }

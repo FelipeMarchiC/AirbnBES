@@ -82,6 +82,10 @@ public class CreateRentalService implements ICreateRentalService {
     }
 
     private void validateRequestedDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isEqual(endDate)) {
+            throw new IllegalArgumentException("Rental cannot have the same date to start and end");
+        }
+
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date must be before end date");
         }

@@ -10,7 +10,7 @@ Grupo: Felipe Marchi, Kayky Rocha, Gabriel Henrique
 ## 📖 Descrição do Projeto
 
 AirbnBES é um módulo back-end para gerenciamento de aluguéis de propriedades, inspirado no modelo Airbnb.  
-N[]()este segundo marco do curso de **Verificação, Validação e Teste de Software**, iremos:
+Neste segundo marco do curso de **Verificação, Validação e Teste de Software**, iremos:
 
 - Especificar user stories e cenários no estilo BDD.
 - Desenvolver o domínio usando TDD + DDD com Spring Boot.

@@ -34,4 +34,11 @@ TODO
 Quando estiver executando o projeto...  
 API disponível em: http://localhost:8080/api/v1  
 Swagger UI em: http://localhost:8080/api/v1/api-docs
-
+---
+Utilizando o dockerfile:
+-Clone o projeto
+-Abra o diretório do projeto no terminal
+-execute o comando: docker build -t airbnbes-app .
+-execute o comando: docker run -p 8080:8080 airbnbes-app
+- acesse o endereço: http://localhost:8080/api/v1/api-docs
+- só fazer as requisições agora

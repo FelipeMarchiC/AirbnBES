@@ -14,7 +14,7 @@
     <description>airbnbes-project</description>
 
     <modules>
-        <module>rental</module>
+        <module>rentalEntity</module>
         <module>web</module>
     </modules>
 

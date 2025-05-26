@@ -1,7 +1,7 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import org.junit.jupiter.api.*;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteRentalServiceTest {
+class DeleteRentalEntityServiceTest {
 
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
@@ -34,7 +34,7 @@ class DeleteRentalServiceTest {
     private UUID rentalId;
     private UUID ownerId;
     private UUID tenantId;
-    private Rental rental;
+    private RentalEntity rentalEntity;
 
     @BeforeEach
     void setup() {
@@ -45,9 +45,9 @@ class DeleteRentalServiceTest {
         User tenant = mock(User.class);
         lenient().when(tenant.getId()).thenReturn(tenantId);
 
-        rental = new Rental();
-        rental.setId(rentalId);
-        rental.setUser(tenant);
+        rentalEntity = new RentalEntity();
+        rentalEntity.setId(rentalId);
+        rentalEntity.setUser(tenant);
     }
 
     @Nested
@@ -61,8 +61,8 @@ class DeleteRentalServiceTest {
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED"})
         @DisplayName("Should delete rental and notify presenter")
         void shouldDeleteWhenStateIsValid(RentalState state) {
-            rental.setState(state);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            rentalEntity.setState(state);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
 
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
             sut.delete(presenter, request);
@@ -88,8 +88,8 @@ class DeleteRentalServiceTest {
         @Test
         @DisplayName("Should throw exception when state is not PENDING or DENIED")
         void shouldThrowWhenStateIsInvalid() {
-            rental.setState(RentalState.CONFIRMED);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            rentalEntity.setState(RentalState.CONFIRMED);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
 
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
             sut.delete(presenter, request);
@@ -124,8 +124,8 @@ class DeleteRentalServiceTest {
         @Test
         @DisplayName("Should handle exception during deletion")
         void shouldHandleExceptionDuringDeletion() {
-            rental.setState(RentalState.DENIED);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            rentalEntity.setState(RentalState.DENIED);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             doThrow(new RuntimeException("Delete failed")).when(rentalRepositoryMock).deleteById(rentalId);
 
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
@@ -137,8 +137,8 @@ class DeleteRentalServiceTest {
         @Test
         @DisplayName("Should handle unexpected exception in presenter")
         void shouldHandleUnexpectedPresenterException() {
-            rental.setState(RentalState.PENDING);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rental));
+            rentalEntity.setState(RentalState.PENDING);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             doThrow(new RuntimeException("Presenter failure")).when(presenter).prepareSuccessView(any());
 
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);

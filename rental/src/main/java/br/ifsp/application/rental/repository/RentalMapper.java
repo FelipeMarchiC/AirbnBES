@@ -1,8 +1,8 @@
 package br.ifsp.application.rental.repository;
 
 import br.ifsp.application.rental.create.ICreateRentalService;
-import br.ifsp.domain.models.property.Property;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.services.IUuidGeneratorService;
@@ -18,16 +18,16 @@ public class RentalMapper {
         this.uuidGeneratorService = uuidGeneratorService;
     }
 
-    public Rental fromCreateRequestModel(
+    public RentalEntity fromCreateRequestModel(
             ICreateRentalService.RequestModel requestModel,
             User user,
-            Property property,
+            PropertyEntity propertyEntity,
             BigDecimal value
     ) {
-        return Rental.builder()
+        return RentalEntity.builder()
                 .id(uuidGeneratorService.generate())
                 .user(user)
-                .property(property)
+                .propertyEntity(propertyEntity)
                 .startDate(requestModel.startDate())
                 .endDate(requestModel.endDate())
                 .value(new Price(value))
@@ -35,17 +35,17 @@ public class RentalMapper {
                 .build();
     }
 
-    public static Rental fromCreateRequestModel(
+    public static RentalEntity fromCreateRequestModel(
             UUID rentalId,
             ICreateRentalService.RequestModel requestModel,
             User user,
-            Property property,
+            PropertyEntity propertyEntity,
             BigDecimal value
     ) {
-        return Rental.builder()
+        return RentalEntity.builder()
                 .id(rentalId)
                 .user(user)
-                .property(property)
+                .propertyEntity(propertyEntity)
                 .startDate(requestModel.startDate())
                 .endDate(requestModel.endDate())
                 .value(new Price(value))

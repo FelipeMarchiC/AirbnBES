@@ -1,6 +1,6 @@
 package br.ifsp.domain.models.user;
 
-import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.property.PropertyEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,7 +42,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<Property> ownedProperties;
+    private List<PropertyEntity> ownedProperties;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,6 +1,6 @@
 package br.ifsp.application.property.find;
 
-import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.property.PropertyEntity;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +14,7 @@ public interface IFindPropertyService {
 
     record LocationRequestModel(String location) {}
     record PriceRangeRequestModel(double min, double max) {}
-    record PropertyListResponseModel(List<Property> properties) {}
+    record PropertyListResponseModel(List<PropertyEntity> properties) {}
 
     record PeriodRequestModel(LocalDate startDate, LocalDate endDate){}
 }

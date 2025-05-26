@@ -1,15 +1,15 @@
 package br.ifsp.application.property.find;
 import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
-import br.ifsp.domain.models.property.Property;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
 import org.junit.jupiter.api.*;
 import java.time.LocalDate;
 import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class FindPropertyServiceTest {
+class FindPropertyEntityServiceTest {
 
     private JpaPropertyRepository jpaPropertyRepository;
     private FindPropertyService findPropertyService;
@@ -47,34 +47,34 @@ class FindPropertyServiceTest {
     }
     @Nested
     @DisplayName("Property search by period tests")
-    class PropertySearchByPeriod{
+    class PropertyEntitySearchByPeriod {
         @Tag("TDD")
         @Tag("UnitTest")
         @Tag("Functional")
         @Test
         @DisplayName("Should find properties available in Period")
         void shouldReturnAvailablePropertiesInPeriod(){
-            Property property = factory.generateProperty();
-            Property property2 = factory.generateProperty();
+            PropertyEntity propertyEntity = factory.generateProperty();
+            PropertyEntity propertyEntity2 = factory.generateProperty();
 
-            Rental rental = factory.generateRental();
+            RentalEntity rentalEntity = factory.generateRental();
             LocalDate startDate = LocalDate.of(2025, 5, 4);
-            rental.setStartDate(startDate);
+            rentalEntity.setStartDate(startDate);
             LocalDate endDate = startDate.plusDays(7);
-            rental.setEndDate(endDate);
+            rentalEntity.setEndDate(endDate);
 
-            Rental rental2 = factory.generateRental();
-            rental.setStartDate(LocalDate.of(2025,5,8));
-            rental.setEndDate(LocalDate.of(2025,5,11));
+            RentalEntity rentalEntity2 = factory.generateRental();
+            rentalEntity.setStartDate(LocalDate.of(2025,5,8));
+            rentalEntity.setEndDate(LocalDate.of(2025,5,11));
 
-            property.addRental(rental);
-            property2.addRental(rental2);
+            propertyEntity.addRental(rentalEntity);
+            propertyEntity2.addRental(rentalEntity2);
 
-            rental.setProperty(property);
-            rental2.setProperty(property2);
+            rentalEntity.setPropertyEntity(propertyEntity);
+            rentalEntity2.setPropertyEntity(propertyEntity2);
 
             var request =new IFindPropertyService.PeriodRequestModel(startDate,endDate);
-            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate)).thenReturn(List.of(property));
+            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate,endDate)).thenReturn(List.of(propertyEntity));
             findPropertyService.findByPeriod(presenter,request);
             assertThat(capturedResponse).isNotNull();
             assertThat(capturedException).isNull();
@@ -86,7 +86,7 @@ class FindPropertyServiceTest {
 
     @Nested
     @DisplayName("Property Search By Location Tests")
-    class PropertySearchByLocationTests {
+    class PropertyEntitySearchByLocationTests {
 
         @Test
         @Tag("UnitTest")
@@ -94,7 +94,7 @@ class FindPropertyServiceTest {
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {
             String location = "São Paulo";
-            List<Property> mockProperties = List.of(mock(Property.class), mock(Property.class));
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
             when(jpaPropertyRepository.findByLocation(location)).thenReturn(mockProperties);
 
             var request = new IFindPropertyService.LocationRequestModel(location);
@@ -137,7 +137,7 @@ class FindPropertyServiceTest {
 
     @Nested
     @DisplayName("Property Search By Price Range Tests")
-    class PropertySearchByPriceRangeTests {
+    class PropertyEntitySearchByPriceRangeTests {
 
         @Test
         @Tag("UnitTest")
@@ -146,7 +146,7 @@ class FindPropertyServiceTest {
         void shouldReturnPropertiesWithinGivenPriceRange() {
             double min = 100.0;
             double max = 300.0;
-            List<Property> mockProperties = List.of(mock(Property.class), mock(Property.class));
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
             when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
 
             var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
@@ -174,14 +174,14 @@ class FindPropertyServiceTest {
 
     @Nested
     @DisplayName("Property FindAll Tests")
-    class PropertyFindAllTests {
+    class PropertyEntityFindAllTests {
 
         @Test
         @Tag("UnitTest")
         @Tag("Functional")
         @DisplayName("Should return all properties from repository")
         void shouldReturnAllProperties() {
-            List<Property> mockProperties = List.of(mock(Property.class), mock(Property.class));
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
             when(jpaPropertyRepository.findAll()).thenReturn(mockProperties);
             findPropertyService.findAll(presenter);
             assertThat(capturedException).isNull();

@@ -5,8 +5,8 @@ import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.user.JpaUserRepository;
-import br.ifsp.domain.models.property.Property;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.services.IUuidGeneratorService;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CreateRentalServiceTest {
+class CreateRentalEntityServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaPropertyRepository propertyRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
@@ -44,7 +44,7 @@ class CreateRentalServiceTest {
 
     private User owner;
     private User tenant;
-    private Property property;
+    private PropertyEntity propertyEntity;
 
     @BeforeEach
     void setupService() {
@@ -66,7 +66,7 @@ class CreateRentalServiceTest {
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
         owner = factory.generateOwner();
-        property = factory.generateProperty(owner);
+        propertyEntity = factory.generateProperty(owner);
     }
 
     @AfterEach
@@ -85,11 +85,11 @@ class CreateRentalServiceTest {
         void shouldSuccessfullyCreateRental() {
             val request = factory.createRequestModel();
             val response = factory.createResponseModel();
-            val rental = factory.entityFromCreateRequest(request, tenant, property);
-            property.addRental(
+            val rental = factory.entityFromCreateRequest(request, tenant, propertyEntity);
+            propertyEntity.addRental(
                     factory.generateRental(
                             factory.generateTenant(),
-                            property,
+                            propertyEntity,
                             rental.getStartDate(),
                             rental.getEndDate(),
                             RentalState.PENDING
@@ -98,25 +98,25 @@ class CreateRentalServiceTest {
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
             when(presenter.isDone()).thenReturn(false);
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
+            when(propertyRepositoryMock.findById(propertyEntity.getId())).thenReturn(Optional.of(propertyEntity));
             when(uuidGeneratorService.generate()).thenReturn(rental.getId());
             when(rentalRepositoryMock.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            ArgumentCaptor<RentalEntity> rentalCaptor = ArgumentCaptor.forClass(RentalEntity.class);
 
             sut.registerRental(presenter, request);
 
             verify(userRepositoryMock).findById(tenant.getId());
-            verify(propertyRepositoryMock).findById(property.getId());
+            verify(propertyRepositoryMock).findById(propertyEntity.getId());
             verify(rentalRepositoryMock).save(rentalCaptor.capture());
             verify(presenter).prepareSuccessView(response);
 
-            Rental savedRental = rentalCaptor.getValue();
-            assertThat(savedRental.getUser()).isEqualTo(tenant);
-            assertThat(savedRental.getProperty()).isEqualTo(property);
-            assertThat(savedRental.getStartDate()).isEqualTo(request.startDate());
-            assertThat(savedRental.getEndDate()).isEqualTo(request.endDate());
-            assertThat(savedRental.getState()).isEqualTo(RentalState.PENDING);
+            RentalEntity savedRentalEntity = rentalCaptor.getValue();
+            assertThat(savedRentalEntity.getUser()).isEqualTo(tenant);
+            assertThat(savedRentalEntity.getPropertyEntity()).isEqualTo(propertyEntity);
+            assertThat(savedRentalEntity.getStartDate()).isEqualTo(request.startDate());
+            assertThat(savedRentalEntity.getEndDate()).isEqualTo(request.endDate());
+            assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.PENDING);
         }
 
         @Tag("TDD")
@@ -137,23 +137,23 @@ class CreateRentalServiceTest {
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
             when(presenter.isDone()).thenReturn(false);
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
+            when(propertyRepositoryMock.findById(propertyEntity.getId())).thenReturn(Optional.of(propertyEntity));
             when(uuidGeneratorService.generate()).thenReturn(factory.rentalId);
 
-            ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
+            ArgumentCaptor<RentalEntity> rentalCaptor = ArgumentCaptor.forClass(RentalEntity.class);
             when(rentalRepositoryMock.save(rentalCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
 
             long daysRented = ChronoUnit.DAYS.between(startDate, endDate);
-            BigDecimal expectedTotal = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
+            BigDecimal expectedTotal = propertyEntity.getDailyRate().getAmount().multiply(BigDecimal.valueOf(daysRented));
 
             sut.registerRental(presenter, request);
 
-            Rental savedRental = rentalCaptor.getValue();
-            assertThat(savedRental.getValue().getAmount()).isEqualByComparingTo(expectedTotal);
+            RentalEntity savedRentalEntity = rentalCaptor.getValue();
+            assertThat(savedRentalEntity.getValue().getAmount()).isEqualByComparingTo(expectedTotal);
 
             verify(userRepositoryMock).findById(tenant.getId());
-            verify(propertyRepositoryMock).findById(property.getId());
-            verify(rentalRepositoryMock).save(any(Rental.class));
+            verify(propertyRepositoryMock).findById(propertyEntity.getId());
+            verify(rentalRepositoryMock).save(any(RentalEntity.class));
             verify(presenter).prepareSuccessView(response);
         }
     }
@@ -179,7 +179,7 @@ class CreateRentalServiceTest {
             factory.generateRental(
                     UUID.randomUUID(),
                     owner,
-                    property,
+                    propertyEntity,
                     startDateOfRentRequest.minusDays(7),
                     startDateOfRentRequest.minusDays(5),
                     RentalState.CONFIRMED
@@ -188,7 +188,7 @@ class CreateRentalServiceTest {
             factory.generateRental(
                     UUID.randomUUID(),
                     owner,
-                    property,
+                    propertyEntity,
                     endDateOfRentRequest.plusDays(5),
                     endDateOfRentRequest.plusDays(7),
                     RentalState.CONFIRMED
@@ -196,7 +196,7 @@ class CreateRentalServiceTest {
 
              factory.generateRental(
                      owner,
-                     property,
+                     propertyEntity,
                      startOfRentedPeriod,
                      endOfRentedPeriod,
                      RentalState.CONFIRMED
@@ -206,7 +206,7 @@ class CreateRentalServiceTest {
 
             when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
             when(presenter.isDone()).thenReturn(false);
-            when(propertyRepositoryMock.findById(property.getId())).thenReturn(Optional.of(property));
+            when(propertyRepositoryMock.findById(propertyEntity.getId())).thenReturn(Optional.of(propertyEntity));
 
             sut.registerRental(presenter, request);
 

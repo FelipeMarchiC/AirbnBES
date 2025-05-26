@@ -2,7 +2,7 @@ package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalEntity;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class FindRentalServiceTest {
+class FindRentalEntityServiceTest {
 
     private JpaRentalRepository jpaRentalRepository;
     private FindRentalService findRentalService;
@@ -29,7 +29,7 @@ class FindRentalServiceTest {
         presenter = new FindRentalPresenter() {
             @Override
             public void prepareSuccessView(IFindRentalService.ResponseModel response) {
-                FindRentalServiceTest.this.response = response;
+                FindRentalEntityServiceTest.this.response = response;
             }
 
             @Override
@@ -46,7 +46,7 @@ class FindRentalServiceTest {
 
     @Nested
     @DisplayName("Rental History Retrieval Tests")
-    class RentalHistoryRetrievalTests {
+    class RentalEntityHistoryRetrievalTests {
         @Tag("TDD")
         @Tag("UnitTest")
         @Tag("Functional")
@@ -54,16 +54,16 @@ class FindRentalServiceTest {
         @Test
         void shouldReturnAllRentalsForGivenPropertyId() {
             UUID propertyId = UUID.randomUUID();
-            List<Rental> mockRentals = List.of(
-                    mock(Rental.class),
-                    mock(Rental.class)
+            List<RentalEntity> mockRentalEntities = List.of(
+                    mock(RentalEntity.class),
+                    mock(RentalEntity.class)
             );
-            response = new IFindRentalService.ResponseModel(mockRentals);
+            response = new IFindRentalService.ResponseModel(mockRentalEntities);
             findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
 
-            when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentals);
+            when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentalEntities);
             findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter);
-            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             assertThat(response).isNotNull();
             verify(jpaRentalRepository).findByPropertyId(propertyId);
@@ -72,7 +72,7 @@ class FindRentalServiceTest {
 
     @Nested
     @DisplayName("Tenant Rental History Retrieval Tests")
-    class TenantRentalHistoryRetrievalTests {
+    class TenantRentalEntityHistoryRetrievalTests {
         @Tag("TDD")
         @Tag("UnitTest")
         @Tag("Functional")
@@ -80,14 +80,14 @@ class FindRentalServiceTest {
         @Test
         void shouldReturnAllRentalsForGivenTenantId() {
             UUID tenantId = UUID.randomUUID();
-            List<Rental> mockRentals = List.of(
-                    mock(Rental.class),
-                    mock(Rental.class)
+            List<RentalEntity> mockRentalEntities = List.of(
+                    mock(RentalEntity.class),
+                    mock(RentalEntity.class)
             );
             IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
-            when(jpaRentalRepository.findByUserId(tenantId)).thenReturn(mockRentals);
+            when(jpaRentalRepository.findByUserId(tenantId)).thenReturn(mockRentalEntities);
             findRentalService.getRentalHistoryByTenant(requestModel, presenter);
-            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserId(tenantId);
         }
@@ -151,16 +151,16 @@ class FindRentalServiceTest {
         @DisplayName("Should return all rentals when list is not empty")
         @Test
         void shouldReturnAllRentals() {
-            List<Rental> mockRentals = List.of(
-                    mock(Rental.class),
-                    mock(Rental.class)
+            List<RentalEntity> mockRentalEntities = List.of(
+                    mock(RentalEntity.class),
+                    mock(RentalEntity.class)
             );
 
-            when(jpaRentalRepository.findAll()).thenReturn(mockRentals);
+            when(jpaRentalRepository.findAll()).thenReturn(mockRentalEntities);
             findRentalService.findAll(presenter);
 
             assertThat(response).isNotNull();
-            assertThat(response.rentalList()).isEqualTo(mockRentals);
+            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findAll();
         }

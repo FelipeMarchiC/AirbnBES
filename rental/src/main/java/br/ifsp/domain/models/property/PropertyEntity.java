@@ -1,6 +1,6 @@
 package br.ifsp.domain.models.property;
 
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "property")
-public class Property {
+public class PropertyEntity {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
@@ -48,14 +48,14 @@ public class Property {
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.NONE)
-    private List<Rental> rentals = new ArrayList<>();
+    private List<RentalEntity> rentalEntities = new ArrayList<>();
 
-    public void addRental(Rental rental) {
-        if (rentals == null) rentals = new ArrayList<>();
+    public void addRental(RentalEntity rentalEntity) {
+        if (rentalEntities == null) rentalEntities = new ArrayList<>();
 
-        if (!rentals.contains(rental)) {
-            rentals.add(rental);
-            rental.setProperty(this);
+        if (!rentalEntities.contains(rentalEntity)) {
+            rentalEntities.add(rentalEntity);
+            rentalEntity.setPropertyEntity(this);
         }
     }
 }

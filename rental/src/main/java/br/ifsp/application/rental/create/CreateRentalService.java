@@ -6,8 +6,8 @@ import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.JpaUserRepository;
-import br.ifsp.domain.models.property.Property;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.services.IUuidGeneratorService;
@@ -49,16 +49,16 @@ public class CreateRentalService implements ICreateRentalService {
         try {
             validateRequestedDates(request.startDate(), request.endDate());
 
-            Property property = propertyRepository.findById(request.propertyId())
+            PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("Property not found"));
 
-            validateOverlappingDates(request.startDate(), request.endDate(), property);
+            validateOverlappingDates(request.startDate(), request.endDate(), propertyEntity);
 
-            Rental rental = rentalRepository.save(buildRental(request, user, property));
+            RentalEntity rentalEntity = rentalRepository.save(buildRental(request, user, propertyEntity));
 
             presenter.prepareSuccessView(
                     new ResponseModel(
-                            rental.getId(),
+                            rentalEntity.getId(),
                             user.getId()
                     )
             );
@@ -68,15 +68,15 @@ public class CreateRentalService implements ICreateRentalService {
     }
 
 
-    private Rental buildRental(RequestModel requestModel, User user, Property property) {
+    private RentalEntity buildRental(RequestModel requestModel, User user, PropertyEntity propertyEntity) {
         long days = ChronoUnit.DAYS.between(requestModel.startDate(), requestModel.endDate());
-        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+        BigDecimal totalCost = propertyEntity.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
 
         return RentalMapper.fromCreateRequestModel(
                 uuidGeneratorService.generate(),
                 requestModel,
                 user,
-                property,
+                propertyEntity,
                 totalCost
         );
     }
@@ -99,14 +99,14 @@ public class CreateRentalService implements ICreateRentalService {
         }
     }
 
-    private static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
-        for (Rental existingRental : property.getRentals()) {
-            if (!existingRental.getState().equals(RentalState.CONFIRMED)) {
+    private static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, PropertyEntity propertyEntity) {
+        for (RentalEntity existingRentalEntity : propertyEntity.getRentalEntities()) {
+            if (!existingRentalEntity.getState().equals(RentalState.CONFIRMED)) {
                 continue;
             }
 
-            boolean isBefore = endDate.isBefore(existingRental.getStartDate());
-            boolean isAfter = startDate.isAfter(existingRental.getEndDate());
+            boolean isBefore = endDate.isBefore(existingRentalEntity.getStartDate());
+            boolean isAfter = startDate.isAfter(existingRentalEntity.getEndDate());
 
             boolean overlaps = !(isBefore || isAfter);
             if (overlaps) {

@@ -1,6 +1,6 @@
 package br.ifsp.domain.models.rental;
 
-import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Price;
 import jakarta.persistence.*;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "rental")
-public class Rental {
+public class RentalEntity {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
@@ -33,7 +33,7 @@ public class Rental {
     @ManyToOne
     @JoinColumn(name = "property_id", nullable = false)
     @ToString.Exclude
-    private Property property;
+    private PropertyEntity propertyEntity;
 
     @NotNull
     @Column(nullable = false)

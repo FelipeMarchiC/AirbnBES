@@ -12,6 +12,7 @@
         </processorPath>
         <module name="web" />
         <module name="rental" />
+        <module name="rentalEntity" />
       </profile>
     </annotationProcessing>
   </component>
@@ -19,6 +20,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="airbnbes" options="" />
       <module name="rental" options="-parameters" />
+      <module name="rentalEntity" options="-parameters" />
       <module name="web" options="-parameters" />
     </option>
   </component>

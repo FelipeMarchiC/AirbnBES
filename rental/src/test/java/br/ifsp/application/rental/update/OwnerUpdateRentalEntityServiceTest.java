@@ -19,6 +19,7 @@ import java.time.*;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class OwnerUpdateRentalEntityServiceTest {
@@ -137,6 +138,23 @@ public class OwnerUpdateRentalEntityServiceTest {
             sut.cancelRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()), null);
 
             verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+        }
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
+        @DisplayName("Should not cancel a rental from a different Owner")
+        void shouldNotCancelARentalFromADifferentOwners() {
+            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+
+            when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
+
+            User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+
+            RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
+
+            sut.cancelRental(presenter, request,null);
+
+            verify(presenter).prepareFailView(any(SecurityException.class));
         }
 
         @Tag("TDD")

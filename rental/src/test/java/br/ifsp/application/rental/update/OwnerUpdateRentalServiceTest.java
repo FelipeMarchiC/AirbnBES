@@ -45,9 +45,11 @@ public class OwnerUpdateRentalServiceTest {
         owner = testDataFactory.generateOwner();
         property = testDataFactory.generateProperty(owner);
     }
+
     @Test
     @Tag("TDD")
     @Tag("UnitTest")
+    @Tag("Functional")
     @Tag("Should throw security exception when non owner tries to confirm rental")
     void shouldThrowSecurityExceptionWhenNonOwnerTriesToConfirmRental() {
         Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
@@ -67,7 +69,8 @@ public class OwnerUpdateRentalServiceTest {
     @Nested
     @DisplayName("Rental Denial Tests")
     class DenyRentalServiceTest {
-
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         void shouldSetPendingRentalAsDeniedIfOwnerDenies() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
@@ -79,9 +82,11 @@ public class OwnerUpdateRentalServiceTest {
             assertThat(rental.getState()).isEqualTo(RentalState.DENIED);
             verify(presenter).prepareSuccessView(any());
         }
+
         @Test
-        @Tag("UnitTest")
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw security exception when non owner tries to deny rental")
         void shouldThrowSecurityExceptionWhenNonOwnerTriesToDenyRental() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
@@ -97,7 +102,8 @@ public class OwnerUpdateRentalServiceTest {
             verify(presenter).prepareFailView(any(SecurityException.class));
         }
 
-
+        @Tag("UnitTest")
+        @Tag("Functional")
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED"})
         void shouldNotPermitDenialIfRentalNotPendingOrRestrained(RentalState state) {
@@ -120,6 +126,8 @@ public class OwnerUpdateRentalServiceTest {
             sut = new OwnerUpdateRentalService(rentalRepositoryMock, fixedClock);
         }
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED", "EXPIRED", "RESTRAINED", "CANCELLED"})
         void shouldNotCancelIfRentalIsNotConfirmed(RentalState state) {
@@ -131,9 +139,10 @@ public class OwnerUpdateRentalServiceTest {
             verify(presenter).prepareFailView(any(IllegalArgumentException.class));
         }
 
-        @Test
         @Tag("TDD")
         @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
         void shouldNotAllowCancelAfterStartDate() {
             Rental rental = testDataFactory.generateRental(
                     tenant,
@@ -155,7 +164,8 @@ public class OwnerUpdateRentalServiceTest {
         }
 
 
-
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         void shouldCancelRentalSuccessfully() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.of(2025, 1, 2), LocalDate.of(2025, 1, 10), RentalState.CONFIRMED);
@@ -169,6 +179,8 @@ public class OwnerUpdateRentalServiceTest {
             verify(presenter).prepareSuccessView(any());
         }
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         void shouldSetRestrainedConflictsToPending() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.of(2025, 1, 2), LocalDate.of(2025, 1, 10), RentalState.CONFIRMED);
@@ -191,6 +203,8 @@ public class OwnerUpdateRentalServiceTest {
     @Nested
     class ConfirmRentalTests {
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         void shouldConfirmPendingRentalWithoutConflict() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.of(1801, 2, 1), LocalDate.of(1801, 2, 10), RentalState.PENDING);
@@ -204,6 +218,8 @@ public class OwnerUpdateRentalServiceTest {
             verify(presenter).prepareSuccessView(any());
         }
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED", "RESTRAINED"})
         void shouldNotConfirmRentalIfNotPending(RentalState state) {
@@ -214,8 +230,10 @@ public class OwnerUpdateRentalServiceTest {
 
             verify(presenter).prepareFailView(any(UnsupportedOperationException.class));
         }
-        @Test
+
         @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
         @DisplayName("should throw IllegalState exception when conflicting rental exists")
         void shouldThrowIllegalStateExceptionWhenConflictingRentalExists() {
             Rental rental = testDataFactory.generateRental(tenant, property, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
@@ -236,7 +254,8 @@ public class OwnerUpdateRentalServiceTest {
 
     @Nested
     class UpdateRentalTests {
-
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         void shouldRestrainConflictingPendingRentals() {
             Rental confirmedRental = testDataFactory.generateRental(tenant, property, LocalDate.of(1801, 2, 1), LocalDate.of(1801, 2, 10), RentalState.CONFIRMED);
@@ -251,8 +270,10 @@ public class OwnerUpdateRentalServiceTest {
             verify(rentalRepositoryMock).save(conflict);
         }
     }
-    @Test
+
     @Tag("UnitTest")
+    @Tag("Functional")
+    @Test
     @Tag("Should throw entity not found exception when rental not found")
     void shouldThrowEntityNotFoundExceptionWhenRentalNotFound() {
         when(rentalRepositoryMock.findById(any())).thenReturn(Optional.empty());

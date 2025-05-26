@@ -53,6 +53,7 @@ class FindPropertyServiceTest {
     class PropertySearchByPeriod{
         @Tag("TDD")
         @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         @DisplayName("Should find properties available in Period")
         void shouldReturnAvailablePropertiesInPeriod(){
@@ -91,6 +92,8 @@ class FindPropertyServiceTest {
     class PropertySearchByLocationTests {
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {
             String location = "São Paulo";
@@ -107,6 +110,8 @@ class FindPropertyServiceTest {
         }
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when location is null")
         void shouldThrowExceptionWhenLocationIsNull() {
             var request = new IFindPropertyService.LocationRequestModel(null);
@@ -119,6 +124,8 @@ class FindPropertyServiceTest {
         }
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when location is blank")
         void shouldThrowExceptionWhenLocationIsBlank() {
             var request = new IFindPropertyService.LocationRequestModel("   ");
@@ -136,6 +143,8 @@ class FindPropertyServiceTest {
     class PropertySearchByPriceRangeTests {
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return properties within given price range")
         void shouldReturnPropertiesWithinGivenPriceRange() {
             double min = 100.0;
@@ -153,6 +162,8 @@ class FindPropertyServiceTest {
         }
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception if min > max")
         void shouldThrowExceptionIfMinGreaterThanMax() {
             var request = new IFindPropertyService.PriceRangeRequestModel(500.0, 100.0);
@@ -169,6 +180,8 @@ class FindPropertyServiceTest {
     class PropertyFindAllTests {
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return all properties from repository")
         void shouldReturnAllProperties() {
             List<Property> mockProperties = List.of(mock(Property.class), mock(Property.class));

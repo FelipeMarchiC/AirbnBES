@@ -30,7 +30,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@Tag("UnitTest")
 @ExtendWith(MockitoExtension.class)
 class CreateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
@@ -76,10 +75,11 @@ class CreateRentalServiceTest {
     }
 
     @Nested
-    @Tag("UnitTest")
     @DisplayName("Testing valid classes")
     class TestingValidClasses {
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         @DisplayName("Should successfully create rental")
         void shouldSuccessfullyCreateRental() {
@@ -120,6 +120,8 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @ParameterizedTest(name = "[{index}]: should calculate rental total value from {0} to {1}")
         @CsvSource({
                 "2025-02-22, 2025-02-23",
@@ -160,6 +162,8 @@ class CreateRentalServiceTest {
     @DisplayName("Testing invalid classes")
     class TestingInvalidClasses {
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @ParameterizedTest(name = "[{index}]: has rental from {0} to {1} and is requested from {2} to {3}")
         @CsvSource({
                 "2025-02-22, 2025-03-22, 2025-02-22, 2025-03-22",
@@ -216,6 +220,8 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test()
         @DisplayName("Should throw exception when rental duration is bigger than one year")
         void shouldThrowExceptionWhenRentalDurationIsBiggerThanOneYear() {
@@ -239,6 +245,8 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test()
         @DisplayName("Should throw exception when start date is after end date")
         void shouldThrowExceptionWhenStartDateIsAfterEndDate() {
@@ -262,6 +270,8 @@ class CreateRentalServiceTest {
         }
 
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test()
         @DisplayName("Should throw exception when start date is in the past")
         void shouldThrowExceptionWhenStartDateIsInThePast() {
@@ -285,6 +295,8 @@ class CreateRentalServiceTest {
         }
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("should throw exception when startDate and endDate are equals")
         void shouldThrowExceptionWhenStartDateAndEndDateAreEquals() {
             val date = LocalDate.of(2025, 2, 22);
@@ -305,6 +317,8 @@ class CreateRentalServiceTest {
         }
 
         @Test()
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when property is null")
         void shouldThrowExceptionWhenPropertyIsNull() {
             val request = factory.createRequestModel();
@@ -324,6 +338,8 @@ class CreateRentalServiceTest {
         }
 
         @Test()
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when user is null")
         void shouldThrowExceptionWhenUserIsNull() {
             val request = factory.createRequestModel();
@@ -343,6 +359,8 @@ class CreateRentalServiceTest {
         }
 
         @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return early if presenter is already done after precondition check")
         void shouldReturnEarlyIfPresenterIsAlreadyDone() {
             val request = factory.createRequestModel();

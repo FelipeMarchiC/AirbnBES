@@ -73,11 +73,12 @@ public class TenantUpdateRentalServiceTest {
     }
 
     @Nested
-    @Tag("UnitTest")
     @DisplayName("Testing valid classes")
     class TestingValidClasses {
         @Tag("TDD")
-        @Test()
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
         @DisplayName("Should successfully cancel rental")
         void shouldSuccessfullyCancelRental(
         ) {
@@ -108,7 +109,9 @@ public class TenantUpdateRentalServiceTest {
         }
 
         @Tag("TDD")
-        @Test()
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
         @DisplayName("Should successfully change restrained rentals in range to pending")
         void shouldSuccessfullyChangeRestrainedRentalsInRangeToPending() {
             // ---------- Arrange ----------
@@ -186,11 +189,12 @@ public class TenantUpdateRentalServiceTest {
     }
 
     @Nested
-    @Tag("UnitTest")
     @DisplayName("Testing invalid classes")
     class TestingInvalidClasses {
         @Tag("TDD")
-        @Test()
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
         @DisplayName("Should throw exception when rental state is different from confirmed")
         void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed() {
             val request = factory.tenantUpdateRequestModel();
@@ -215,6 +219,8 @@ public class TenantUpdateRentalServiceTest {
                     .hasMessageContaining("Rental is not in a valid state to be cancelled");
         }
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         @DisplayName("Should return early if presenter is already done after precondition check")
         void shouldReturnEarlyIfPresenterIsAlreadyDone() {
@@ -229,6 +235,8 @@ public class TenantUpdateRentalServiceTest {
             verify(presenter, never()).prepareSuccessView(any());
         }
 
+        @Tag("UnitTest")
+        @Tag("Functional")
         @Test
         @DisplayName("Should return early if presenter is already done after precondition check")
         void shouldReturnEarlyIfPresenterIsAlreadyDone2() {

@@ -47,8 +47,9 @@ class FindRentalServiceTest {
     @Nested
     @DisplayName("Rental History Retrieval Tests")
     class RentalHistoryRetrievalTests {
-        @Tag("UnitTest")
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return all rentals for a given property ID")
         @Test
         void shouldReturnAllRentalsForGivenPropertyId() {
@@ -72,8 +73,9 @@ class FindRentalServiceTest {
     @Nested
     @DisplayName("Tenant Rental History Retrieval Tests")
     class TenantRentalHistoryRetrievalTests {
-        @Tag("UnitTest")
         @Tag("TDD")
+        @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return all rentals for a given tenant ID")
         @Test
         void shouldReturnAllRentalsForGivenTenantId() {
@@ -96,6 +98,7 @@ class FindRentalServiceTest {
     class NullInputValidationTests {
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when property ID is null")
         @Test
         void shouldThrowExceptionWhenPropertyIdIsNull() {
@@ -107,6 +110,7 @@ class FindRentalServiceTest {
         }
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when tenant ID is null")
         @Test
         void shouldThrowExceptionWhenTenantIdIsNull() {
@@ -118,6 +122,7 @@ class FindRentalServiceTest {
         }
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when property request model is null")
         @Test
         void shouldThrowExceptionWhenRequestModelIsNull_Property() {
@@ -127,6 +132,7 @@ class FindRentalServiceTest {
         }
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should throw exception when tenant request model is null")
         @Test
         void shouldThrowExceptionWhenRequestModelIsNull_Tenant() {
@@ -141,6 +147,7 @@ class FindRentalServiceTest {
     class FindAllRentalsTests {
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should return all rentals when list is not empty")
         @Test
         void shouldReturnAllRentals() {
@@ -159,6 +166,7 @@ class FindRentalServiceTest {
         }
 
         @Tag("UnitTest")
+        @Tag("Functional")
         @DisplayName("Should handle empty rental list with EntityNotFoundException")
         @Test
         void shouldHandleEmptyRentalList() {

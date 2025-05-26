@@ -1,8 +1,5 @@
-package br.ifsp.application.rental.find;
+package br.ifsp.application.property.find;
 import br.ifsp.application.property.JpaPropertyRepository;
-import br.ifsp.application.property.find.FindPropertyPresenter;
-import br.ifsp.application.property.find.FindPropertyService;
-import br.ifsp.application.property.find.IFindPropertyService;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.rental.Rental;

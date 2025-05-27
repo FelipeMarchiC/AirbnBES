@@ -9,7 +9,7 @@ import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -19,7 +19,6 @@ import java.time.*;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class OwnerUpdateRentalEntityServiceTest {
@@ -34,8 +33,8 @@ public class OwnerUpdateRentalEntityServiceTest {
     private OwnerUpdateRentalService sut;
 
     private TestDataFactory testDataFactory;
-    private User tenant;
-    private User owner;
+    private UserEntity tenant;
+    private UserEntity owner;
     private PropertyEntity propertyEntity;
 
     @BeforeEach
@@ -57,7 +56,7 @@ public class OwnerUpdateRentalEntityServiceTest {
 
         when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-        User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+        UserEntity nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
 
         RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
@@ -94,7 +93,7 @@ public class OwnerUpdateRentalEntityServiceTest {
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            User nonOwner = testDataFactory.generateTenant();
+            UserEntity nonOwner = testDataFactory.generateTenant();
 
             RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
@@ -148,7 +147,7 @@ public class OwnerUpdateRentalEntityServiceTest {
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+            UserEntity nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
 
             RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 

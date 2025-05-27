@@ -9,7 +9,7 @@ import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import lombok.val;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +43,7 @@ public class TenantUpdateRentalEntityServiceTest {
 
     private AutoCloseable closeable;
 
-    private User tenant;
+    private UserEntity tenant;
     private PropertyEntity propertyEntity;
     private RentalEntity rentalEntity;
 
@@ -55,7 +55,7 @@ public class TenantUpdateRentalEntityServiceTest {
 
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
-        User owner = factory.generateOwner();
+        UserEntity owner = factory.generateOwner();
         propertyEntity = factory.generateProperty(owner);
         rentalEntity = factory.generateRental(
                 factory.rentalId,

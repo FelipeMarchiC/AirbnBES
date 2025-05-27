@@ -1,81 +1,44 @@
 package br.ifsp.domain.models.user;
 
-import br.ifsp.domain.models.property.PropertyEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.Getter;
 
-import java.sql.Types;
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "user")
-public class User implements UserDetails {
-    @Id
-    @JdbcTypeCode(Types.VARCHAR)
-    @NonNull @Column(nullable = false)
-    private UUID id;
+public class User {
 
-    @NonNull @Column(nullable = false)
-    private String name;
+    @Getter
+    private final UUID id;
 
-    @NonNull @Column(nullable = false)
-    private String lastname;
+    @Getter
+    private final String name;
 
-    @NonNull @Column(nullable = false)
-    private String email;
+    @Getter
+    private final String lastname;
 
-    @NonNull @JsonIgnore @Column(nullable = false)
-    private String password;
+    @Getter
+    private final String email;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Getter
+    private final Role role;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<PropertyEntity> ownedProperties;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+    public User(UserEntity entity) {
+        this.id = entity.getId();
+        this.name = entity.getName();
+        this.lastname = entity.getLastname();
+        this.email = entity.getEmail();
+        this.role = entity.getRole();
     }
 
-    @Override
-    public @NonNull String getPassword() {
-        return password;
+    public User(UUID id, String name, String lastname, String email, Role role) {
+        this.id = id;
+        this.name = name;
+        this.lastname = lastname;
+        this.email = email;
+        this.role = role;
     }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+    public String getFullName() {
+        return name + " " + lastname;
     }
 }
+

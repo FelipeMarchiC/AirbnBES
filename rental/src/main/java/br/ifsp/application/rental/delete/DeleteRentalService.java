@@ -27,7 +27,7 @@ public class DeleteRentalService implements IDeleteRentalService {
 
             repository.deleteById(rentalEntity.getId());
 
-            var response = new ResponseModel(request.ownerId(), rentalEntity.getUser().getId());
+            var response = new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId());
             presenter.prepareSuccessView(response);
         } catch (Exception e) {
             presenter.prepareFailView(e);

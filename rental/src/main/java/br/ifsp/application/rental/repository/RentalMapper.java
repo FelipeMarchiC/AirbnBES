@@ -4,7 +4,7 @@ import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.services.IUuidGeneratorService;
 import br.ifsp.domain.shared.valueobjects.Price;
 
@@ -20,13 +20,13 @@ public class RentalMapper {
 
     public RentalEntity fromCreateRequestModel(
             ICreateRentalService.RequestModel requestModel,
-            User user,
+            UserEntity userEntity,
             PropertyEntity propertyEntity,
             BigDecimal value
     ) {
         return RentalEntity.builder()
                 .id(uuidGeneratorService.generate())
-                .user(user)
+                .userEntity(userEntity)
                 .propertyEntity(propertyEntity)
                 .startDate(requestModel.startDate())
                 .endDate(requestModel.endDate())
@@ -38,13 +38,13 @@ public class RentalMapper {
     public static RentalEntity fromCreateRequestModel(
             UUID rentalId,
             ICreateRentalService.RequestModel requestModel,
-            User user,
+            UserEntity userEntity,
             PropertyEntity propertyEntity,
             BigDecimal value
     ) {
         return RentalEntity.builder()
                 .id(rentalId)
-                .user(user)
+                .userEntity(userEntity)
                 .propertyEntity(propertyEntity)
                 .startDate(requestModel.startDate())
                 .endDate(requestModel.endDate())

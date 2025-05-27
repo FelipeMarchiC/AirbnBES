@@ -9,7 +9,7 @@ import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.services.IUuidGeneratorService;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +42,8 @@ public class CreateRentalService implements ICreateRentalService {
 
     @Override
     public void registerRental(CreateRentalPresenter presenter, RequestModel request) {
-        User user = userRepository.findById(request.userId()).orElse(null);
-        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
+        UserEntity userEntity = userRepository.findById(request.userId()).orElse(null);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, userEntity);
         if (presenter.isDone()) return;
 
         try {
@@ -54,12 +54,12 @@ public class CreateRentalService implements ICreateRentalService {
 
             validateOverlappingDates(request.startDate(), request.endDate(), propertyEntity);
 
-            RentalEntity rentalEntity = rentalRepository.save(buildRental(request, user, propertyEntity));
+            RentalEntity rentalEntity = rentalRepository.save(buildRental(request, userEntity, propertyEntity));
 
             presenter.prepareSuccessView(
                     new ResponseModel(
                             rentalEntity.getId(),
-                            user.getId()
+                            userEntity.getId()
                     )
             );
         } catch (Exception e) {
@@ -68,14 +68,14 @@ public class CreateRentalService implements ICreateRentalService {
     }
 
 
-    private RentalEntity buildRental(RequestModel requestModel, User user, PropertyEntity propertyEntity) {
+    private RentalEntity buildRental(RequestModel requestModel, UserEntity userEntity, PropertyEntity propertyEntity) {
         long days = ChronoUnit.DAYS.between(requestModel.startDate(), requestModel.endDate());
         BigDecimal totalCost = propertyEntity.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
 
         return RentalMapper.fromCreateRequestModel(
                 uuidGeneratorService.generate(),
                 requestModel,
-                user,
+                userEntity,
                 propertyEntity,
                 totalCost
         );

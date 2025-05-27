@@ -7,7 +7,7 @@ import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.Role;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import com.github.javafaker.Faker;
@@ -31,8 +31,8 @@ public class TestDataFactory {
     public final UUID ownerId = UUID.randomUUID();
     public final UUID propertyId = UUID.randomUUID();
 
-    public User generateTenant() {
-        return User.builder()
+    public UserEntity generateTenant() {
+        return UserEntity.builder()
                 .id(tenantId)
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
@@ -43,8 +43,8 @@ public class TestDataFactory {
                 .build();
     }
 
-    public User generateTenant(UUID thisTenantId) {
-        return User.builder()
+    public UserEntity generateTenant(UUID thisTenantId) {
+        return UserEntity.builder()
                 .id(thisTenantId)
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
@@ -55,8 +55,8 @@ public class TestDataFactory {
                 .build();
     }
 
-    public User generateOwner() {
-        return User.builder()
+    public UserEntity generateOwner() {
+        return UserEntity.builder()
                 .id(ownerId)
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
@@ -103,7 +103,7 @@ public class TestDataFactory {
                 .build();
     }
 
-    public PropertyEntity generateProperty(User owner) {
+    public PropertyEntity generateProperty(UserEntity owner) {
         return PropertyEntity.builder()
                 .id(propertyId)
                 .name(faker.address().streetName())
@@ -124,7 +124,7 @@ public class TestDataFactory {
     public RentalEntity generateRental() {
         return RentalEntity.builder()
                 .id(rentalId)
-                .user(generateTenant())
+                .userEntity(generateTenant())
                 .propertyEntity(generateProperty())
                 .startDate(LocalDate.parse("2025-01-01"))
                 .endDate(LocalDate.parse("2025-01-01").plusDays(7))
@@ -136,7 +136,7 @@ public class TestDataFactory {
     public RentalEntity generateRental(UUID thisRentalId) {
         return RentalEntity.builder()
                 .id(thisRentalId)
-                .user(generateTenant())
+                .userEntity(generateTenant())
                 .propertyEntity(generateProperty())
                 .startDate(LocalDate.parse("2025-01-01"))
                 .endDate(LocalDate.parse("2025-01-01").plusDays(7))
@@ -147,7 +147,7 @@ public class TestDataFactory {
 
     public RentalEntity generateRental(
             UUID thisRentalId,
-            User tenant,
+            UserEntity tenant,
             PropertyEntity propertyEntity,
             LocalDate startDate,
             LocalDate endDate,
@@ -155,7 +155,7 @@ public class TestDataFactory {
     ) {
         val rental = RentalEntity.builder()
                 .id(thisRentalId)
-                .user(tenant)
+                .userEntity(tenant)
                 .propertyEntity(propertyEntity)
                 .startDate(startDate)
                 .endDate(endDate)
@@ -169,7 +169,7 @@ public class TestDataFactory {
     }
 
     public RentalEntity generateRental(
-            User tenant,
+            UserEntity tenant,
             PropertyEntity propertyEntity,
             LocalDate startDate,
             LocalDate endDate,
@@ -177,7 +177,7 @@ public class TestDataFactory {
     ) {
         val rental = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(tenant)
+                .userEntity(tenant)
                 .propertyEntity(propertyEntity)
                 .startDate(startDate)
                 .endDate(endDate)
@@ -214,7 +214,7 @@ public class TestDataFactory {
 
     public RentalEntity entityFromCreateRequest(
             ICreateRentalService.RequestModel request,
-            User tenant,
+            UserEntity tenant,
             PropertyEntity propertyEntity
     ) {
         BigDecimal totalCost = calculateRentalCost(request.startDate(), request.endDate(), propertyEntity);

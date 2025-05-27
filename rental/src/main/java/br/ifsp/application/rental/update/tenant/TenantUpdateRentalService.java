@@ -5,7 +5,7 @@ import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -29,8 +29,8 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
     @Override
     public void cancelRental(TenantUpdateRentalPresenter presenter, RequestModel request) {
-        User user = userRepository.findById(request.tenantId()).orElse(null);
-        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
+        UserEntity userEntity = userRepository.findById(request.tenantId()).orElse(null);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, userEntity);
         if (presenter.isDone()) return;
 
         try {
@@ -50,7 +50,7 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
             unrestrainConflitingRentals(updatedRentalEntity);
 
             presenter.prepareSuccessView(
-                    new ITenantUpdateRentalService.ResponseModel(rentalEntity.getId(), user.getId())
+                    new ITenantUpdateRentalService.ResponseModel(rentalEntity.getId(), userEntity.getId())
             );
         } catch (Exception e) {
             presenter.prepareFailView(e);

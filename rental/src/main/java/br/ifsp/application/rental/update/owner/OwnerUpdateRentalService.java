@@ -52,7 +52,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             rentalRepository.save(rentalEntity);
             restrainPendingRentalsInConflict(rentalEntity);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -77,7 +77,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             rentalEntity.setState(RentalState.DENIED);
             rentalRepository.save(rentalEntity);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -109,7 +109,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             rentalRepository.save(rentalEntity);
             rentalRepository.saveAll(restrainedConflicts);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }

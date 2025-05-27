@@ -8,7 +8,7 @@ import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.services.IUuidGeneratorService;
 import lombok.val;
 import org.junit.jupiter.api.*;
@@ -42,8 +42,8 @@ class CreateRentalEntityServiceTest {
 
     private AutoCloseable closeable;
 
-    private User owner;
-    private User tenant;
+    private UserEntity owner;
+    private UserEntity tenant;
     private PropertyEntity propertyEntity;
 
     @BeforeEach
@@ -112,7 +112,7 @@ class CreateRentalEntityServiceTest {
             verify(presenter).prepareSuccessView(response);
 
             RentalEntity savedRentalEntity = rentalCaptor.getValue();
-            assertThat(savedRentalEntity.getUser()).isEqualTo(tenant);
+            assertThat(savedRentalEntity.getUserEntity()).isEqualTo(tenant);
             assertThat(savedRentalEntity.getPropertyEntity()).isEqualTo(propertyEntity);
             assertThat(savedRentalEntity.getStartDate()).isEqualTo(request.startDate());
             assertThat(savedRentalEntity.getEndDate()).isEqualTo(request.endDate());

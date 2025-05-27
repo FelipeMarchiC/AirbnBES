@@ -28,18 +28,23 @@ public class UserMapper {
         return user;
     }
 
-    public static UserEntity toEntity(User user) {
+    public static UserEntity toEntity(User user, String password) {
         return UserEntity.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .lastname(user.getLastname())
                 .email(user.getEmail())
+                .password(password)
                 .ownedProperties(
                         user.getOwnedProperties().stream()
                                 .map(PropertyMapper::toEntity)
                                 .collect(Collectors.toList())
                 )
                 .build();
+    }
+
+    public static UserEntity toEntity(User user) {
+        return toEntity(user, "defaultTestPassword123");
     }
 }
 

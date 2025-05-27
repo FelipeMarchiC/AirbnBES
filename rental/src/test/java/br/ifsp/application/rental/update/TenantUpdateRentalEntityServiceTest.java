@@ -1,6 +1,5 @@
 package br.ifsp.application.rental.update;
 
-import br.ifsp.application.property.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalPresenter;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
@@ -36,14 +35,13 @@ import static org.mockito.Mockito.*;
 public class TenantUpdateRentalEntityServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
-    @Mock private JpaPropertyRepository propertyRepository;
     @Mock private TenantUpdateRentalPresenter presenter;
     @InjectMocks private TenantUpdateRentalService sut;
     private TestDataFactory factory;
 
     private AutoCloseable closeable;
 
-    private UserEntity tenant;
+    private UserEntity tenantEntity;
     private PropertyEntity propertyEntity;
     private RentalEntity rentalEntity;
 
@@ -54,12 +52,12 @@ public class TenantUpdateRentalEntityServiceTest {
         sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, fixedClock);
 
         factory = new TestDataFactory();
-        tenant = factory.generateTenant();
-        UserEntity owner = factory.generateOwner();
-        propertyEntity = factory.generateProperty(owner);
-        rentalEntity = factory.generateRental(
+        tenantEntity = factory.generateTenantEntity();
+        UserEntity owner = factory.generateOwnerEntity();
+        propertyEntity = factory.generatePropertyEntity(owner);
+        rentalEntity = factory.generateRentalEntity(
                 factory.rentalId,
-                tenant,
+                tenantEntity,
                 propertyEntity,
                 LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2025-04-30"),
@@ -85,10 +83,10 @@ public class TenantUpdateRentalEntityServiceTest {
             val request = factory.tenantUpdateRequestModel();
             val response = factory.tenantUpdateResponseModel();
 
-            UUID tenantId = tenant.getId();
+            UUID tenantId = tenantEntity.getId();
             UUID rentalId = rentalEntity.getId();
 
-            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenantEntity));
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(presenter.isDone()).thenReturn(false, false);
             when(rentalRepositoryMock.save(any(RentalEntity.class)))
@@ -118,26 +116,26 @@ public class TenantUpdateRentalEntityServiceTest {
             val request = factory.tenantUpdateRequestModel();
             val response = factory.tenantUpdateResponseModel();
 
-            val existingRental1 = factory.generateRental(
-                    factory.generateTenant(UUID.randomUUID()),
+            val existingRental1 = factory.generateRentalEntity(
+                    factory.generateTenantEntity(),
                     propertyEntity,
                     LocalDate.parse("2025-01-02"),
                     LocalDate.parse("2025-01-15"),
                     RentalState.RESTRAINED
             );
 
-            val existingRental2 = factory.generateRental(
-                    factory.generateTenant(UUID.randomUUID()),
+            val existingRental2 = factory.generateRentalEntity(
+                    factory.generateTenantEntity(),
                     propertyEntity,
                     LocalDate.parse("2025-02-15"),
                     LocalDate.parse("2025-03-27"),
                     RentalState.RESTRAINED
             );
 
-            UUID tenantId = tenant.getId();
+            UUID tenantId = tenantEntity.getId();
             UUID rentalId = rentalEntity.getId();
 
-            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenantEntity));
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(presenter.isDone()).thenReturn(false, false);
             when(rentalRepositoryMock.findRentalsByOverlapAndState(
@@ -199,12 +197,12 @@ public class TenantUpdateRentalEntityServiceTest {
         void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed() {
             val request = factory.tenantUpdateRequestModel();
 
-            UUID tenantId = tenant.getId();
+            UUID tenantId = tenantEntity.getId();
             UUID rentalId = rentalEntity.getId();
 
             rentalEntity.setState(RentalState.PENDING);
 
-            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenant));
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenantEntity));
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(presenter.isDone()).thenReturn(false);
 
@@ -226,7 +224,7 @@ public class TenantUpdateRentalEntityServiceTest {
         void shouldReturnEarlyIfPresenterIsAlreadyDone() {
             val request = factory.tenantUpdateRequestModel();
 
-            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
             when(presenter.isDone()).thenReturn(true);
 
             sut.cancelRental(presenter, request);
@@ -242,7 +240,7 @@ public class TenantUpdateRentalEntityServiceTest {
         void shouldReturnEarlyIfPresenterIsAlreadyDone2() {
             val request = factory.tenantUpdateRequestModel();
 
-            when(userRepositoryMock.findById(tenant.getId())).thenReturn(Optional.of(tenant));
+            when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(presenter.isDone()).thenReturn(false, true);
 

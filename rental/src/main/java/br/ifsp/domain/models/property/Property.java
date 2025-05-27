@@ -5,6 +5,7 @@ import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Builder
 public class Property {
     @Getter
     private final UUID id;

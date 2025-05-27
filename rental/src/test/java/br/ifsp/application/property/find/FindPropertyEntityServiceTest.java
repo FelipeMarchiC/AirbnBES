@@ -54,7 +54,7 @@ class FindPropertyEntityServiceTest {
         @Test
         @DisplayName("Should return available properties in period")
         void shouldReturnAvailablePropertiesInPeriod() {
-            PropertyEntity property = factory.generateProperty();
+            PropertyEntity property = factory.generatePropertyEntity();
             LocalDate startDate = LocalDate.of(2025, 5, 4);
             LocalDate endDate = startDate.plusDays(7);
 

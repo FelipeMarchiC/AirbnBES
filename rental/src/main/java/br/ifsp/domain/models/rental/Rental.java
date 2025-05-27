@@ -3,12 +3,14 @@ package br.ifsp.domain.models.rental;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Price;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Builder
 public class Rental {
 
     @Getter

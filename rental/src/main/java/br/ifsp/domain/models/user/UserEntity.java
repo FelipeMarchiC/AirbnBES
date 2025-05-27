@@ -44,6 +44,7 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<PropertyEntity> ownedProperties;
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

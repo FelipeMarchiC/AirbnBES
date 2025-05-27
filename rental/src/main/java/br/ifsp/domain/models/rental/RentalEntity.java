@@ -1,7 +1,7 @@
 package br.ifsp.domain.models.rental;
 
 import br.ifsp.domain.models.property.PropertyEntity;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Price;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -22,15 +22,16 @@ public class RentalEntity {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
-    @NotNull @Column(nullable = false)
+    @NotNull
+    @Column(nullable = false)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
-    private User user;
+    private UserEntity userEntity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "property_id", nullable = false)
     @ToString.Exclude
     private PropertyEntity propertyEntity;

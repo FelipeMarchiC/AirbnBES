@@ -1,7 +1,9 @@
 package br.ifsp.domain.models.property;
 
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import jakarta.persistence.*;
@@ -25,13 +27,16 @@ public class PropertyEntity {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
-    @NonNull @Column(nullable = false)
+    @NonNull
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
-    @NonNull @Column(nullable = false)
+    @NonNull
+    @Column(nullable = false)
     private String name;
 
-    @NonNull @Column(nullable = false)
+    @NonNull
+    @Column(nullable = false)
     private String description;
 
     @Embedded
@@ -42,20 +47,11 @@ public class PropertyEntity {
     @NonNull
     private Address address;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    private UserEntity owner;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter(AccessLevel.NONE)
-    private List<RentalEntity> rentalEntities = new ArrayList<>();
-
-    public void addRental(RentalEntity rentalEntity) {
-        if (rentalEntities == null) rentalEntities = new ArrayList<>();
-
-        if (!rentalEntities.contains(rentalEntity)) {
-            rentalEntities.add(rentalEntity);
-            rentalEntity.setPropertyEntity(this);
-        }
-    }
+    @Builder.Default
+    private List<RentalEntity> rentals = new ArrayList<>();
 }

@@ -3,7 +3,7 @@ package br.ifsp.application.rental.delete;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,12 +42,12 @@ class DeleteRentalEntityServiceTest {
         ownerId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         tenantId = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
-        User tenant = mock(User.class);
+        UserEntity tenant = mock(UserEntity.class);
         lenient().when(tenant.getId()).thenReturn(tenantId);
 
         rentalEntity = new RentalEntity();
         rentalEntity.setId(rentalId);
-        rentalEntity.setUser(tenant);
+        rentalEntity.setUserEntity(tenant);
     }
 
     @Nested

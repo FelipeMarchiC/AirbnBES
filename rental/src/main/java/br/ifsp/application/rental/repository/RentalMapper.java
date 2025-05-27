@@ -1,7 +1,10 @@
 package br.ifsp.application.rental.repository;
 
+import br.ifsp.application.property.PropertyMapper;
 import br.ifsp.application.rental.create.ICreateRentalService;
-import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.application.user.UserMapper;
+import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
@@ -18,38 +21,61 @@ public class RentalMapper {
         this.uuidGeneratorService = uuidGeneratorService;
     }
 
-    public RentalEntity fromCreateRequestModel(
+    public Rental fromCreateRequestModel(
             ICreateRentalService.RequestModel requestModel,
             User user,
-            PropertyEntity propertyEntity,
+            Property property,
             BigDecimal value
     ) {
-        return RentalEntity.builder()
-                .id(uuidGeneratorService.generate())
-                .user(user)
-                .propertyEntity(propertyEntity)
-                .startDate(requestModel.startDate())
-                .endDate(requestModel.endDate())
-                .value(new Price(value))
-                .state(RentalState.PENDING)
-                .build();
+        return property.createRental(
+                uuidGeneratorService.generate(),
+                user,
+                requestModel.startDate(),
+                requestModel.endDate(),
+                new Price(value),
+                RentalState.PENDING
+        );
     }
 
-    public static RentalEntity fromCreateRequestModel(
+    public static Rental fromCreateRequestModel(
             UUID rentalId,
             ICreateRentalService.RequestModel requestModel,
             User user,
-            PropertyEntity propertyEntity,
+            Property property,
             BigDecimal value
     ) {
+        return property.createRental(
+                rentalId,
+                user,
+                requestModel.startDate(),
+                requestModel.endDate(),
+                new Price(value),
+                RentalState.PENDING
+        );
+    }
+
+    public static Rental toDomain(RentalEntity entity, Property property) {
+        return Rental.builder()
+                .id(entity.getId())
+                .user(new User(entity.getUserEntity()))
+                .property(property)
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .value(entity.getValue())
+                .state(entity.getState())
+                .build();
+    }
+
+    public static RentalEntity toEntity(Rental rental) {
         return RentalEntity.builder()
-                .id(rentalId)
-                .user(user)
-                .propertyEntity(propertyEntity)
-                .startDate(requestModel.startDate())
-                .endDate(requestModel.endDate())
-                .value(new Price(value))
-                .state(RentalState.PENDING)
+                .id(rental.getId())
+                .userEntity(UserMapper.toEntity(rental.getUser()))
+                .propertyEntity(PropertyMapper.toShallowEntity(rental.getProperty()))
+                .startDate(rental.getStartDate())
+                .endDate(rental.getEndDate())
+                .value(rental.getValue())
+                .state(rental.getState())
                 .build();
     }
 }
+

@@ -9,7 +9,7 @@ import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -19,7 +19,6 @@ import java.time.*;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class OwnerUpdateRentalEntityServiceTest {
@@ -33,31 +32,45 @@ public class OwnerUpdateRentalEntityServiceTest {
     @InjectMocks
     private OwnerUpdateRentalService sut;
 
+    private AutoCloseable closeable;
+
     private TestDataFactory testDataFactory;
-    private User tenant;
-    private User owner;
+    private UserEntity tenantEntity;
+    private UserEntity ownerEntity;
     private PropertyEntity propertyEntity;
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         testDataFactory = new TestDataFactory();
-        tenant = testDataFactory.generateTenant();
-        owner = testDataFactory.generateOwner();
-        propertyEntity = testDataFactory.generateProperty(owner);
+        tenantEntity = testDataFactory.generateTenantEntity();
+        ownerEntity = testDataFactory.generateOwnerEntity();
+        propertyEntity = testDataFactory.generatePropertyEntity(ownerEntity);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
     @Tag("TDD")
     @Tag("UnitTest")
     @Tag("Functional")
-    @Tag("Should throw security exception when non owner tries to confirm rental")
+    @DisplayName("Should throw security exception when non owner tries to confirm rental")
     void shouldThrowSecurityExceptionWhenNonOwnerTriesToConfirmRental() {
-        RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+        RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                UUID.randomUUID(),
+                tenantEntity,
+                propertyEntity,
+                LocalDate.now(),
+                LocalDate.now().plusDays(7),
+                RentalState.PENDING
+        );
 
         when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-        User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+        UserEntity nonOwner = testDataFactory.generateTenantEntity();
 
         RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
@@ -74,10 +87,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldSetPendingRentalAsDeniedIfOwnerDenies() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    RentalState.PENDING
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            RequestModel request = new RequestModel(owner.getId(), rentalEntity.getId());
+            RequestModel request = new RequestModel(ownerEntity.getId(), rentalEntity.getId());
             sut.denyRental(presenter, request);
 
             assertThat(rentalEntity.getState()).isEqualTo(RentalState.DENIED);
@@ -90,11 +111,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @DisplayName("Should throw security exception when non owner tries to deny rental")
         void shouldThrowSecurityExceptionWhenNonOwnerTriesToDenyRental() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    RentalState.PENDING
+            );
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            User nonOwner = testDataFactory.generateTenant();
+            UserEntity nonOwner = testDataFactory.generateTenantEntity();
 
             RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
@@ -108,10 +136,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED"})
         void shouldNotPermitDenialIfRentalNotPendingOrRestrained(RentalState state) {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), state);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    state
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            RequestModel request = new RequestModel(owner.getId(), rentalEntity.getId());
+            RequestModel request = new RequestModel(ownerEntity.getId(), rentalEntity.getId());
             sut.denyRental(presenter, request);
 
             verify(presenter).prepareFailView(any(UnsupportedOperationException.class));
@@ -132,10 +168,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED", "EXPIRED", "RESTRAINED", "CANCELLED"})
         void shouldNotCancelIfRentalIsNotConfirmed(RentalState state) {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(2025, 1, 2), LocalDate.of(2025, 1, 10), state);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(2025, 1, 2),
+                    LocalDate.of(2025, 1, 10),
+                    state
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            sut.cancelRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
 
             verify(presenter).prepareFailView(any(IllegalArgumentException.class));
         }
@@ -144,11 +188,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Test
         @DisplayName("Should not cancel a rental from a different Owner")
         void shouldNotCancelARentalFromADifferentOwners() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    RentalState.PENDING
+            );
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            User nonOwner = testDataFactory.generateTenant();  // Diferente do proprietário
+            UserEntity nonOwner = testDataFactory.generateTenantEntity();  // Diferente do proprietário
 
             RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
@@ -162,16 +213,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldNotAllowCancelAfterStartDate() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(
-                    tenant,
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
                     propertyEntity,
                     LocalDate.of(2024, 12, 30), // startDate (no passado)
                     LocalDate.of(2025, 1, 10),
                     RentalState.CONFIRMED
             );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            sut.cancelRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
 
             ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
             verify(presenter).prepareFailView(captor.capture());
@@ -186,12 +239,20 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldCancelRentalSuccessfully() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(2025, 1, 2), LocalDate.of(2025, 1, 10), RentalState.CONFIRMED);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(2025, 1, 2),
+                    LocalDate.of(2025, 1, 10),
+                    RentalState.CONFIRMED
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.RESTRAINED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
 
-            sut.cancelRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
 
             assertThat(rentalEntity.getState()).isEqualTo(RentalState.CANCELLED);
             verify(presenter).prepareSuccessView(any());
@@ -201,15 +262,38 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldSetRestrainedConflictsToPending() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(2025, 1, 2), LocalDate.of(2025, 1, 10), RentalState.CONFIRMED);
-            RentalEntity r1 = testDataFactory.generateRental(tenant, propertyEntity, rentalEntity.getStartDate(), rentalEntity.getEndDate(), RentalState.RESTRAINED);
-            RentalEntity r2 = testDataFactory.generateRental(tenant, propertyEntity, rentalEntity.getStartDate(), rentalEntity.getEndDate(), RentalState.RESTRAINED);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(2025, 1, 2),
+                    LocalDate.of(2025, 1, 10),
+                    RentalState.CONFIRMED
+            );
+
+            RentalEntity r1 = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    rentalEntity.getStartDate(),
+                    rentalEntity.getEndDate(),
+                    RentalState.RESTRAINED
+            );
+
+            RentalEntity r2 = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    rentalEntity.getStartDate(),
+                    rentalEntity.getEndDate(),
+                    RentalState.RESTRAINED
+            );
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.RESTRAINED), any(), any(), any()))
                     .thenReturn(List.of(r1, r2));
 
-            sut.cancelRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
 
             assertThat(r1.getState()).isEqualTo(RentalState.PENDING);
             assertThat(r2.getState()).isEqualTo(RentalState.PENDING);
@@ -225,12 +309,20 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldConfirmPendingRentalWithoutConflict() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(1801, 2, 1), LocalDate.of(1801, 2, 10), RentalState.PENDING);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(1801, 2, 1),
+                    LocalDate.of(1801, 2, 10),
+                    RentalState.PENDING
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.CONFIRMED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
 
-            sut.confirmRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()));
+            sut.confirmRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()));
 
             assertThat(rentalEntity.getState()).isEqualTo(RentalState.CONFIRMED);
             verify(presenter).prepareSuccessView(any());
@@ -241,10 +333,18 @@ public class OwnerUpdateRentalEntityServiceTest {
         @ParameterizedTest
         @EnumSource(value = RentalState.class, names = {"CONFIRMED", "EXPIRED", "DENIED", "RESTRAINED"})
         void shouldNotConfirmRentalIfNotPending(RentalState state) {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(1801, 2, 1), LocalDate.of(1801, 2, 10), state);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(1801, 2, 1),
+                    LocalDate.of(1801, 2, 10),
+                    state
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            sut.confirmRental(presenter, new RequestModel(owner.getId(), rentalEntity.getId()));
+            sut.confirmRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()));
 
             verify(presenter).prepareFailView(any(UnsupportedOperationException.class));
         }
@@ -254,20 +354,33 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Test
         @DisplayName("should throw IllegalState exception when conflicting rental exists")
         void shouldThrowIllegalStateExceptionWhenConflictingRentalExists() {
-            RentalEntity rentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.PENDING);
-            RentalEntity conflictingRentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.now(), LocalDate.now().plusDays(7), RentalState.CONFIRMED);
+            RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    RentalState.PENDING
+            );
+
+            RentalEntity conflictingRentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(7),
+                    RentalState.CONFIRMED
+            );
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.CONFIRMED), any(), any(), any()))
                     .thenReturn(List.of(conflictingRentalEntity));
 
-            RequestModel request = new RequestModel(owner.getId(), rentalEntity.getId());
+            RequestModel request = new RequestModel(ownerEntity.getId(), rentalEntity.getId());
             sut.confirmRental(presenter, request);
 
             verify(presenter).prepareFailView(any(IllegalStateException.class));
         }
-
-
-
     }
 
     @Nested
@@ -276,8 +389,23 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("Functional")
         @Test
         void shouldRestrainConflictingPendingRentals() {
-            RentalEntity confirmedRentalEntity = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(1801, 2, 1), LocalDate.of(1801, 2, 10), RentalState.CONFIRMED);
-            RentalEntity conflict = testDataFactory.generateRental(tenant, propertyEntity, LocalDate.of(1801, 2, 5), LocalDate.of(1801, 2, 8), RentalState.PENDING);
+            RentalEntity confirmedRentalEntity = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(1801, 2, 1),
+                    LocalDate.of(1801, 2, 10),
+                    RentalState.CONFIRMED
+            );
+
+            RentalEntity conflict = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(1801, 2, 5),
+                    LocalDate.of(1801, 2, 8),
+                    RentalState.PENDING
+            );
 
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.PENDING), any(), any(), any()))
                     .thenReturn(List.of(conflict));
@@ -292,11 +420,11 @@ public class OwnerUpdateRentalEntityServiceTest {
     @Tag("UnitTest")
     @Tag("Functional")
     @Test
-    @Tag("Should throw entity not found exception when rental not found")
+    @DisplayName("Should throw entity not found exception when rental not found")
     void shouldThrowEntityNotFoundExceptionWhenRentalNotFound() {
         when(rentalRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        RequestModel request = new RequestModel(owner.getId(), UUID.randomUUID());
+        RequestModel request = new RequestModel(ownerEntity.getId(), UUID.randomUUID());
         sut.denyRental(presenter, request);
 
         verify(presenter).prepareFailView(any(EntityNotFoundException.class));

@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CreateRentalEntityServiceTest {
+class CreateRentalServiceTest {
     @Mock private JpaUserRepository userRepositoryMock;
     @Mock private JpaPropertyRepository propertyRepositoryMock;
     @Mock private JpaRentalRepository rentalRepositoryMock;
@@ -44,7 +44,6 @@ class CreateRentalEntityServiceTest {
 
     private AutoCloseable closeable;
 
-    private User owner;
     private UserEntity ownerEntity;
     private User tenant;
     private UserEntity tenantEntity;
@@ -71,7 +70,7 @@ class CreateRentalEntityServiceTest {
         factory = new TestDataFactory();
         tenant = factory.generateTenant();
         tenantEntity = factory.generateTenantEntity(tenant);
-        owner = factory.generateOwner();
+        User owner = factory.generateOwner();
         ownerEntity = factory.generateOwnerEntity(owner);
         property = factory.generateProperty(owner);
         propertyEntity = factory.generatePropertyEntity(property);
@@ -94,14 +93,12 @@ class CreateRentalEntityServiceTest {
             val request = factory.createRequestModel();
             val response = factory.createResponseModel();
             val rental = factory.entityFromCreateRequest(request, tenant, property);
-            property.addRental(
-                    factory.generateRental(
-                            factory.generateTenant(),
-                            property,
-                            rental.getStartDate(),
-                            rental.getEndDate(),
-                            RentalState.PENDING
-                    )
+            factory.generateRental(
+                    factory.generateTenant(),
+                    property,
+                    rental.getStartDate(),
+                    rental.getEndDate(),
+                    RentalState.PENDING
             );
 
             when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
@@ -176,6 +173,7 @@ class CreateRentalEntityServiceTest {
         @CsvSource({
                 "2025-02-22, 2025-03-22, 2025-02-22, 2025-03-22",
                 "2025-02-22, 2025-04-30, 2025-04-30, 2025-05-10",
+                "2025-02-22, 2025-03-22, 2025-03-01, 2025-03-10"
         })
         @DisplayName("Should throw exception when property is already rented in any period between start and end dates")
         void shouldThrowExceptionWhenPropertyIsAlreadyRentedInAnyPeriodBetweenStartAndEndDates(
@@ -184,7 +182,7 @@ class CreateRentalEntityServiceTest {
                 LocalDate startDateOfRentRequest,
                 LocalDate endDateOfRentRequest
         ) {
-            val rentalEntity1 = factory.generateRentalEntity(
+            factory.generateRentalEntity(
                     UUID.randomUUID(),
                     ownerEntity,
                     propertyEntity,
@@ -193,7 +191,7 @@ class CreateRentalEntityServiceTest {
                     RentalState.CONFIRMED
             );
 
-            val rentalEntity2 = factory.generateRentalEntity(
+            factory.generateRentalEntity(
                     UUID.randomUUID(),
                     ownerEntity,
                     propertyEntity,
@@ -202,7 +200,7 @@ class CreateRentalEntityServiceTest {
                     RentalState.CONFIRMED
             );
 
-            val rentalEntity3 = factory.generateRentalEntity(
+            factory.generateRentalEntity(
                     UUID.randomUUID(),
                     ownerEntity,
                     propertyEntity,
@@ -211,7 +209,7 @@ class CreateRentalEntityServiceTest {
                     RentalState.PENDING
             );
 
-            val rentalEntity4 = factory.generateRentalEntity(
+            factory.generateRentalEntity(
                      UUID.randomUUID(),
                      ownerEntity,
                      propertyEntity,
@@ -219,11 +217,6 @@ class CreateRentalEntityServiceTest {
                      endOfRentedPeriod,
                      RentalState.CONFIRMED
              );
-
-            propertyEntity.getRentals().add(rentalEntity1);
-            propertyEntity.getRentals().add(rentalEntity2);
-            propertyEntity.getRentals().add(rentalEntity3);
-            propertyEntity.getRentals().add(rentalEntity4);
 
             val request = factory.createRequestModel(startDateOfRentRequest, endDateOfRentRequest);
 
@@ -396,6 +389,45 @@ class CreateRentalEntityServiceTest {
             verify(propertyRepositoryMock, never()).findById(any());
             verify(rentalRepositoryMock, never()).save(any());
             verify(presenter, never()).prepareSuccessView(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Testing against mutations")
+    class TestingMutations {
+        @CsvSource({
+                "2025-02-22, 2025-03-22, 2025-03-01, 2025-03-10, true"
+        })
+        @ParameterizedTest(name = "[{index}]: existing = ({0} to {1}), request = ({2} to {3}), throwException = {4}")
+        @DisplayName("Should properly validate overlapping logic")
+        void testValidateOverlappingDates(
+                LocalDate existingStart,
+                LocalDate existingEnd,
+                LocalDate requestStart,
+                LocalDate requestEnd,
+                boolean shouldThrow
+        ) {
+            factory.generateRental(
+                    UUID.fromString("87619d8d-0ea5-4a06-9f29-660bcebc711f"),
+                    tenant,
+                    property,
+                    existingStart,
+                    existingEnd,
+                    RentalState.CONFIRMED
+            );
+
+            if (shouldThrow) {
+                assertThatThrownBy(() ->
+                        CreateRentalService.validateOverlappingDates(requestStart, requestEnd, property)
+                )
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessageContaining("Property is already rented during the requested period");
+            } else {
+                assertThatCode(() ->
+                        CreateRentalService.validateOverlappingDates(requestStart, requestEnd, property)
+                )
+                        .doesNotThrowAnyException();
+            }
         }
     }
 }

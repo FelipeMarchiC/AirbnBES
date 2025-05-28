@@ -89,7 +89,7 @@ public class CreateRentalService implements ICreateRentalService {
         }
     }
 
-    private static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
+    static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
         for (Rental existingRental : property.getRentals()) {
             if (!existingRental.getState().equals(RentalState.CONFIRMED)) {
                 continue;

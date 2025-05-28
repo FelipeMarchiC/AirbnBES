@@ -108,7 +108,10 @@ public class TestDataFactory {
                 state
         );
 
-        return RentalMapper.toEntity(rental);
+        RentalEntity rentalEntity = RentalMapper.toEntity(rental);
+        propertyEntity.getRentals().add(rentalEntity);
+
+        return rentalEntity;
     }
 
 

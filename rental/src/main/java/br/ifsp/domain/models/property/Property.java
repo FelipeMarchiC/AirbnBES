@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Builder
 public class Property {
@@ -40,17 +39,7 @@ public class Property {
 
     private final List<Rental> rentals;
 
-    public Property(PropertyEntity entity) {
-        this.id = entity.getId();
-        this.name = entity.getName();
-        this.description = entity.getDescription();
-        this.dailyRate = entity.getDailyRate();
-        this.address = entity.getAddress();
-        this.owner = new User(entity.getOwner());
-        this.rentals = entity.getRentals().stream().map(Rental::new).collect(Collectors.toList());
-    }
-
-    public Property(
+    private Property(
             UUID id,
             String name,
             String description,

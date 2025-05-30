@@ -84,34 +84,6 @@ public class Rental {
         }
     }
 
-    public Rental(RentalEntity entity) {
-        this.id = entity.getId();
-        this.user = new User(entity.getUserEntity());
-        this.property = new Property(entity.getPropertyEntity());
-        this.startDate = entity.getStartDate();
-        this.endDate = entity.getEndDate();
-        this.value = entity.getValue();
-        this.state = entity.getState();
-    }
-
-    public Rental(
-            UUID id,
-            User user,
-            Property property,
-            LocalDate startDate,
-            LocalDate endDate,
-            Price value,
-            RentalState state
-    ) {
-        this.id = id;
-        this.user = user;
-        this.property = property;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.value = value;
-        this.state = state;
-    }
-
     private static boolean shouldExpire(LocalDate endDate, RentalState currentState, Clock clock) {
         return endDate.isBefore(LocalDate.now(clock)) && !FINAL_STATES.contains(currentState);
     }

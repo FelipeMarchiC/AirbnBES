@@ -60,7 +60,7 @@ public class RentalMapper {
 
         return Rental.builder()
                 .id(entity.getId())
-                .user(new User(entity.getUserEntity()))
+                .user(UserMapper.toDomain(entity.getUserEntity()))
                 .property(property)
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
@@ -73,8 +73,6 @@ public class RentalMapper {
     public static Rental toDomain(RentalEntity entity) {
         return toDomain(entity, null);
     }
-
-
 
     public static RentalEntity toEntity(Rental rental) {
         return RentalEntity.builder()

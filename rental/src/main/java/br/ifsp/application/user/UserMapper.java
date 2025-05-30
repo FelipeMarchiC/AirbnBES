@@ -6,17 +6,19 @@ import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class UserMapper {
 
     public static User toDomain(UserEntity entity) {
-        User user = new User(
-                entity.getId(),
-                entity.getName(),
-                entity.getLastname(),
-                entity.getEmail()
-        );
+        User user = User.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .lastname(entity.getLastname())
+                .email(entity.getEmail())
+                .ownedProperties(new ArrayList<>())
+                .build();
 
         if (entity.getOwnedProperties() != null) {
             for (PropertyEntity propertyEntity : entity.getOwnedProperties()) {

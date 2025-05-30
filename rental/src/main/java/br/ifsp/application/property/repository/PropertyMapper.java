@@ -4,38 +4,29 @@ import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.user.UserMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
-import br.ifsp.domain.models.rental.Rental;
-import br.ifsp.domain.models.rental.RentalEntity;
-import br.ifsp.domain.models.user.User;
 
-import java.util.ArrayList;
+import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PropertyMapper {
 
+    public static Property toDomain(PropertyEntity entity, Clock clock) {
+        return Property.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .dailyRate(entity.getDailyRate())
+                .address(entity.getAddress())
+                .owner(UserMapper.toDomain(entity.getOwner()))
+                .rentals(entity.getRentals().stream()
+                        .map(r -> RentalMapper.toDomain(r, null))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
     public static Property toDomain(PropertyEntity entity) {
-        User owner = new User(entity.getOwner());
-
-        List<Rental> rentals = new ArrayList<>();
-        Property property = new Property(
-                entity.getId(),
-                entity.getName(),
-                entity.getDescription(),
-                entity.getDailyRate(),
-                entity.getAddress(),
-                owner,
-                rentals
-        );
-
-        if (entity.getRentals() != null) {
-            for (RentalEntity rentalEntity : entity.getRentals()) {
-                Rental rental = RentalMapper.toDomain(rentalEntity);
-                property.addRental(rental);
-            }
-        }
-
-        return property;
+        return toDomain(entity, null);
     }
 
     public static PropertyEntity toEntity(Property property) {

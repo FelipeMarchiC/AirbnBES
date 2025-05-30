@@ -8,8 +8,6 @@ import java.time.LocalDate;
 
 public final class PreconditionChecker {
 
-    private PreconditionChecker() {}
-
     public static void prepareIfFailsPreconditions(GenericPresenter<?> presenter, UserEntity userEntity) {
         prepareIfUserIsNull(presenter, userEntity);
     }

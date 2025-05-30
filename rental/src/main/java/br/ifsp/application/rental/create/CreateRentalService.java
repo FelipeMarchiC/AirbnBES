@@ -56,6 +56,7 @@ public class CreateRentalService implements ICreateRentalService {
             PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("Property not found"));
 
+            assert userEntity != null;
             User user = new User(userEntity);
             Property property = PropertyMapper.toDomain(propertyEntity);
 

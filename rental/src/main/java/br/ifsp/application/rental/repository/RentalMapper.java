@@ -54,7 +54,9 @@ public class RentalMapper {
         );
     }
 
-    public static Rental toDomain(RentalEntity entity, Property property) {
+    public static Rental toDomain(RentalEntity entity) {
+        Property property = PropertyMapper.toDomain(entity.getPropertyEntity());
+
         return Rental.builder()
                 .id(entity.getId())
                 .user(new User(entity.getUserEntity()))

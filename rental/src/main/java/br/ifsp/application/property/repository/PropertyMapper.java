@@ -30,7 +30,7 @@ public class PropertyMapper {
 
         if (entity.getRentals() != null) {
             for (RentalEntity rentalEntity : entity.getRentals()) {
-                Rental rental = RentalMapper.toDomain(rentalEntity, property);
+                Rental rental = RentalMapper.toDomain(rentalEntity);
                 property.addRental(rental);
             }
         }

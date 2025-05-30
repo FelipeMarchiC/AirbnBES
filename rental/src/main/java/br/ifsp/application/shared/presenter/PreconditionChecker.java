@@ -1,28 +1,31 @@
 package br.ifsp.application.shared.presenter;
 
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
-import br.ifsp.domain.models.user.UserEntity;
+import br.ifsp.application.shared.exceptions.ImmutablePastEntityException;
+import br.ifsp.domain.models.user.User;
 
 import java.time.Clock;
 import java.time.LocalDate;
 
 public final class PreconditionChecker {
 
-    public static void prepareIfFailsPreconditions(GenericPresenter<?> presenter, UserEntity userEntity) {
-        prepareIfUserIsNull(presenter, userEntity);
+    public static void prepareIfFailsPreconditions(GenericPresenter<?> presenter, User user) {
+        prepareIfUserIsNull(presenter, user);
     }
 
-    public static void prepareIfUserIsNull(GenericPresenter<?> presenter, UserEntity userEntity) {
-        if (userEntity == null) {
+    public static void prepareIfUserIsNull(GenericPresenter<?> presenter, User user) {
+        if (user == null) {
             presenter.prepareFailView(new EntityNotFoundException("User does not exist"));
         }
     }
 
-    public static void prepareIfTheDateIsInThePast(
-            GenericPresenter<?> presenter, Clock clock, LocalDate targetDate
+    public static void prepareIfTheDateIsInThePast (
+            GenericPresenter<?> presenter,
+            Clock clock,
+            LocalDate targetDate
     ) {
         if (targetDate.isBefore(LocalDate.now(clock))) {
-            presenter.prepareFailView(new EntityNotFoundException("User does not exist"));
+            presenter.prepareFailView(new ImmutablePastEntityException("This operation must be current or future dates."));
         }
     }
 }

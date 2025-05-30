@@ -1,15 +1,20 @@
 package br.ifsp.application.rental.update.tenant;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.application.user.UserMapper;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
+import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TenantUpdateRentalService implements ITenantUpdateRentalService {
@@ -29,46 +34,58 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
     @Override
     public void cancelRental(TenantUpdateRentalPresenter presenter, RequestModel request) {
-        UserEntity userEntity = userRepository.findById(request.tenantId()).orElse(null);
-        PreconditionChecker.prepareIfFailsPreconditions(presenter, userEntity);
+        User user = getUser(request).orElse(null);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
         if (presenter.isDone()) return;
 
         try {
             RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
-            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rentalEntity.getStartDate());
+            Rental rental = RentalMapper.toDomain(rentalEntity);
+
+            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rental.getStartDate());
             if (presenter.isDone()) return;
 
-            if (rentalEntity.getState() != RentalState.CONFIRMED) {
+            if (rental.getState() != RentalState.CONFIRMED) {
                 throw new IllegalArgumentException("Rental is not in a valid state to be cancelled");
             }
 
-            rentalEntity.setState(RentalState.CANCELLED);
-            RentalEntity updatedRentalEntity = rentalRepository.save(rentalEntity);
+            rental.setState(RentalState.CANCELLED);
+            rentalRepository.save(RentalMapper.toEntity(rental));
 
-            unrestrainConflitingRentals(updatedRentalEntity);
+            setRestrainedRentalsToPending(rental);
 
-            presenter.prepareSuccessView(
-                    new ITenantUpdateRentalService.ResponseModel(rentalEntity.getId(), userEntity.getId())
-            );
+            assert user != null;
+            presenter.prepareSuccessView(new ResponseModel(rental.getId(), user.getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
     }
 
-    private void unrestrainConflitingRentals(RentalEntity confirmedRentalEntity) {
+    private Optional<User> getUser(RequestModel request) {
+        UserEntity userEntity = userRepository.findById(request.tenantId()).orElse(null);
+
+        return userEntity != null ? Optional.of(UserMapper.toDomain(userEntity)) : Optional.empty();
+    }
+
+    private void setRestrainedRentalsToPending(Rental confirmedRental) {
         List<RentalEntity> pendingConflicts = rentalRepository.findRentalsByOverlapAndState(
-                confirmedRentalEntity.getPropertyEntity().getId(),
+                confirmedRental.getProperty().getId(),
                 RentalState.RESTRAINED,
-                confirmedRentalEntity.getStartDate(),
-                confirmedRentalEntity.getEndDate(),
-                confirmedRentalEntity.getId()
+                confirmedRental.getStartDate(),
+                confirmedRental.getEndDate(),
+                confirmedRental.getId()
         );
 
         pendingConflicts.forEach(r -> {
-            r.setState(RentalState.PENDING);
-            rentalRepository.save(r);
+            var rental = RentalMapper.toDomain(r);
+
+            if (rental.getState() != RentalState.EXPIRED) {
+                rental.setState(RentalState.PENDING);
+            }
+
+            rentalRepository.save(RentalMapper.toEntity(rental));
         });
     }
 }

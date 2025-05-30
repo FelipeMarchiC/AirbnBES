@@ -7,10 +7,10 @@ import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.application.user.UserMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.Rental;
-import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 public class CreateRentalService implements ICreateRentalService {
@@ -46,8 +47,8 @@ public class CreateRentalService implements ICreateRentalService {
 
     @Override
     public void registerRental(CreateRentalPresenter presenter, RequestModel request) {
-        UserEntity userEntity = userRepository.findById(request.userId()).orElse(null);
-        PreconditionChecker.prepareIfFailsPreconditions(presenter, userEntity);
+        User user = getUser(request).orElse(null);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
         if (presenter.isDone()) return;
 
         try {
@@ -56,20 +57,25 @@ public class CreateRentalService implements ICreateRentalService {
             PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("Property not found"));
 
-            assert userEntity != null;
-            User user = new User(userEntity);
             Property property = PropertyMapper.toDomain(propertyEntity);
 
             validateOverlappingDates(request.startDate(), request.endDate(), property);
 
             Rental rental = buildRental(request, user, property);
 
-            RentalEntity rentalEntity = rentalRepository.save(RentalMapper.toEntity(rental));
+            rentalRepository.save(RentalMapper.toEntity(rental));
 
-            presenter.prepareSuccessView(new ResponseModel(rentalEntity.getId(), userEntity.getId()));
+            assert user != null;
+            presenter.prepareSuccessView(new ResponseModel(rental.getId(), user.getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
+    }
+
+    private Optional<User> getUser(RequestModel request) {
+        UserEntity userEntity = userRepository.findById(request.userId()).orElse(null);
+
+        return userEntity != null ? Optional.of(UserMapper.toDomain(userEntity)) : Optional.empty();
     }
 
     private void validateRequestedDates(LocalDate startDate, LocalDate endDate) {

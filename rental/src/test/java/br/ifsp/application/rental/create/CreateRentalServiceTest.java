@@ -1,6 +1,6 @@
 package br.ifsp.application.rental.create;
 
-import br.ifsp.application.property.JpaPropertyRepository;
+import br.ifsp.application.property.repository.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;

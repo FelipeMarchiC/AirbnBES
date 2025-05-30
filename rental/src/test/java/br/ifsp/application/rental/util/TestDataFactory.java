@@ -1,6 +1,6 @@
 package br.ifsp.application.rental.util;
 
-import br.ifsp.application.property.PropertyMapper;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
@@ -10,7 +10,6 @@ import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
-import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;

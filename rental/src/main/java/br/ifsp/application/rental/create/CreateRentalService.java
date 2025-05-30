@@ -1,7 +1,7 @@
 package br.ifsp.application.rental.create;
 
-import br.ifsp.application.property.JpaPropertyRepository;
-import br.ifsp.application.property.PropertyMapper;
+import br.ifsp.application.property.repository.JpaPropertyRepository;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;

@@ -1,6 +1,6 @@
 package br.ifsp.application.rental.repository;
 
-import br.ifsp.application.property.PropertyMapper;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.user.UserMapper;
 import br.ifsp.domain.models.property.Property;

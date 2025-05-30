@@ -1,6 +1,6 @@
 package br.ifsp.application.user;
 
-import br.ifsp.application.property.PropertyMapper;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.user.User;

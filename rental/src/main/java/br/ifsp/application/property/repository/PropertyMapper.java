@@ -1,4 +1,4 @@
-package br.ifsp.application.property;
+package br.ifsp.application.property.repository;
 
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.user.UserMapper;

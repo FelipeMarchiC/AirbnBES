@@ -12,6 +12,7 @@ import br.ifsp.domain.services.IUuidGeneratorService;
 import br.ifsp.domain.shared.valueobjects.Price;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.UUID;
 
 public class RentalMapper {
@@ -54,7 +55,7 @@ public class RentalMapper {
         );
     }
 
-    public static Rental toDomain(RentalEntity entity) {
+    public static Rental toDomain(RentalEntity entity, Clock clock) {
         Property property = PropertyMapper.toDomain(entity.getPropertyEntity());
 
         return Rental.builder()
@@ -65,8 +66,15 @@ public class RentalMapper {
                 .endDate(entity.getEndDate())
                 .value(entity.getValue())
                 .state(entity.getState())
+                .clock(clock)
                 .build();
     }
+
+    public static Rental toDomain(RentalEntity entity) {
+        return toDomain(entity, null);
+    }
+
+
 
     public static RentalEntity toEntity(Rental rental) {
         return RentalEntity.builder()

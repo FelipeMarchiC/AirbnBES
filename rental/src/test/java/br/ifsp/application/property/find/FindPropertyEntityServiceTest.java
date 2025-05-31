@@ -6,7 +6,10 @@ import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.PropertyEntity;
 import org.junit.jupiter.api.*;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,7 +44,9 @@ class FindPropertyEntityServiceTest {
                 return false;
             }
         };
-        factory = new TestDataFactory();
+
+        Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneId.systemDefault());
+        factory = new TestDataFactory(fixedClock);
         findPropertyService = new FindPropertyService(jpaPropertyRepository);
         capturedResponse = null;
         capturedException = null;

@@ -54,10 +54,7 @@ class CreateRentalServiceTest {
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        Clock fixedClock = Clock.fixed(
-                LocalDate.of(2025, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant(),
-                ZoneOffset.UTC
-        );
+        Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
 
         sut = new CreateRentalService(
                 userRepositoryMock,
@@ -67,7 +64,7 @@ class CreateRentalServiceTest {
                 fixedClock
         );
 
-        factory = new TestDataFactory();
+        factory = new TestDataFactory(fixedClock);
         tenant = factory.generateTenant();
         tenantEntity = factory.generateTenantEntity(tenant);
         User owner = factory.generateOwner();
@@ -392,6 +389,8 @@ class CreateRentalServiceTest {
         }
     }
 
+    @Tag("Mutation")
+    @Tag("UnitTest")
     @Nested
     @DisplayName("Testing against mutations")
     class TestingMutations {

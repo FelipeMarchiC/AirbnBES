@@ -57,7 +57,7 @@ public class CreateRentalService implements ICreateRentalService {
             PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("Property not found"));
 
-            Property property = PropertyMapper.toDomain(propertyEntity);
+            Property property = PropertyMapper.toDomain(propertyEntity, clock);
 
             validateOverlappingDates(request.startDate(), request.endDate(), property);
 
@@ -65,7 +65,6 @@ public class CreateRentalService implements ICreateRentalService {
 
             rentalRepository.save(RentalMapper.toEntity(rental));
 
-            assert user != null;
             presenter.prepareSuccessView(new ResponseModel(rental.getId(), user.getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
@@ -121,7 +120,8 @@ public class CreateRentalService implements ICreateRentalService {
                 request,
                 user,
                 property,
-                totalCost
+                totalCost,
+                clock
         );
     }
 }

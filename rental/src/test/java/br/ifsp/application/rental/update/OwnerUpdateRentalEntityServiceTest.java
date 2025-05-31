@@ -42,7 +42,8 @@ public class OwnerUpdateRentalEntityServiceTest {
     @BeforeEach
     void setup() {
         closeable = MockitoAnnotations.openMocks(this);
-        testDataFactory = new TestDataFactory();
+        Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
+        testDataFactory = new TestDataFactory(fixedClock);
         tenantEntity = testDataFactory.generateTenantEntity();
         ownerEntity = testDataFactory.generateOwnerEntity();
         propertyEntity = testDataFactory.generatePropertyEntity(ownerEntity);

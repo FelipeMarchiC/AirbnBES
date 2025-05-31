@@ -42,7 +42,7 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
             RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 
-            Rental rental = RentalMapper.toDomain(rentalEntity);
+            Rental rental = RentalMapper.toDomain(rentalEntity, clock);
 
             PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rental.getStartDate());
             if (presenter.isDone()) return;
@@ -56,7 +56,6 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
             setRestrainedRentalsToPending(rental);
 
-            assert user != null;
             presenter.prepareSuccessView(new ResponseModel(rental.getId(), user.getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
@@ -79,7 +78,7 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
         );
 
         pendingConflicts.forEach(r -> {
-            var rental = RentalMapper.toDomain(r);
+            var rental = RentalMapper.toDomain(r, clock);
 
             if (rental.getState() != RentalState.EXPIRED) {
                 rental.setState(RentalState.PENDING);

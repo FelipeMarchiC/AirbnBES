@@ -26,7 +26,8 @@ public class RentalMapper {
             ICreateRentalService.RequestModel requestModel,
             User user,
             Property property,
-            BigDecimal value
+            BigDecimal value,
+            Clock clock
     ) {
         return property.createRental(
                 uuidGeneratorService.generate(),
@@ -34,7 +35,8 @@ public class RentalMapper {
                 requestModel.startDate(),
                 requestModel.endDate(),
                 new Price(value),
-                RentalState.PENDING
+                RentalState.PENDING,
+                clock
         );
     }
 
@@ -43,7 +45,8 @@ public class RentalMapper {
             ICreateRentalService.RequestModel requestModel,
             User user,
             Property property,
-            BigDecimal value
+            BigDecimal value,
+            Clock clock
     ) {
         return property.createRental(
                 rentalId,
@@ -51,7 +54,8 @@ public class RentalMapper {
                 requestModel.startDate(),
                 requestModel.endDate(),
                 new Price(value),
-                RentalState.PENDING
+                RentalState.PENDING,
+                clock
         );
     }
 
@@ -68,10 +72,6 @@ public class RentalMapper {
                 .state(entity.getState())
                 .clock(clock)
                 .build();
-    }
-
-    public static Rental toDomain(RentalEntity entity) {
-        return toDomain(entity, null);
     }
 
     public static RentalEntity toEntity(Rental rental) {

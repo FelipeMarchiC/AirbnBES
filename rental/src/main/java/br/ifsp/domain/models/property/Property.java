@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +64,8 @@ public class Property {
             LocalDate startDate,
             LocalDate endDate,
             Price value,
-            RentalState state
+            RentalState state,
+            Clock clock
     ) {
         Rental rental = Rental.builder()
                 .id(id)
@@ -73,6 +75,7 @@ public class Property {
                 .endDate(endDate)
                 .value(value)
                 .state(state)
+                .clock(clock)
                 .build();
 
         this.addRental(rental);

@@ -17,24 +17,27 @@ import br.ifsp.domain.shared.valueobjects.Price;
 import com.github.javafaker.Faker;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.UUID;
 
 import br.ifsp.application.rental.create.ICreateRentalService;
-import lombok.NoArgsConstructor;
 import lombok.val;
 
-@NoArgsConstructor
 public class TestDataFactory {
     private final Faker faker = new Faker();
+    private final Clock clock;
 
     public final UUID rentalId = UUID.randomUUID();
     public final UUID tenantId = UUID.randomUUID();
     public final UUID ownerId = UUID.randomUUID();
     public final UUID propertyId = UUID.randomUUID();
 
+    public TestDataFactory(Clock clock) {
+        this.clock = clock;
+    }
 
     public UserEntity generateTenantEntity(){
         return UserMapper.toEntity(generateTenant());
@@ -67,29 +70,6 @@ public class TestDataFactory {
         return PropertyMapper.toEntity(property);
     }
 
-    public RentalEntity generateRentalEntity() {
-        Rental rental = generateRental();
-        return RentalMapper.toEntity(rental);
-    }
-
-    public RentalEntity generateRentalEntity(
-            UserEntity tenantEntity,
-            PropertyEntity propertyEntity,
-            LocalDate startDate,
-            LocalDate endDate,
-            RentalState state
-    ) {
-        Rental rental = generateRental(
-                UserMapper.toDomain(tenantEntity),
-                PropertyMapper.toDomain(propertyEntity),
-                startDate,
-                endDate,
-                state
-        );
-
-        return RentalMapper.toEntity(rental);
-    }
-
     public RentalEntity generateRentalEntity(
             UUID rentalId,
             UserEntity tenantEntity,
@@ -101,7 +81,7 @@ public class TestDataFactory {
         Rental rental = generateRental(
                 rentalId,
                 UserMapper.toDomain(tenantEntity),
-                PropertyMapper.toDomain(propertyEntity),
+                PropertyMapper.toDomain(propertyEntity, clock),
                 startDate,
                 endDate,
                 state
@@ -117,15 +97,6 @@ public class TestDataFactory {
     public User generateTenant() {
         return User.builder()
                 .id(tenantId)
-                .name(faker.name().firstName())
-                .lastname(faker.name().lastName())
-                .email(faker.internet().emailAddress())
-                .build();
-    }
-
-    public User generateTenant(UUID thisTenantId) {
-        return User.builder()
-                .id(thisTenantId)
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
                 .email(faker.internet().emailAddress())
@@ -159,24 +130,6 @@ public class TestDataFactory {
                 .build();
     }
 
-    public Property generateProperty(UUID thisPropertyId) {
-        return Property.builder()
-                .id(thisPropertyId)
-                .name(faker.address().streetName())
-                .description(faker.lorem().sentence())
-                .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
-                .address(Address.builder()
-                        .number(faker.address().buildingNumber())
-                        .street(faker.address().streetAddress())
-                        .city(faker.address().city())
-                        .state(faker.address().state())
-                        .postalCode(faker.address().zipCode())
-                        .build())
-                .owner(generateOwner())
-                .rentals(new ArrayList<>())
-                .build();
-    }
-
     public Property generateProperty(User owner) {
         return Property.builder()
                 .id(propertyId)
@@ -192,30 +145,6 @@ public class TestDataFactory {
                         .build())
                 .owner(owner)
                 .rentals(new ArrayList<>())
-                .build();
-    }
-
-    public Rental generateRental() {
-        return Rental.builder()
-                .id(rentalId)
-                .user(generateTenant())
-                .property(generateProperty())
-                .startDate(LocalDate.parse("2025-01-01"))
-                .endDate(LocalDate.parse("2025-01-01").plusDays(7))
-                .value(new Price(BigDecimal.valueOf(1500.00)))
-                .state(RentalState.CONFIRMED)
-                .build();
-    }
-
-    public Rental generateRental(UUID thisRentalId) {
-        return Rental.builder()
-                .id(thisRentalId)
-                .user(generateTenant())
-                .property(generateProperty())
-                .startDate(LocalDate.parse("2025-01-01"))
-                .endDate(LocalDate.parse("2025-01-01").plusDays(7))
-                .value(new Price(BigDecimal.valueOf(1500.00)))
-                .state(RentalState.CONFIRMED)
                 .build();
     }
 
@@ -235,6 +164,7 @@ public class TestDataFactory {
                 .endDate(endDate)
                 .value(new Price(calculateRentalCost(startDate, endDate, property)))
                 .state(state)
+                .clock(clock)
                 .build();
 
         property.addRental(rental);
@@ -257,6 +187,7 @@ public class TestDataFactory {
                 .endDate(endDate)
                 .value(new Price(calculateRentalCost(startDate, endDate, property)))
                 .state(state)
+                .clock(clock)
                 .build();
 
         property.addRental(rental);
@@ -293,7 +224,7 @@ public class TestDataFactory {
     ) {
         BigDecimal totalCost = calculateRentalCost(request.startDate(), request.endDate(), property);
 
-        return RentalMapper.fromCreateRequestModel(rentalId, request, tenant, property, totalCost);
+        return RentalMapper.fromCreateRequestModel(rentalId, request, tenant, property, totalCost, clock);
     }
 
     private static BigDecimal calculateRentalCost(LocalDate start, LocalDate end, Property property) {

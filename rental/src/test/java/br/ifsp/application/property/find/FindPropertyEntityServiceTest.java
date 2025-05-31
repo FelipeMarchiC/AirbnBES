@@ -224,4 +224,61 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Database error");
         }
     }
+    @Nested
+    @DisplayName("Mutation Tests")
+    class MutationTests {
+
+        @Test
+        @DisplayName("Should allow price range when min equals max")
+        void shouldAllowPriceRangeWhenMinEqualsMax() {
+            double min = 150.0;
+            double max = 150.0;
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+        }
+        @Test
+        @DisplayName("Should allow zero values for price range")
+        void shouldAllowZeroValuesForPriceRange() {
+            double min = 0.0;
+            double max = 0.0;
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+        }
+        @Test
+        @DisplayName("Should reject negative min and zero max")
+        void shouldRejectNegativeMinWithZeroMax() {
+            var request = new IFindPropertyService.PriceRangeRequestModel(-1.0, 0.0);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Prices must be non-negative");
+        }
+        @Test
+        @DisplayName("Should reject zero min and negative max")
+        void shouldRejectZeroMinWithNegativeMax() {
+            var request = new IFindPropertyService.PriceRangeRequestModel(0.0, -1.0);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Prices must be non-negative");
+        }
+    }
 }

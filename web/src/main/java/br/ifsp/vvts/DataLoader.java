@@ -1,13 +1,13 @@
 package br.ifsp.vvts;
 
-import br.ifsp.application.property.JpaPropertyRepository;
+import br.ifsp.application.property.repository.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.user.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.Role;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
 import org.springframework.boot.CommandLineRunner;
@@ -42,7 +42,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        User user1 = User.builder()
+        UserEntity user1 = UserEntity.builder()
                 .id(UUID.fromString("9b96aa7e-4f1b-4c2f-b273-3b9f7c9b1a01"))
                 .name("Amiya").lastname("Rhodes")
                 .email("amiya@rhodesisland.com")
@@ -51,7 +51,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user2 = User.builder()
+        UserEntity user2 = UserEntity.builder()
                 .id(UUID.fromString("2e13c4b8-b5a2-4af4-b881-c0298bfe5132"))
                 .name("Catherine")
                 .lastname("Earnshaw")
@@ -61,7 +61,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user3 = User.builder()
+        UserEntity user3 = UserEntity.builder()
                 .id(UUID.fromString("8dfc6c64-1e7b-4ec1-8450-d20e160c7092"))
                 .name("Coragem").lastname("o Cão Covarde")
                 .email("uriel@eustacio.com")
@@ -70,7 +70,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user4 = User.builder()
+        UserEntity user4 = UserEntity.builder()
                 .id(UUID.fromString("a7e6f768-b8cb-4a14-9205-84fd94961cb1"))
                 .name("Roberto")
                 .lastname("Abadia")
@@ -79,7 +79,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user5 = User.builder()
+        UserEntity user5 = UserEntity.builder()
                 .id(UUID.fromString("1a8a419c-4d84-4a7a-9c18-282df27819d3"))
                 .name("Vin").lastname("Diesel")
                 .email("familia@outlook.com")
@@ -88,7 +88,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user6 = User.builder()
+        UserEntity user6 = UserEntity.builder()
                 .id(UUID.fromString("3bd202db-2a38-4979-b13c-2ff0a6f31f76"))
                 .name("Pedro")
                 .lastname("Bosta")
@@ -98,7 +98,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user7 = User.builder()
+        UserEntity user7 = UserEntity.builder()
                 .id(UUID.fromString("f25b5c68-2ac9-4bc4-9f30-3d3b2a6832c4"))
                 .name("Goleiro")
                 .lastname("Bruno")
@@ -108,7 +108,7 @@ public class DataLoader implements CommandLineRunner {
                 .role(Role.USER)
                 .build();
 
-        User user8 = User.builder()
+        UserEntity user8 = UserEntity.builder()
                 .id(UUID.fromString("c8b4708c-bdb2-42bb-90e7-e77bcb44eb11"))
                 .name("Rock")
                 .lastname("Roll")
@@ -118,7 +118,7 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        User user9 = User.builder()
+        UserEntity user9 = UserEntity.builder()
                 .id(UUID.fromString("9440aeed-5809-4df3-950e-b839c3cf25a5"))
                 .name("Lazaro")
                 .lastname("Assassino")
@@ -128,7 +128,7 @@ public class DataLoader implements CommandLineRunner {
                 .role(Role.USER)
                 .build();
 
-        User user10 = User.builder()
+        UserEntity user10 = UserEntity.builder()
                 .id(UUID.fromString("bd869fa0-4b6f-4bc2-8d84-c164a49c58da"))
                 .name("Nickel")
                 .lastname("Back")
@@ -156,7 +156,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("01000-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p2 = PropertyEntity.builder()
@@ -173,7 +173,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("22000-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p3 = PropertyEntity.builder()
@@ -191,7 +191,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("01311-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p4 = PropertyEntity.builder()
@@ -209,7 +209,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("13000-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p5 = PropertyEntity.builder()
@@ -227,7 +227,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("01413-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p6 = PropertyEntity.builder()
@@ -245,7 +245,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("12460-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p7 = PropertyEntity.builder()
@@ -263,7 +263,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("01415-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p8 = PropertyEntity.builder()
@@ -281,7 +281,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("25680-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p9 = PropertyEntity.builder()
@@ -299,7 +299,7 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("22070-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         PropertyEntity p10 = PropertyEntity.builder()
@@ -317,14 +317,14 @@ public class DataLoader implements CommandLineRunner {
                                 .postalCode("05435-000")
                                 .build()
                 )
-                .rentalEntities(emptyList())
+                .rentals(emptyList())
                 .build();
 
         propertyRepository.saveAll(List.of(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10));
 
         RentalEntity r1 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user5)
+                .userEntity(user5)
                 .propertyEntity(p1)
                 .startDate(LocalDate.of(2025, 3, 10))
                 .endDate(LocalDate.of(2025, 3, 15))
@@ -334,7 +334,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r2 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user6)
+                .userEntity(user6)
                 .propertyEntity(p2)
                 .startDate(LocalDate.of(2025, 4, 5))
                 .endDate(LocalDate.of(2025, 4, 12))
@@ -344,7 +344,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r3 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user7)
+                .userEntity(user7)
                 .propertyEntity(p3)
                 .startDate(LocalDate.of(2025, 5, 1))
                 .endDate(LocalDate.of(2025, 5, 6))
@@ -354,7 +354,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r4 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user8)
+                .userEntity(user8)
                 .propertyEntity(p4)
                 .startDate(LocalDate.of(2025, 6, 20))
                 .endDate(LocalDate.of(2025, 6, 30))
@@ -364,7 +364,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r5 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user9)
+                .userEntity(user9)
                 .propertyEntity(p5)
                 .startDate(LocalDate.of(2025, 7, 1))
                 .endDate(LocalDate.of(2025, 7, 10))
@@ -374,7 +374,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r6 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user10)
+                .userEntity(user10)
                 .propertyEntity(p6)
                 .startDate(LocalDate.of(2025, 8, 15))
                 .endDate(LocalDate.of(2025, 8, 20))
@@ -384,7 +384,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r7 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user1)
+                .userEntity(user1)
                 .propertyEntity(p7)
                 .startDate(LocalDate.of(2025, 9, 10))
                 .endDate(LocalDate.of(2025, 9, 18))
@@ -394,7 +394,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r8 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user2)
+                .userEntity(user2)
                 .propertyEntity(p8)
                 .startDate(LocalDate.of(2025, 10, 2))
                 .endDate(LocalDate.of(2025, 10, 7))
@@ -405,7 +405,7 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r9 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .user(user3)
+                .userEntity(user3)
                 .propertyEntity(p9)
                 .startDate(LocalDate.of(2025, 11, 12))
                 .endDate(LocalDate.of(2025, 11, 19))
@@ -416,7 +416,7 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r10 = RentalEntity
                 .builder()
                 .id(UUID.randomUUID())
-                .user(user4)
+                .userEntity(user4)
                 .propertyEntity(p10)
                 .startDate(LocalDate.of(2024, 12, 1))
                 .endDate(LocalDate.of(2024, 12, 5))

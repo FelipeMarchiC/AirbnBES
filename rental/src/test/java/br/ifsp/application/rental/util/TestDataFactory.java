@@ -4,7 +4,7 @@ import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService;
 import br.ifsp.application.rental.update.tenant.ITenantUpdateRentalService;
-import br.ifsp.application.user.UserMapper;
+import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.Rental;

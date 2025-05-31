@@ -4,6 +4,7 @@ import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.rental.RentalEntity;
 import org.junit.jupiter.api.*;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.List;
@@ -14,10 +15,14 @@ import static org.mockito.Mockito.*;
 
 class FindRentalEntityServiceTest {
 
+    @Mock
     private JpaRentalRepository jpaRentalRepository;
+
+    @InjectMocks
     private FindRentalService findRentalService;
     @Mock
     private FindRentalPresenter presenter;
+
     private IFindRentalService.FindByPropertyIdRequestModel findByPropertyIdRequestModel;
     private IFindRentalService.ResponseModel response;
     private Exception exceptionResponse;
@@ -61,12 +66,12 @@ class FindRentalEntityServiceTest {
             response = new IFindRentalService.ResponseModel(mockRentalEntities);
             findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
 
-            when(jpaRentalRepository.findByPropertyId(propertyId)).thenReturn(mockRentalEntities);
+            when(jpaRentalRepository.findByPropertyEntityId(propertyId)).thenReturn(mockRentalEntities);
             findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter);
             assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             assertThat(response).isNotNull();
-            verify(jpaRentalRepository).findByPropertyId(propertyId);
+            verify(jpaRentalRepository).findByPropertyEntityId(propertyId);
         }
     }
 
@@ -85,11 +90,11 @@ class FindRentalEntityServiceTest {
                     mock(RentalEntity.class)
             );
             IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
-            when(jpaRentalRepository.findByUserId(tenantId)).thenReturn(mockRentalEntities);
+            when(jpaRentalRepository.findByUserEntityId(tenantId)).thenReturn(mockRentalEntities);
             findRentalService.getRentalHistoryByTenant(requestModel, presenter);
             assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
-            verify(jpaRentalRepository).findByUserId(tenantId);
+            verify(jpaRentalRepository).findByUserEntityId(tenantId);
         }
     }
 

@@ -6,6 +6,7 @@ import br.ifsp.application.rental.update.owner.OwnerUpdateRentalService;
 import br.ifsp.application.rental.update.owner.IOwnerUpdateRentalService.RequestModel;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.application.shared.exceptions.ImmutablePastEntityException;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
@@ -20,6 +21,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+
 
 public class OwnerUpdateRentalEntityServiceTest {
 
@@ -219,7 +221,7 @@ public class OwnerUpdateRentalEntityServiceTest {
                     tenantEntity,
                     propertyEntity,
                     LocalDate.of(2024, 12, 30), // startDate (no passado)
-                    LocalDate.of(2025, 1, 10),
+                    LocalDate.of(2025, 10, 10),
                     RentalState.CONFIRMED
             );
 
@@ -231,8 +233,8 @@ public class OwnerUpdateRentalEntityServiceTest {
             verify(presenter).prepareFailView(captor.capture());
 
             Exception exception = captor.getValue();
-            assertThat(exception).isInstanceOf(EntityNotFoundException.class);
-            assertThat(exception.getMessage()).isEqualTo("User does not exist");
+            assertThat(exception).isInstanceOf(ImmutablePastEntityException.class);
+            assertThat(exception.getMessage()).isEqualTo("This operation must be current or future dates.");
         }
 
 
@@ -314,8 +316,8 @@ public class OwnerUpdateRentalEntityServiceTest {
                     UUID.randomUUID(),
                     tenantEntity,
                     propertyEntity,
-                    LocalDate.of(1801, 2, 1),
-                    LocalDate.of(1801, 2, 10),
+                    LocalDate.of(2025, 2, 1),
+                    LocalDate.of(2025, 10, 10),
                     RentalState.PENDING
             );
 

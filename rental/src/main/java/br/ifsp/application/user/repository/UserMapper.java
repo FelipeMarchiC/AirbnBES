@@ -1,4 +1,4 @@
-package br.ifsp.application.user;
+package br.ifsp.application.user.repository;
 
 import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.domain.models.property.Property;

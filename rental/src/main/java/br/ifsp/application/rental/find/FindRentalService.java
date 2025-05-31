@@ -21,7 +21,7 @@ public class FindRentalService implements IFindRentalService {
             throw new IllegalArgumentException("propertyId cannot be null");
 
         try {
-            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByPropertyId(findByPropertyIdRequestModel.propertyId());
+            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByPropertyEntityId(findByPropertyIdRequestModel.propertyId());
             presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
         } catch (Exception e) {
             presenter.prepareFailView(e);
@@ -33,7 +33,7 @@ public class FindRentalService implements IFindRentalService {
             throw new IllegalArgumentException("tenantId cannot be null");
 
         try {
-            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByUserId(requestModel.tenantId());
+            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByUserEntityId(requestModel.tenantId());
             presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
         } catch (Exception e) {
             presenter.prepareFailView(e);

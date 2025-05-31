@@ -51,7 +51,7 @@ public class PropertyEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "propertyEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RentalEntity> rentals = new ArrayList<>();
 }

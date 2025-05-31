@@ -1,4 +1,4 @@
-package br.ifsp.application.user;
+package br.ifsp.application.user.repository;
 
 import br.ifsp.domain.models.user.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

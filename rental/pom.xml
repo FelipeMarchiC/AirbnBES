@@ -12,7 +12,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>rentalEntity</artifactId>
+    <artifactId>rental</artifactId>
     <name>Rental Module</name>
     <description>Rental domain module for AirbnbES project</description>
 

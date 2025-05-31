@@ -5,6 +5,7 @@ import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.domain.models.property.PropertyEntity;
 import org.junit.jupiter.api.*;
+import org.mockito.Mock;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -17,9 +18,16 @@ import static org.mockito.Mockito.*;
 
 class FindPropertyEntityServiceTest {
 
+    @Mock
     private JpaPropertyRepository jpaPropertyRepository;
+
+    @Mock
     private FindPropertyService findPropertyService;
+
+    @Mock
     private FindPropertyPresenter presenter;
+
+    @Mock
     private TestDataFactory factory;
 
     private IFindPropertyService.PropertyListResponseModel capturedResponse;

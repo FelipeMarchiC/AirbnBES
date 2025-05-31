@@ -4,7 +4,7 @@ import br.ifsp.application.property.repository.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
-import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;

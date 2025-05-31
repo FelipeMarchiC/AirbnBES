@@ -5,7 +5,7 @@ import br.ifsp.application.rental.update.tenant.TenantUpdateRentalPresenter;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
-import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
@@ -324,7 +324,31 @@ public class TenantUpdateRentalEntityServiceTest {
             sut.cancelRental(presenter, request);
 
             // ---------- Assert ----------
+            verify(userRepositoryMock).findById(tenantId);
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+        }
+    }
 
+    @Tag("Mutation")
+    @Tag("UnitTest")
+    @Nested
+    @DisplayName("Testing against mutations")
+    class TestingMutations {
+        @Test
+        @DisplayName("Should return empty optional when user is not found in repository")
+        void shouldReturnEmptyOptionalWhenUserIsNotFoundInRepository() {
+            // ---------- Arrange ----------
+            val request = factory.tenantUpdateRequestModel();
+
+            UUID tenantId = tenantEntity.getId();
+
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.empty());
+            when(presenter.isDone()).thenReturn(true);
+
+            // ---------- Act ----------
+            sut.cancelRental(presenter, request);
+
+            // ---------- Assert ----------
             verify(userRepositoryMock).findById(tenantId);
             verify(presenter).prepareFailView(any(EntityNotFoundException.class));
         }

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface JpaRentalRepository extends JpaRepository<RentalEntity, UUID> {
-    List<RentalEntity> findByPropertyId(UUID propertyId);
+    List<RentalEntity> findByPropertyEntityId(UUID propertyId);
 
-    List<RentalEntity> findByUserId(UUID tenantId);
+    List<RentalEntity> findByUserEntityId(UUID tenantId);
 
-    @Query("SELECT r FROM Rental r WHERE r.property.id = :propertyId " +
+    @Query("SELECT r FROM RentalEntity r WHERE r.propertyEntity.id = :propertyId " +
             "AND r.state = :state " +
             "AND ((r.startDate BETWEEN :startDate AND :endDate) " +
             "OR (r.endDate BETWEEN :startDate AND :endDate) " +

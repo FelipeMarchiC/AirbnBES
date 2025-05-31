@@ -1,7 +1,7 @@
 package br.ifsp.application.property.repository;
 
 import br.ifsp.application.rental.repository.RentalMapper;
-import br.ifsp.application.user.UserMapper;
+import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 

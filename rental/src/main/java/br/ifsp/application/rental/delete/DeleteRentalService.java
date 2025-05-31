@@ -1,11 +1,17 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.shared.presenter.PreconditionChecker; // Adicionado
+import br.ifsp.application.user.repository.JpaUserRepository;
+import br.ifsp.application.user.repository.UserMapper; // Adicionado
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
+import br.ifsp.domain.models.user.User; // Adicionado
+import br.ifsp.domain.models.user.UserEntity; // Adicionado
 import org.springframework.stereotype.Service;
-import br.ifsp.application.user.repository.JpaUserRepository; // Adicionado
-import java.time.Clock; // Adicionado
+
+import java.time.Clock;
+import java.util.Optional; // Adicionado
 
 
 @Service
@@ -25,6 +31,10 @@ public class DeleteRentalService implements IDeleteRentalService {
 
     @Override
     public void delete(DeleteRentalPresenter presenter, RequestModel request) {
+        User user = getUser(request).orElse(null);
+        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
+        if (presenter.isDone()) return;
+
         try {
             RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
@@ -40,5 +50,10 @@ public class DeleteRentalService implements IDeleteRentalService {
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
+    }
+
+    private Optional<User> getUser(RequestModel request) {
+        UserEntity userEntity = userRepository.findById(request.ownerId()).orElse(null);
+        return userEntity != null ? Optional.of(UserMapper.toDomain(userEntity)) : Optional.empty();
     }
 }

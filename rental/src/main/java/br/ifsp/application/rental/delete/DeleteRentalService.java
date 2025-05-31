@@ -33,11 +33,11 @@ public class DeleteRentalService implements IDeleteRentalService {
 
     @Override
     public void delete(DeleteRentalPresenter presenter, RequestModel request) {
-        User user = getUser(request).orElse(null);
-        PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
-        if (presenter.isDone()) return;
-
         try {
+            User user = getUser(request).orElse(null);
+            PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
+            if (presenter.isDone()) return;
+
             var rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
 

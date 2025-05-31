@@ -243,5 +243,20 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedResponse).isNotNull();
             assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
         }
+        @Test
+        @DisplayName("Should allow zero values for price range")
+        void shouldAllowZeroValuesForPriceRange() {
+            double min = 0.0;
+            double max = 0.0;
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+        }
     }
 }

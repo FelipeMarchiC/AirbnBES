@@ -20,7 +20,7 @@ public class RestFindRentalPresenter implements FindRentalPresenter {
         List<RentalViewModel> viewModelList = response.rentalEntityList().stream()
                 .map(rental -> new RentalViewModel(
                         rental.getId(),
-                        rental.getUser().getUsername(),
+                        rental.getUserEntity().getUsername(),
                         rental.getPropertyEntity().getName(),
                         rental.getStartDate(),
                         rental.getEndDate(),

@@ -1,5 +1,6 @@
 package br.ifsp.vvts.security.auth;
 
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.exception.EntityAlreadyExistsException;
 import br.ifsp.vvts.security.config.JwtService;
 import br.ifsp.domain.models.user.User;
@@ -29,7 +30,7 @@ public class AuthenticationService {
         String encryptedPassword = passwordEncoder.encode(request.password());
 
         final UUID id = UUID.randomUUID();
-        final User user = User.builder()
+        final UserEntity user = UserEntity.builder()
                 .id(id)
                 .name(request.name())
                 .lastname(request.lastname())
@@ -46,7 +47,7 @@ public class AuthenticationService {
         final var authentication = new UsernamePasswordAuthenticationToken(request.username(), request.password());
         authenticationManager.authenticate(authentication);
 
-        final User user = userRepository.findByEmail(request.username()).orElseThrow();
+        final UserEntity user = userRepository.findByEmail(request.username()).orElseThrow();
         final String token = jwtService.generateToken(user);
 
         return new AuthResponse(token);

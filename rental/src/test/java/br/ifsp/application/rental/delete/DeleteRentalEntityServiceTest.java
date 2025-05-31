@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,6 +84,7 @@ class DeleteRentalEntityServiceTest {
 
                 Rental mockedRental = mock(Rental.class);
                 when(mockedRental.getState()).thenReturn(state);
+                when(mockedRental.getStartDate()).thenReturn(LocalDate.now(clock).plusDays(1));
                 when(mockedRental.getId()).thenReturn(rentalId);
                 when(mockedRental.getUser()).thenReturn(mock(User.class));
                 when(mockedRental.getUser().getId()).thenReturn(tenantId);
@@ -182,6 +184,7 @@ class DeleteRentalEntityServiceTest {
 
                 Rental mockedRental = mock(Rental.class);
                 when(mockedRental.getState()).thenReturn(RentalState.DENIED);
+                when(mockedRental.getStartDate()).thenReturn(LocalDate.now(clock).plusDays(1));
                 when(mockedRental.getId()).thenReturn(rentalId);
 
                 rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
@@ -209,6 +212,7 @@ class DeleteRentalEntityServiceTest {
 
                 Rental mockedRental = mock(Rental.class);
                 when(mockedRental.getState()).thenReturn(RentalState.PENDING);
+                when(mockedRental.getStartDate()).thenReturn(LocalDate.now(clock).plusDays(1));
                 when(mockedRental.getId()).thenReturn(rentalId);
                 when(mockedRental.getUser()).thenReturn(mock(User.class));
                 when(mockedRental.getUser().getId()).thenReturn(tenantId);

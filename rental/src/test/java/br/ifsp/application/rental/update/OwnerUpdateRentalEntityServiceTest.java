@@ -228,7 +228,7 @@ public class    OwnerUpdateRentalEntityServiceTest {
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
 
-            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), LocalDate.of(2024, 12, 30).minusDays(1));
 
             ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
             verify(presenter).prepareFailView(captor.capture());

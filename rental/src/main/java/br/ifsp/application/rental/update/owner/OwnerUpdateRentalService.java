@@ -93,9 +93,8 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
                 throw new SecurityException("Only the property owner can cancel the rental.");
             }
 
-            if (cancelDate == null) LocalDate.now(clock);
-            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rentalEntity.getStartDate());
-            if (presenter.isDone()) return;
+            if (cancelDate == null)cancelDate= LocalDate.now(clock);
+            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, cancelDate);
 
             if (!rentalEntity.getState().equals(RentalState.CONFIRMED)) {
                 throw new IllegalArgumentException("Only confirmed rentals can be cancelled.");

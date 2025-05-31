@@ -2,6 +2,7 @@ package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.repository.RentalMapper;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.rental.Rental;
@@ -147,7 +148,7 @@ class DeleteRentalEntityServiceTest {
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
             sut.delete(presenter, request);
 
-            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
             verify(rentalRepositoryMock, never()).deleteById(any());
         }
 

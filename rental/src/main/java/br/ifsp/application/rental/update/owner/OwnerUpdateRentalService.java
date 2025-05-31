@@ -3,7 +3,7 @@ package br.ifsp.application.rental.update.owner;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import org.springframework.stereotype.Service;
 
@@ -25,34 +25,34 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void confirmRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
         try {
-            Rental rental = rentalRepository.findById(request.rentalId())
+            RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+            if (!rentalEntity.getPropertyEntity().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can confirm the rental.");
             }
 
-            if (!rental.getState().equals(RentalState.PENDING)) {
+            if (!rentalEntity.getState().equals(RentalState.PENDING)) {
                 throw new UnsupportedOperationException("Rental must be in a PENDING state to be confirmed.");
             }
 
             var conflicts = rentalRepository.findRentalsByOverlapAndState(
-                    rental.getProperty().getId(),
+                    rentalEntity.getPropertyEntity().getId(),
                     RentalState.CONFIRMED,
-                    rental.getStartDate(),
-                    rental.getEndDate(),
-                    rental.getId()
+                    rentalEntity.getStartDate(),
+                    rentalEntity.getEndDate(),
+                    rentalEntity.getId()
             );
 
             if (!conflicts.isEmpty()) {
                 throw new IllegalStateException("Cannot confirm rental due to conflict with another confirmed rental.");
             }
 
-            rental.setState(RentalState.CONFIRMED);
-            rentalRepository.save(rental);
-            restrainPendingRentalsInConflict(rental);
+            rentalEntity.setState(RentalState.CONFIRMED);
+            rentalRepository.save(rentalEntity);
+            restrainPendingRentalsInConflict(rentalEntity);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -61,23 +61,23 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void denyRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
         try {
-            Rental rental = rentalRepository.findById(request.rentalId())
+            RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-            if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+            if (!rentalEntity.getPropertyEntity().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can deny the rental.");
             }
 
-            if (!List.of(RentalState.PENDING, RentalState.RESTRAINED).contains(rental.getState())) {
+            if (!List.of(RentalState.PENDING, RentalState.RESTRAINED).contains(rentalEntity.getState())) {
                 throw new UnsupportedOperationException(
-                        String.format("Cannot deny a rental that is %s.", rental.getState())
+                        String.format("Cannot deny a rental that is %s.", rentalEntity.getState())
                 );
             }
 
-            rental.setState(RentalState.DENIED);
-            rentalRepository.save(rental);
+            rentalEntity.setState(RentalState.DENIED);
+            rentalRepository.save(rentalEntity);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -86,42 +86,42 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void cancelRental(OwnerUpdateRentalPresenter presenter, RequestModel request, LocalDate cancelDate) {
         try {
-            Rental rental = rentalRepository.findById(request.rentalId())
+            RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
                     .orElseThrow(() -> new EntityNotFoundException("Rental not found."));
 
-                if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
+                if (!rentalEntity.getPropertyEntity().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can cancel the rental.");
             }
 
             if (cancelDate == null) LocalDate.now(clock);
-            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rental.getStartDate());
+            PreconditionChecker.prepareIfTheDateIsInThePast(presenter, clock, rentalEntity.getStartDate());
             if (presenter.isDone()) return;
 
-            if (!rental.getState().equals(RentalState.CONFIRMED)) {
+            if (!rentalEntity.getState().equals(RentalState.CONFIRMED)) {
                 throw new IllegalArgumentException("Only confirmed rentals can be cancelled.");
             }
 
-            rental.setState(RentalState.CANCELLED);
+            rentalEntity.setState(RentalState.CANCELLED);
 
-            List<Rental> restrainedConflicts = findRestrainedConflictingRentals(rental);
+            List<RentalEntity> restrainedConflicts = findRestrainedConflictingRentals(rentalEntity);
             restrainedConflicts.forEach(r -> r.setState(RentalState.PENDING));
 
-            rentalRepository.save(rental);
+            rentalRepository.save(rentalEntity);
             rentalRepository.saveAll(restrainedConflicts);
 
-            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
+            presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rentalEntity.getUserEntity().getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
     }
 
-    public void restrainPendingRentalsInConflict(Rental confirmedRental) {
-        List<Rental> pendingConflicts = rentalRepository.findRentalsByOverlapAndState(
-                confirmedRental.getProperty().getId(),
+    public void restrainPendingRentalsInConflict(RentalEntity confirmedRentalEntity) {
+        List<RentalEntity> pendingConflicts = rentalRepository.findRentalsByOverlapAndState(
+                confirmedRentalEntity.getPropertyEntity().getId(),
                 RentalState.PENDING,
-                confirmedRental.getStartDate(),
-                confirmedRental.getEndDate(),
-                confirmedRental.getId()
+                confirmedRentalEntity.getStartDate(),
+                confirmedRentalEntity.getEndDate(),
+                confirmedRentalEntity.getId()
         );
         pendingConflicts.forEach(r -> {
             r.setState(RentalState.RESTRAINED);
@@ -129,13 +129,13 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
         });
     }
 
-    private List<Rental> findRestrainedConflictingRentals(Rental rental) {
+    private List<RentalEntity> findRestrainedConflictingRentals(RentalEntity rentalEntity) {
         return rentalRepository.findRentalsByOverlapAndState(
-                rental.getProperty().getId(),
+                rentalEntity.getPropertyEntity().getId(),
                 RentalState.RESTRAINED,
-                rental.getStartDate(),
-                rental.getEndDate(),
-                rental.getId()
+                rentalEntity.getStartDate(),
+                rentalEntity.getEndDate(),
+                rentalEntity.getId()
         );
     }
 }

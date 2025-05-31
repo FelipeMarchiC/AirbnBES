@@ -1,81 +1,63 @@
 package br.ifsp.domain.models.user;
 
 import br.ifsp.domain.models.property.Property;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import br.ifsp.domain.shared.valueobjects.Address;
+import br.ifsp.domain.shared.valueobjects.Price;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.sql.Types;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "user")
-public class User implements UserDetails {
-    @Id
-    @JdbcTypeCode(Types.VARCHAR)
-    @NonNull @Column(nullable = false)
-    private UUID id;
+public class User {
+    @Getter private final UUID id;
+    @Getter private final String name;
+    @Getter private final String lastname;
+    @Getter private final String email;
 
-    @NonNull @Column(nullable = false)
-    private String name;
+    private final List<Property> ownedProperties;
 
-    @NonNull @Column(nullable = false)
-    private String lastname;
-
-    @NonNull @Column(nullable = false)
-    private String email;
-
-    @NonNull @JsonIgnore @Column(nullable = false)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<Property> ownedProperties;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+    private User(UUID id, String name, String lastname, String email, List<Property> ownedProperties) {
+        this.id = id;
+        this.name = name;
+        this.lastname = lastname;
+        this.email = email;
+        this.ownedProperties = new ArrayList<>(ownedProperties != null ? ownedProperties : new ArrayList<>());
     }
 
-    @Override
-    public @NonNull String getPassword() {
-        return password;
+    public List<Property> getOwnedProperties() {
+        return Collections.unmodifiableList(ownedProperties);
     }
 
-    @Override
-    public String getUsername() {
-        return email;
+    public Property createProperty(
+            UUID propertyId,
+            String name,
+            String description,
+            Price dailyRate,
+            Address address
+    ) {
+        Property property = Property.builder()
+                .id(propertyId)
+                .name(name)
+                .description(description)
+                .dailyRate(dailyRate)
+                .address(address)
+                .owner(this)
+                .rentals(new ArrayList<>())
+                .build();
+
+        this.addOwnedProperty(property);
+        return property;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+    public void addOwnedProperty(Property property) {
+        if (!ownedProperties.contains(property)) {
+            ownedProperties.add(property);
+        }
     }
 }
+
+

@@ -1,61 +1,96 @@
 package br.ifsp.domain.models.property;
 
 import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.shared.valueobjects.Address;
 import br.ifsp.domain.shared.valueobjects.Price;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.sql.Types;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-@Entity
-@Table(name = "property")
 public class Property {
+    @Getter
+    private final UUID id;
 
-    @Id
-    @JdbcTypeCode(Types.VARCHAR)
-    @NonNull @Column(nullable = false)
-    private UUID id;
-
-    @NonNull @Column(nullable = false)
+    @Getter
+    @Setter
     private String name;
 
-    @NonNull @Column(nullable = false)
+    @Getter
+    @Setter
     private String description;
 
-    @Embedded
-    @NonNull
-    private Price dailyRate;
+    @Getter
+    private final Price dailyRate;
 
-    @Embedded
-    @NonNull
-    private Address address;
+    @Getter
+    private final Address address;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @Getter
+    private final User owner;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter(AccessLevel.NONE)
-    private List<Rental> rentals = new ArrayList<>();
+    private final List<Rental> rentals;
+
+    private Property(
+            UUID id,
+            String name,
+            String description,
+            Price dailyRate,
+            Address address,
+            User owner,
+            List<Rental> rentals
+    ) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.dailyRate = dailyRate;
+        this.address = address;
+        this.owner = owner;
+        this.rentals = new ArrayList<>(rentals != null ? rentals : new ArrayList<>());
+    }
+
+    public Rental createRental(
+            UUID id,
+            User user,
+            LocalDate startDate,
+            LocalDate endDate,
+            Price value,
+            RentalState state,
+            Clock clock
+    ) {
+        Rental rental = Rental.builder()
+                .id(id)
+                .user(user)
+                .property(this)
+                .startDate(startDate)
+                .endDate(endDate)
+                .value(value)
+                .state(state)
+                .clock(clock)
+                .build();
+
+        this.addRental(rental);
+        return rental;
+    }
+
+    public List<Rental> getRentals() {
+        return Collections.unmodifiableList(rentals);
+    }
 
     public void addRental(Rental rental) {
-        if (rentals == null) rentals = new ArrayList<>();
-
-        if (!rentals.contains(rental)) {
+        if (!rentals.contains(rental) && rental.getProperty() == this) {
             rentals.add(rental);
-            rental.setProperty(this);
         }
     }
 }
+
+

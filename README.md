@@ -12,7 +12,7 @@ Grupo: Felipe Marchi, Kayky Rocha, Gabriel Henrique
 AirbnBES é um módulo back-end para gerenciamento de aluguéis de propriedades, inspirado no modelo Airbnb.  
 Neste segundo marco do curso de **Verificação, Validação e Teste de Software**, iremos:
 
-- Especificar user stories e cenários no estilo BDD.
+- Especificar userEntity stories e cenários no estilo BDD.
 - Desenvolver o domínio usando TDD + DDD com Spring Boot.
 - Controlar o versionamento utilizando Conventional Commits.
 - Criar suítes de testes TDD e Unitários.

@@ -1,15 +1,19 @@
 package br.ifsp.application.rental.create;
 
-import br.ifsp.application.property.JpaPropertyRepository;
+import br.ifsp.application.property.repository.JpaPropertyRepository;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
-import br.ifsp.application.user.JpaUserRepository;
+import br.ifsp.application.user.repository.JpaUserRepository;
+import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.property.Property;
+import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.services.IUuidGeneratorService;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 public class CreateRentalService implements ICreateRentalService {
@@ -42,43 +47,34 @@ public class CreateRentalService implements ICreateRentalService {
 
     @Override
     public void registerRental(CreateRentalPresenter presenter, RequestModel request) {
-        User user = userRepository.findById(request.userId()).orElse(null);
+        User user = getUser(request).orElse(null);
         PreconditionChecker.prepareIfFailsPreconditions(presenter, user);
         if (presenter.isDone()) return;
 
         try {
             validateRequestedDates(request.startDate(), request.endDate());
 
-            Property property = propertyRepository.findById(request.propertyId())
+            PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("Property not found"));
+
+            Property property = PropertyMapper.toDomain(propertyEntity, clock);
 
             validateOverlappingDates(request.startDate(), request.endDate(), property);
 
-            Rental rental = rentalRepository.save(buildRental(request, user, property));
+            Rental rental = buildRental(request, user, property);
 
-            presenter.prepareSuccessView(
-                    new ResponseModel(
-                            rental.getId(),
-                            user.getId()
-                    )
-            );
+            rentalRepository.save(RentalMapper.toEntity(rental));
+
+            presenter.prepareSuccessView(new ResponseModel(rental.getId(), user.getId()));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
     }
 
+    private Optional<User> getUser(RequestModel request) {
+        UserEntity userEntity = userRepository.findById(request.userId()).orElse(null);
 
-    private Rental buildRental(RequestModel requestModel, User user, Property property) {
-        long days = ChronoUnit.DAYS.between(requestModel.startDate(), requestModel.endDate());
-        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
-
-        return RentalMapper.fromCreateRequestModel(
-                uuidGeneratorService.generate(),
-                requestModel,
-                user,
-                property,
-                totalCost
-        );
+        return userEntity != null ? Optional.of(UserMapper.toDomain(userEntity)) : Optional.empty();
     }
 
     private void validateRequestedDates(LocalDate startDate, LocalDate endDate) {
@@ -99,7 +95,7 @@ public class CreateRentalService implements ICreateRentalService {
         }
     }
 
-    private static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
+    static void validateOverlappingDates(LocalDate startDate, LocalDate endDate, Property property) {
         for (Rental existingRental : property.getRentals()) {
             if (!existingRental.getState().equals(RentalState.CONFIRMED)) {
                 continue;
@@ -113,5 +109,19 @@ public class CreateRentalService implements ICreateRentalService {
                 throw new IllegalArgumentException("Property is already rented during the requested period");
             }
         }
+    }
+
+    private Rental buildRental(RequestModel request, User user, Property property) {
+        long days = ChronoUnit.DAYS.between(request.startDate(), request.endDate());
+        BigDecimal totalCost = property.getDailyRate().getAmount().multiply(BigDecimal.valueOf(days));
+
+        return RentalMapper.fromCreateRequestModel(
+                uuidGeneratorService.generate(),
+                request,
+                user,
+                property,
+                totalCost,
+                clock
+        );
     }
 }

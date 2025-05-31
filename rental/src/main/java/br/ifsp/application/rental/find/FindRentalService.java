@@ -2,7 +2,7 @@ package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
-import br.ifsp.domain.models.rental.Rental;
+import br.ifsp.domain.models.rental.RentalEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +21,8 @@ public class FindRentalService implements IFindRentalService {
             throw new IllegalArgumentException("propertyId cannot be null");
 
         try {
-            List<Rental> rentalHistory = jpaRentalRepository.findByPropertyId(findByPropertyIdRequestModel.propertyId());
-            presenter.prepareSuccessView(new ResponseModel(rentalHistory));
+            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByPropertyEntityId(findByPropertyIdRequestModel.propertyId());
+            presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -33,8 +33,8 @@ public class FindRentalService implements IFindRentalService {
             throw new IllegalArgumentException("tenantId cannot be null");
 
         try {
-            List<Rental> rentalHistory = jpaRentalRepository.findByUserId(requestModel.tenantId());
-            presenter.prepareSuccessView(new ResponseModel(rentalHistory));
+            List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByUserEntityId(requestModel.tenantId());
+            presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -42,9 +42,9 @@ public class FindRentalService implements IFindRentalService {
 
     public void findAll(FindRentalPresenter presenter) {
         try {
-            List<Rental> allRentals = jpaRentalRepository.findAll();
-            if (allRentals.isEmpty()) throw new EntityNotFoundException("There are no rentals registered");
-            presenter.prepareSuccessView(new ResponseModel(allRentals));
+            List<RentalEntity> allRentalEntities = jpaRentalRepository.findAll();
+            if (allRentalEntities.isEmpty()) throw new EntityNotFoundException("There are no rentals registered");
+            presenter.prepareSuccessView(new ResponseModel(allRentalEntities));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }

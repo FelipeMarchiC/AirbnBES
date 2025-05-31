@@ -44,7 +44,7 @@
 
         <dependency>
             <groupId>br.ifsp</groupId>
-            <artifactId>rental</artifactId>
+            <artifactId>airbnbes</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
@@ -150,6 +150,12 @@
             <groupId>org.pitest</groupId>
             <artifactId>pitest-maven</artifactId>
             <version>1.18.1</version>
+        </dependency>
+        <dependency>
+            <groupId>br.ifsp</groupId>
+            <artifactId>rental</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -11,6 +11,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
         <module name="web" />
+        <module name="rentalEntity" />
         <module name="rental" />
       </profile>
     </annotationProcessing>
@@ -19,6 +20,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="airbnbes" options="" />
       <module name="rental" options="-parameters" />
+      <module name="rentalEntity" options="-parameters" />
       <module name="web" options="-parameters" />
     </option>
   </component>

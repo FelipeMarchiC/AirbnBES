@@ -23,8 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
-public class OwnerUpdateRentalEntityServiceTest {
+public class    OwnerUpdateRentalEntityServiceTest {
 
+    private final String string = "";
     @Mock
     private JpaRentalRepository rentalRepositoryMock;
 
@@ -241,6 +242,7 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("UnitTest")
         @Tag("Functional")
         @Test
+        @DisplayName("Should Cancel Rental Successfully")
         void shouldCancelRentalSuccessfully() {
             RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
                     UUID.randomUUID(),
@@ -255,7 +257,7 @@ public class OwnerUpdateRentalEntityServiceTest {
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.RESTRAINED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
 
-            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
+            sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), LocalDate.of(2025, 1, 2).minusDays(2));
 
             assertThat(rentalEntity.getState()).isEqualTo(RentalState.CANCELLED);
             verify(presenter).prepareSuccessView(any());
@@ -302,7 +304,6 @@ public class OwnerUpdateRentalEntityServiceTest {
             assertThat(r2.getState()).isEqualTo(RentalState.PENDING);
             verify(rentalRepositoryMock).saveAll(List.of(r1, r2));
         }
-
     }
 
     @Nested
@@ -432,5 +433,6 @@ public class OwnerUpdateRentalEntityServiceTest {
 
         verify(presenter).prepareFailView(any(EntityNotFoundException.class));
     }
+
 
 }

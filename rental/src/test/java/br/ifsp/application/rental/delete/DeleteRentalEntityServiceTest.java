@@ -1,8 +1,10 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.application.user.repository.UserMapper;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
@@ -71,11 +73,21 @@ class DeleteRentalEntityServiceTest {
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED"})
         @DisplayName("Should delete rental and notify presenter")
         void shouldDeleteWhenStateIsValid(RentalState state) {
-            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+            try (
+                    MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class);
+                    MockedStatic<RentalMapper> rentalMapperMocked = mockStatic(RentalMapper.class)
+            ) {
                 User mockedUser = mock(User.class);
                 userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mockedUser);
 
-                rentalEntity.setState(state);
+                Rental mockedRental = mock(Rental.class);
+                when(mockedRental.getState()).thenReturn(state);
+                when(mockedRental.getId()).thenReturn(rentalId);
+                when(mockedRental.getUser()).thenReturn(mock(User.class));
+                when(mockedRental.getUser().getId()).thenReturn(tenantId);
+
+                rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
+
                 when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
                 when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
@@ -111,11 +123,18 @@ class DeleteRentalEntityServiceTest {
             try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
                 userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
 
-                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-                sut.delete(presenter, request);
+                Rental mockedRental = mock(Rental.class);
+                when(mockedRental.getState()).thenReturn(RentalState.CONFIRMED);
 
-                verify(presenter).prepareFailView(any(IllegalArgumentException.class));
-                verify(rentalRepositoryMock, never()).deleteById(any());
+                try (MockedStatic<RentalMapper> rentalMapperMocked = mockStatic(RentalMapper.class)) {
+                    rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
+
+                    var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                    sut.delete(presenter, request);
+
+                    verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+                    verify(rentalRepositoryMock, never()).deleteById(any());
+                }
             }
         }
 
@@ -153,10 +172,19 @@ class DeleteRentalEntityServiceTest {
             rentalEntity.setState(RentalState.DENIED);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
-            doThrow(new RuntimeException("Delete failed")).when(rentalRepositoryMock).deleteById(rentalId);
 
-            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+            try (
+                    MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class);
+                    MockedStatic<RentalMapper> rentalMapperMocked = mockStatic(RentalMapper.class)
+            ) {
                 userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
+
+                Rental mockedRental = mock(Rental.class);
+                when(mockedRental.getState()).thenReturn(RentalState.DENIED);
+                when(mockedRental.getId()).thenReturn(rentalId);
+
+                rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
+                doThrow(new RuntimeException("Delete failed")).when(rentalRepositoryMock).deleteById(rentalId);
 
                 var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
                 sut.delete(presenter, request);
@@ -171,10 +199,21 @@ class DeleteRentalEntityServiceTest {
             rentalEntity.setState(RentalState.PENDING);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
-            doThrow(new RuntimeException("Presenter failure")).when(presenter).prepareSuccessView(any());
 
-            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+            try (
+                    MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class);
+                    MockedStatic<RentalMapper> rentalMapperMocked = mockStatic(RentalMapper.class)
+            ) {
                 userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
+
+                Rental mockedRental = mock(Rental.class);
+                when(mockedRental.getState()).thenReturn(RentalState.PENDING);
+                when(mockedRental.getId()).thenReturn(rentalId);
+                when(mockedRental.getUser()).thenReturn(mock(User.class));
+                when(mockedRental.getUser().getId()).thenReturn(tenantId);
+
+                rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
+                doThrow(new RuntimeException("Presenter failure")).when(presenter).prepareSuccessView(any());
 
                 var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
 

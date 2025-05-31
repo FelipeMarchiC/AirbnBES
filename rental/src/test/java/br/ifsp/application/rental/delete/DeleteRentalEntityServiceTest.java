@@ -3,6 +3,7 @@ package br.ifsp.application.rental.delete;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.rental.Rental;
@@ -224,6 +225,7 @@ class DeleteRentalEntityServiceTest {
             }
         }
     }
+
     @Nested
     @Tag("UnitTest")
     @Tag("Coverage")
@@ -253,6 +255,31 @@ class DeleteRentalEntityServiceTest {
                 sut.delete(presenter, request);
 
                 verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+            }
+        }
+
+        @Test
+        @DisplayName("Should handle owner not found and interrupt execution via PreconditionChecker")
+        void shouldHandleOwnerNotFound() {
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.empty());
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+
+            try (MockedStatic<PreconditionChecker> preconditionCheckerMockedStatic = mockStatic(PreconditionChecker.class)) {
+                preconditionCheckerMockedStatic.when(() -> PreconditionChecker.prepareIfFailsPreconditions(any(), any()))
+                        .thenAnswer(invocation -> {
+                            DeleteRentalPresenter actualPresenter = invocation.getArgument(0);
+                            when(actualPresenter.isDone()).thenReturn(true);
+                            return null;
+                        });
+
+                sut.delete(presenter, request);
+
+                preconditionCheckerMockedStatic.verify(() -> PreconditionChecker.prepareIfFailsPreconditions(eq(presenter), isNull()));
+
+                verify(presenter).isDone();
+
+                verify(rentalRepositoryMock, never()).findById(any());
+                verify(presenter, never()).prepareFailView(any());
             }
         }
     }

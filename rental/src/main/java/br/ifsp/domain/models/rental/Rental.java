@@ -72,15 +72,15 @@ public class Rental {
                 resolvedState = initialState;
             }
 
-            return internalBuilder()
-                    .id(this.id)
-                    .user(this.user)
-                    .property(this.property)
-                    .startDate(this.startDate)
-                    .endDate(this.endDate)
-                    .value(this.value)
-                    .state(resolvedState)
-                    .build();
+            return new Rental(
+                    this.id,
+                    this.user,
+                    this.property,
+                    this.startDate,
+                    this.endDate,
+                    this.value,
+                    resolvedState
+            );
         }
     }
 

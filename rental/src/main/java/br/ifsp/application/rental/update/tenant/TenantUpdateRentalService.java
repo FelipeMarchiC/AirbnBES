@@ -2,6 +2,7 @@ package br.ifsp.application.rental.update.tenant;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
 import br.ifsp.application.rental.repository.RentalMapper;
+import br.ifsp.application.shared.exceptions.EntityNotFoundException;
 import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.application.user.repository.UserMapper;
@@ -40,7 +41,7 @@ public class TenantUpdateRentalService implements ITenantUpdateRentalService {
 
         try {
             RentalEntity rentalEntity = rentalRepository.findById(request.rentalId())
-                    .orElseThrow(() -> new IllegalArgumentException("Rental not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
 
             Rental rental = RentalMapper.toDomain(rentalEntity, clock);
 

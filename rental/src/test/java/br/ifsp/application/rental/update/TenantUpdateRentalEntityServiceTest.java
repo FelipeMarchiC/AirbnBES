@@ -5,6 +5,7 @@ import br.ifsp.application.rental.update.tenant.TenantUpdateRentalPresenter;
 import br.ifsp.application.rental.update.tenant.TenantUpdateRentalService;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.application.shared.exceptions.ImmutablePastEntityException;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
@@ -325,7 +326,12 @@ public class TenantUpdateRentalEntityServiceTest {
 
             // ---------- Assert ----------
             verify(userRepositoryMock).findById(tenantId);
-            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+
+            ArgumentCaptor<EntityNotFoundException> captor = ArgumentCaptor.forClass(EntityNotFoundException.class);
+            verify(presenter).prepareFailView(captor.capture());
+
+            EntityNotFoundException exception = captor.getValue();
+            assertThat(exception.getMessage()).isEqualTo("User does not exist");
         }
     }
 
@@ -335,22 +341,63 @@ public class TenantUpdateRentalEntityServiceTest {
     @DisplayName("Testing against mutations")
     class TestingMutations {
         @Test
-        @DisplayName("Should return empty optional when user is not found in repository")
-        void shouldReturnEmptyOptionalWhenUserIsNotFoundInRepository() {
+        @DisplayName("Should throw exception when rental is not found in repository")
+        void shouldThrowExceptionWhenRentalIsNotFoundInRepository() {
             // ---------- Arrange ----------
             val request = factory.tenantUpdateRequestModel();
 
             UUID tenantId = tenantEntity.getId();
 
-            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.empty());
-            when(presenter.isDone()).thenReturn(true);
+            when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
+            when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.empty());
+            when(presenter.isDone()).thenReturn(false);
 
             // ---------- Act ----------
             sut.cancelRental(presenter, request);
 
             // ---------- Assert ----------
             verify(userRepositoryMock).findById(tenantId);
-            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+
+            ArgumentCaptor<EntityNotFoundException> captor = ArgumentCaptor.forClass(EntityNotFoundException.class);
+            verify(presenter).prepareFailView(captor.capture());
+
+            EntityNotFoundException exception = captor.getValue();
+            assertThat(exception.getMessage()).isEqualTo("Rental not found");
+        }
+
+        @Test
+        @DisplayName("Should throw exception inside presenter when rental is expired")
+        void shouldThrowExceptionInsidePresenterWhenRentalIsExpired() {
+            // ---------- Arrange ----------
+            val request = factory.tenantUpdateRequestModel();
+
+            UUID tenantId = tenantEntity.getId();
+            RentalEntity rental = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.parse("2024-12-28"),
+                    LocalDate.parse("2024-12-30"),
+                    RentalState.PENDING
+            );
+
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenantEntity));
+            when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rental));
+            when(presenter.isDone()).thenReturn(false, true);
+
+            // ---------- Act ----------
+            sut.cancelRental(presenter, request);
+
+            // ---------- Assert ----------
+            verify(userRepositoryMock).findById(tenantId);
+
+            ArgumentCaptor<ImmutablePastEntityException> captor =
+                    ArgumentCaptor.forClass(ImmutablePastEntityException.class);
+
+            verify(presenter).prepareFailView(captor.capture());
+
+            ImmutablePastEntityException exception = captor.getValue();
+            assertThat(exception.getMessage()).isEqualTo("This operation must be current or future dates.");
         }
     }
 }

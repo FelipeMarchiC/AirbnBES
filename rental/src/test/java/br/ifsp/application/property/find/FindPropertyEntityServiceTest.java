@@ -224,4 +224,24 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Database error");
         }
     }
+    @Nested
+    @DisplayName("Mutation Tests")
+    class MutationTests {
+
+        @Test
+        @DisplayName("Should allow price range when min equals max")
+        void shouldAllowPriceRangeWhenMinEqualsMax() {
+            double min = 150.0;
+            double max = 150.0;
+            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+        }
+    }
 }

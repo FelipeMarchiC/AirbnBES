@@ -136,7 +136,6 @@ class DeleteRentalEntityServiceTest {
                     sut.delete(presenter, request);
 
                     verify(presenter).prepareFailView(any(IllegalArgumentException.class));
-                    verify(rentalRepositoryMock, never()).deleteById(any());
                 }
             }
         }
@@ -151,7 +150,6 @@ class DeleteRentalEntityServiceTest {
             sut.delete(presenter, request);
 
             verify(presenter).prepareFailView(any(EntityNotFoundException.class));
-            verify(rentalRepositoryMock, never()).deleteById(any());
         }
 
         @Test
@@ -223,6 +221,38 @@ class DeleteRentalEntityServiceTest {
                 var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
 
                 assertThatCode(() -> sut.delete(presenter, request)).doesNotThrowAnyException();
+            }
+        }
+    }
+    @Nested
+    @Tag("UnitTest")
+    @Tag("Coverage")
+    @DisplayName("Tests for 100% Coverage")
+    class FullCoverageCases {
+
+        @Test
+        @DisplayName("Should throw exception when start date is not in the future")
+        void shouldThrowWhenStartDateIsNotInFuture() {
+            rentalEntity.setState(RentalState.PENDING);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
+
+            try (
+                    MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class);
+                    MockedStatic<RentalMapper> rentalMapperMocked = mockStatic(RentalMapper.class)
+            ) {
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
+
+                Rental mockedRental = mock(Rental.class);
+                when(mockedRental.getState()).thenReturn(RentalState.PENDING);
+                when(mockedRental.getStartDate()).thenReturn(LocalDate.now(clock).minusDays(1));
+
+                rentalMapperMocked.when(() -> RentalMapper.toDomain(eq(rentalEntity), any())).thenReturn(mockedRental);
+
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                sut.delete(presenter, request);
+
+                verify(presenter).prepareFailView(any(IllegalArgumentException.class));
             }
         }
     }

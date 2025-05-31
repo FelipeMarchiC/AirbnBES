@@ -9,10 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,16 +30,19 @@ class DeleteRentalEntityServiceTest {
     @Mock
     private DeleteRentalPresenter presenter;
 
-    @InjectMocks
     private DeleteRentalService sut;
 
     private UUID rentalId;
     private UUID ownerId;
     private UUID tenantId;
     private RentalEntity rentalEntity;
+    private Clock clock;
 
     @BeforeEach
     void setup() {
+        clock = Clock.fixed(Instant.parse("2025-06-01T00:00:00Z"), ZoneId.systemDefault());
+        sut = new DeleteRentalService(rentalRepositoryMock, null, clock);
+
         rentalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         ownerId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         tenantId = UUID.fromString("00000000-0000-0000-0000-000000000002");

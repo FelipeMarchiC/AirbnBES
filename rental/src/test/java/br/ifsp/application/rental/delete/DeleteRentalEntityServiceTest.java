@@ -1,15 +1,17 @@
 package br.ifsp.application.rental.delete;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.user.repository.JpaUserRepository;
+import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
+import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
@@ -28,6 +30,9 @@ class DeleteRentalEntityServiceTest {
     private JpaRentalRepository rentalRepositoryMock;
 
     @Mock
+    private JpaUserRepository userRepositoryMock;
+
+    @Mock
     private DeleteRentalPresenter presenter;
 
     private DeleteRentalService sut;
@@ -41,7 +46,7 @@ class DeleteRentalEntityServiceTest {
     @BeforeEach
     void setup() {
         clock = Clock.fixed(Instant.parse("2025-06-01T00:00:00Z"), ZoneId.systemDefault());
-        sut = new DeleteRentalService(rentalRepositoryMock, null, clock);
+        sut = new DeleteRentalService(rentalRepositoryMock, userRepositoryMock, clock);
 
         rentalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         ownerId = UUID.fromString("00000000-0000-0000-0000-000000000001");
@@ -66,21 +71,27 @@ class DeleteRentalEntityServiceTest {
         @EnumSource(value = RentalState.class, names = {"PENDING", "DENIED"})
         @DisplayName("Should delete rental and notify presenter")
         void shouldDeleteWhenStateIsValid(RentalState state) {
-            rentalEntity.setState(state);
-            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+                User mockedUser = mock(User.class);
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mockedUser);
 
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-            sut.delete(presenter, request);
+                rentalEntity.setState(state);
+                when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+                when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
-            verify(rentalRepositoryMock).deleteById(rentalId);
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                sut.delete(presenter, request);
 
-            ArgumentCaptor<IDeleteRentalService.ResponseModel> captor =
-                    ArgumentCaptor.forClass(IDeleteRentalService.ResponseModel.class);
-            verify(presenter).prepareSuccessView(captor.capture());
+                verify(rentalRepositoryMock).deleteById(rentalId);
 
-            var response = captor.getValue();
-            assertThat(response.ownerId()).isEqualTo(ownerId);
-            assertThat(response.tenantId()).isEqualTo(tenantId);
+                ArgumentCaptor<IDeleteRentalService.ResponseModel> captor =
+                        ArgumentCaptor.forClass(IDeleteRentalService.ResponseModel.class);
+                verify(presenter).prepareSuccessView(captor.capture());
+
+                var response = captor.getValue();
+                assertThat(response.ownerId()).isEqualTo(ownerId);
+                assertThat(response.tenantId()).isEqualTo(tenantId);
+            }
         }
     }
 
@@ -95,18 +106,24 @@ class DeleteRentalEntityServiceTest {
         void shouldThrowWhenStateIsInvalid() {
             rentalEntity.setState(RentalState.CONFIRMED);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-            sut.delete(presenter, request);
+            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
 
-            verify(presenter).prepareFailView(any(IllegalArgumentException.class));
-            verify(rentalRepositoryMock, never()).deleteById(any());
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                sut.delete(presenter, request);
+
+                verify(presenter).prepareFailView(any(IllegalArgumentException.class));
+                verify(rentalRepositoryMock, never()).deleteById(any());
+            }
         }
 
         @Test
         @DisplayName("Should handle rental not found")
         void shouldHandleRentalNotFound() {
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.empty());
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(new UserEntity()));
 
             var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
             sut.delete(presenter, request);
@@ -119,11 +136,15 @@ class DeleteRentalEntityServiceTest {
         @DisplayName("Should handle exception from repository when finding rental")
         void shouldHandleExceptionFromRepository() {
             when(rentalRepositoryMock.findById(rentalId)).thenThrow(new RuntimeException("DB error"));
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
+            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
 
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-            sut.delete(presenter, request);
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                sut.delete(presenter, request);
 
-            verify(presenter).prepareFailView(any(RuntimeException.class));
+                verify(presenter).prepareFailView(any(RuntimeException.class));
+            }
         }
 
         @Test
@@ -131,12 +152,17 @@ class DeleteRentalEntityServiceTest {
         void shouldHandleExceptionDuringDeletion() {
             rentalEntity.setState(RentalState.DENIED);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
             doThrow(new RuntimeException("Delete failed")).when(rentalRepositoryMock).deleteById(rentalId);
 
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
-            sut.delete(presenter, request);
+            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
 
-            verify(presenter).prepareFailView(any(RuntimeException.class));
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+                sut.delete(presenter, request);
+
+                verify(presenter).prepareFailView(any(RuntimeException.class));
+            }
         }
 
         @Test
@@ -144,11 +170,16 @@ class DeleteRentalEntityServiceTest {
         void shouldHandleUnexpectedPresenterException() {
             rentalEntity.setState(RentalState.PENDING);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
+            when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
             doThrow(new RuntimeException("Presenter failure")).when(presenter).prepareSuccessView(any());
 
-            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+            try (MockedStatic<UserMapper> userMapperMocked = mockStatic(UserMapper.class)) {
+                userMapperMocked.when(() -> UserMapper.toDomain(any())).thenReturn(mock(User.class));
 
-            assertThatCode(() -> sut.delete(presenter, request)).doesNotThrowAnyException();
+                var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+
+                assertThatCode(() -> sut.delete(presenter, request)).doesNotThrowAnyException();
+            }
         }
     }
 }

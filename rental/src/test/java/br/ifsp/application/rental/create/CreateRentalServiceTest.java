@@ -394,6 +394,39 @@ class CreateRentalServiceTest {
     @Nested
     @DisplayName("Testing against mutations")
     class TestingMutations {
+        @CsvSource({
+                "2025-02-22, 2025-03-22, 2025-03-01, 2025-03-10, true"
+        })
+        @ParameterizedTest(name = "[{index}]: existing = ({0} to {1}), request = ({2} to {3}), throwException = {4}")
+        @DisplayName("Should properly validate overlapping logic")
+        void testValidateOverlappingDates(
+                LocalDate existingStart,
+                LocalDate existingEnd,
+                LocalDate requestStart,
+                LocalDate requestEnd,
+                boolean shouldThrow
+        ) {
+            factory.generateRental(
+                    UUID.fromString("87619d8d-0ea5-4a06-9f29-660bcebc711f"),
+                    tenant,
+                    property,
+                    existingStart,
+                    existingEnd,
+                    RentalState.CONFIRMED
+            );
 
+            if (shouldThrow) {
+                assertThatThrownBy(() ->
+                        CreateRentalService.validateOverlappingDates(requestStart, requestEnd, property)
+                )
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessageContaining("Property is already rented during the requested period");
+            } else {
+                assertThatCode(() ->
+                        CreateRentalService.validateOverlappingDates(requestStart, requestEnd, property)
+                )
+                        .doesNotThrowAnyException();
+            }
+        }
     }
 }

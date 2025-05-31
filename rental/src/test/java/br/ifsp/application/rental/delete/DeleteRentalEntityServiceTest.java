@@ -282,5 +282,17 @@ class DeleteRentalEntityServiceTest {
                 verify(presenter, never()).prepareFailView(any());
             }
         }
+
+        @Test
+        @DisplayName("Should handle exception when fetching owner from repository")
+        void shouldHandleExceptionWhenFetchingOwner() {
+            when(userRepositoryMock.findById(ownerId)).thenThrow(new RuntimeException("Error fetching user"));
+            var request = new IDeleteRentalService.RequestModel(ownerId, rentalId);
+
+            sut.delete(presenter, request);
+
+            verify(presenter).prepareFailView(any(RuntimeException.class));
+            verify(rentalRepositoryMock, never()).findById(any());
+        }
     }
 }

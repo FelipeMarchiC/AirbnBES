@@ -7,7 +7,6 @@ import br.ifsp.application.shared.presenter.PreconditionChecker;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.application.user.repository.UserMapper;
 import br.ifsp.domain.models.rental.Rental;
-import br.ifsp.domain.models.rental.RentalEntity; // Mantido para o .orElseThrow original, mas será removido no próximo commit
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
@@ -40,7 +39,8 @@ public class DeleteRentalService implements IDeleteRentalService {
 
         try {
             var rentalEntity = rentalRepository.findById(request.rentalId())
-                    .orElseThrow(() -> new IllegalArgumentException("Rental not found."));
+                    .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
             Rental rental = RentalMapper.toDomain(rentalEntity, clock);
 
             if (rental.getState() != RentalState.PENDING && rental.getState() != RentalState.DENIED) {

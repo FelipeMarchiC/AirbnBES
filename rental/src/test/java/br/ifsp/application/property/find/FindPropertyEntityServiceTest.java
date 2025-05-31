@@ -258,5 +258,16 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedResponse).isNotNull();
             assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
         }
+        @Test
+        @DisplayName("Should reject negative min and zero max")
+        void shouldRejectNegativeMinWithZeroMax() {
+            var request = new IFindPropertyService.PriceRangeRequestModel(-1.0, 0.0);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Prices must be non-negative");
+        }
     }
 }

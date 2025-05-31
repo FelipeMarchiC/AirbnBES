@@ -308,5 +308,25 @@ public class TenantUpdateRentalEntityServiceTest {
             );
             verify(presenter).prepareSuccessView(response);
         }
+
+        @Test
+        @DisplayName("Should return empty optional when user is not found in repository")
+        void shouldReturnEmptyOptionalWhenUserIsNotFoundInRepository() {
+            // ---------- Arrange ----------
+            val request = factory.tenantUpdateRequestModel();
+
+            UUID tenantId = tenantEntity.getId();
+
+            when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.empty());
+            when(presenter.isDone()).thenReturn(true);
+
+            // ---------- Act ----------
+            sut.cancelRental(presenter, request);
+
+            // ---------- Assert ----------
+
+            verify(userRepositoryMock).findById(tenantId);
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+        }
     }
 }

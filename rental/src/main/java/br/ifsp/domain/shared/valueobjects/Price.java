@@ -1,16 +1,18 @@
 package br.ifsp.domain.shared.valueobjects;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
 
-@Getter
 @Embeddable
-@EqualsAndHashCode
-@NoArgsConstructor
+@Getter
+@ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Price {
 
+    @NotNull
     private BigDecimal amount;
 
     public Price(BigDecimal amount) {
@@ -22,7 +24,15 @@ public class Price {
     }
 
     @Override
-    public String toString() {
-        return "R$" + amount.toString();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Price price = (Price) o;
+        return amount.compareTo(price.amount) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return amount.stripTrailingZeros().hashCode();
     }
 }

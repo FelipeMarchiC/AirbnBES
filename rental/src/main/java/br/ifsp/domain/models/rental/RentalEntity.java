@@ -12,28 +12,28 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Data
+
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Getter
+@EqualsAndHashCode(of = "id")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "rental")
 public class RentalEntity {
 
     @Id
     @JdbcTypeCode(Types.VARCHAR)
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
     private UserEntity userEntity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "property_id", nullable = false)
-    @ToString.Exclude
     private PropertyEntity propertyEntity;
 
     @NotNull

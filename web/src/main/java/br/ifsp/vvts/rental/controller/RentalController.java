@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:5173/")
 @RestController
 @RequestMapping(path = "/api/v1/rental")
 @SecurityRequirement(name = "bearerAuth")

@@ -11,10 +11,7 @@ import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Builder
 public class Property {
@@ -90,6 +87,19 @@ public class Property {
         if (!rentals.contains(rental) && rental.getProperty() == this) {
             rentals.add(rental);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Property property = (Property) o;
+        return Objects.equals(id, property.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
 

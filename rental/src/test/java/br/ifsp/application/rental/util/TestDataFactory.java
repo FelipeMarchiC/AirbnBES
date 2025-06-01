@@ -61,6 +61,10 @@ public class TestDataFactory {
         return PropertyMapper.toEntity(generateProperty());
     }
 
+    public PropertyEntity generatePropertyEntity(UUID propertyId) {
+        return PropertyMapper.toEntity(generateProperty(propertyId));
+    }
+
     public PropertyEntity generatePropertyEntity(Property property) {
         return PropertyMapper.toEntity(property);
     }
@@ -129,6 +133,24 @@ public class TestDataFactory {
                 .rentals(new ArrayList<>())
                 .build();
     }
+    public Property generateProperty(UUID newPropertyId) {
+        return Property.builder()
+                .id(newPropertyId)
+                .name(faker.address().streetName())
+                .description(faker.lorem().sentence())
+                .dailyRate(new Price(BigDecimal.valueOf(faker.number().randomDouble(2, 100, 1000))))
+                .address(Address.builder()
+                        .number(faker.address().buildingNumber())
+                        .street(faker.address().streetAddress())
+                        .city(faker.address().city())
+                        .state(faker.address().state())
+                        .postalCode(faker.address().zipCode())
+                        .build())
+                .owner(generateOwner())
+                .rentals(new ArrayList<>())
+                .build();
+    }
+
 
     public Property generateProperty(User owner) {
         return Property.builder()

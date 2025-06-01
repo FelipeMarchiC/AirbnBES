@@ -413,6 +413,37 @@ class CreateRentalServiceTest {
         }
     }
 
+    @Tag("Structural")
+    @Tag("UnitTest")
+    @Nested
+    @DisplayName("Testing for structural integrity")
+    class TestingStructure {
+        @Test
+        @DisplayName("User has owned property but is not renting it")
+        void userHasOwnedPropertyButIsNotRentingIt() {
+            val request = factory.createRequestModel();
+            val response = factory.createResponseModel();
+
+            val unrelatedProperty = factory.generatePropertyEntity(UUID.randomUUID());
+            tenantEntity.setOwnedProperties(List.of(unrelatedProperty));
+
+            when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
+            when(presenter.isDone()).thenReturn(false);
+            when(propertyRepositoryMock.findById(propertyEntity.getId())).thenReturn(Optional.of(propertyEntity));
+            when(uuidGeneratorService.generate()).thenReturn(factory.rentalId);
+
+            ArgumentCaptor<RentalEntity> rentalCaptor = ArgumentCaptor.forClass(RentalEntity.class);
+            when(rentalRepositoryMock.save(rentalCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+            sut.registerRental(presenter, request);
+
+            verify(userRepositoryMock).findById(tenantEntity.getId());
+            verify(propertyRepositoryMock).findById(propertyEntity.getId());
+            verify(rentalRepositoryMock).save(any(RentalEntity.class));
+            verify(presenter).prepareSuccessView(response);
+        }
+    }
+
     @Tag("Mutation")
     @Tag("UnitTest")
     @Nested

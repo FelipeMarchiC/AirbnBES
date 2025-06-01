@@ -28,11 +28,8 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void confirmRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
         try {
-            Rental rental = getRental(request).orElse(null);
-            if (rental == null) {
-                presenter.prepareFailView(new EntityNotFoundException("Rental not found"));
-                return;
-            }
+            Rental rental = getRental(request).orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
             if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can confirm the rental.");
             }
@@ -40,7 +37,6 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
             if (!rental.getState().equals(RentalState.PENDING)) {
                 throw new UnsupportedOperationException("Rental must be in a PENDING state to be confirmed.");
             }
-
 
             RentalEntity rentalEntity = RentalMapper.toEntity(rental);
             var conflicts = rentalRepository.findRentalsByOverlapAndState(
@@ -68,11 +64,8 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void denyRental(OwnerUpdateRentalPresenter presenter, RequestModel request) {
         try {
-            Rental rental = getRental(request).orElse(null);
-            if (rental == null) {
-                presenter.prepareFailView(new EntityNotFoundException("Rental not found"));
-                return;
-            }
+            Rental rental = getRental(request).orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
             if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can deny the rental.");
             }
@@ -95,11 +88,8 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
     @Override
     public void cancelRental(OwnerUpdateRentalPresenter presenter, RequestModel request, LocalDate cancelDate) {
         try {
-            Rental rental = getRental(request).orElse(null);
-            if (rental == null){
-                presenter.prepareFailView(new EntityNotFoundException("Rental not found"));
-                return;
-            }
+            Rental rental = getRental(request).orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
             if (!rental.getProperty().getOwner().getId().equals(request.ownerId())) {
                 throw new SecurityException("Only the property owner can cancel the rental.");
             }
@@ -133,6 +123,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
                 confirmedRentalEntity.getEndDate(),
                 confirmedRentalEntity.getId()
         );
+
         pendingConflicts.forEach(r -> {
             r.setState(RentalState.RESTRAINED);
             rentalRepository.save(r);
@@ -153,6 +144,5 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
         RentalEntity rentalEntity = rentalRepository.findById(requestModel.rentalId()).orElse(null);
 
         return rentalEntity != null ? Optional.of(RentalMapper.toDomain(rentalEntity, clock)) : Optional.empty();
-
     }
 }

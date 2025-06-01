@@ -11,6 +11,7 @@ import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.UserEntity;
+import br.ifsp.domain.shared.valueobjects.Price;
 import lombok.val;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +38,7 @@ public class TenantUpdateRentalEntityServiceTest {
     @Mock private JpaRentalRepository rentalRepositoryMock;
     @Mock private TenantUpdateRentalPresenter presenter;
     @InjectMocks private TenantUpdateRentalService sut;
+
     private TestDataFactory factory;
 
     private AutoCloseable closeable;
@@ -47,10 +50,10 @@ public class TenantUpdateRentalEntityServiceTest {
     @BeforeEach
     void setupService() {
         closeable = MockitoAnnotations.openMocks(this);
-        Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
-        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, fixedClock);
+        Clock clock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
+        sut = new TenantUpdateRentalService(rentalRepositoryMock, userRepositoryMock, clock);
 
-        factory = new TestDataFactory(fixedClock);
+        factory = new TestDataFactory(clock);
         tenantEntity = factory.generateTenantEntity();
         UserEntity owner = factory.generateOwnerEntity();
         propertyEntity = factory.generatePropertyEntity(owner);
@@ -192,10 +195,17 @@ public class TenantUpdateRentalEntityServiceTest {
         void shouldThrowExceptionWhenRentalStateIsDifferentFromConfirmed() {
             val request = factory.tenantUpdateRequestModel();
 
+            rentalEntity = factory.generateRentalEntity(
+                    factory.rentalId,
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.parse("2025-01-01"),
+                    LocalDate.parse("2025-04-30"),
+                    RentalState.PENDING
+            );
+
             UUID tenantId = tenantEntity.getId();
             UUID rentalId = rentalEntity.getId();
-
-            rentalEntity.setState(RentalState.PENDING);
 
             when(userRepositoryMock.findById(tenantId)).thenReturn(Optional.of(tenantEntity));
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
@@ -258,15 +268,15 @@ public class TenantUpdateRentalEntityServiceTest {
             val request = factory.tenantUpdateRequestModel();
             val response = factory.tenantUpdateResponseModel();
 
-            val existingRental = factory.generateRentalEntity(
+            val rental = new RentalEntity(
                     UUID.fromString("3f7409a7-3e55-472c-9d6c-6ecd6be6e571"),
                     factory.generateTenantEntity(),
                     propertyEntity,
                     LocalDate.parse("2024-12-25"),
                     LocalDate.parse("2024-12-31"),
+                    new Price(BigDecimal.valueOf(3000.00)),
                     RentalState.PENDING
             );
-            existingRental.setState(RentalState.PENDING);
 
             UUID tenantId = tenantEntity.getId();
             UUID rentalId = rentalEntity.getId();
@@ -280,7 +290,7 @@ public class TenantUpdateRentalEntityServiceTest {
                     rentalEntity.getStartDate(),
                     rentalEntity.getEndDate(),
                     rentalId
-            )).thenReturn(List.of(existingRental));
+            )).thenReturn(List.of(rental));
             when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
             // ---------- Act ----------

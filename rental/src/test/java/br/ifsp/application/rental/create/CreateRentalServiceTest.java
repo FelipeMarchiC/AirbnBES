@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -119,6 +120,7 @@ class CreateRentalServiceTest {
             assertThat(savedRentalEntity.getStartDate()).isEqualTo(request.startDate());
             assertThat(savedRentalEntity.getEndDate()).isEqualTo(request.endDate());
             assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.PENDING);
+            assertThat(savedRentalEntity.getValue()).isEqualTo(rental.getValue());
         }
 
         @Tag("TDD")
@@ -386,6 +388,28 @@ class CreateRentalServiceTest {
             verify(propertyRepositoryMock, never()).findById(any());
             verify(rentalRepositoryMock, never()).save(any());
             verify(presenter, never()).prepareSuccessView(any());
+        }
+
+        @Test
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @DisplayName("should throw exception when user owns the property")
+        void shouldThrowExceptionWhenUserOwnsTheProperty() {
+            val request = factory.createRequestModel();
+
+            tenantEntity.setOwnedProperties(List.of(factory.generatePropertyEntity()));
+            when(userRepositoryMock.findById(tenantEntity.getId())).thenReturn(Optional.of(tenantEntity));
+            when(presenter.isDone()).thenReturn(false);
+
+            sut.registerRental(presenter, request);
+
+            ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
+            verify(presenter).prepareFailView(exceptionCaptor.capture());
+
+            Exception captured = exceptionCaptor.getValue();
+            assertThat(captured)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Owner cannot rent its property");
         }
     }
 

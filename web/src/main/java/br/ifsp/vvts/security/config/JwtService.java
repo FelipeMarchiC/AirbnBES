@@ -1,5 +1,6 @@
 package br.ifsp.vvts.security.config;
 
+import br.ifsp.domain.models.user.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,7 +29,14 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        if (userDetails instanceof UserEntity user) {
+            extraClaims.put("id", user.getId().toString());
+            extraClaims.put("role", user.getRole().name());
+        }
+
+        return generateToken(extraClaims, userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -42,14 +50,14 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-         return Jwts
-                 .builder()
-                 .setClaims(extraClaims)
-                 .setSubject(userDetails.getUsername())
-                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                 .compact();
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

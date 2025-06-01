@@ -8,7 +8,6 @@ import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.User;
-import br.ifsp.domain.services.IUuidGeneratorService;
 import br.ifsp.domain.shared.valueobjects.Price;
 
 import java.math.BigDecimal;
@@ -16,29 +15,6 @@ import java.time.Clock;
 import java.util.UUID;
 
 public class RentalMapper {
-    private final IUuidGeneratorService uuidGeneratorService;
-
-    public RentalMapper(IUuidGeneratorService uuidGeneratorService) {
-        this.uuidGeneratorService = uuidGeneratorService;
-    }
-
-    public Rental fromCreateRequestModel(
-            ICreateRentalService.RequestModel requestModel,
-            User user,
-            Property property,
-            BigDecimal value,
-            Clock clock
-    ) {
-        return property.createRental(
-                uuidGeneratorService.generate(),
-                user,
-                requestModel.startDate(),
-                requestModel.endDate(),
-                new Price(value),
-                RentalState.PENDING,
-                clock
-        );
-    }
 
     public static Rental fromCreateRequestModel(
             UUID rentalId,

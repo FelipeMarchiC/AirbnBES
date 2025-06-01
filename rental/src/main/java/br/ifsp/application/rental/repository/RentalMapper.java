@@ -36,12 +36,10 @@ public class RentalMapper {
     }
 
     public static Rental toDomain(RentalEntity entity, Clock clock) {
-        Property property = PropertyMapper.toDomain(entity.getPropertyEntity());
-
         return Rental.builder()
                 .id(entity.getId())
-                .user(UserMapper.toDomain(entity.getUserEntity()))
-                .property(property)
+                .user(UserMapper.toDomainShallow(entity.getUserEntity()))
+                .property(PropertyMapper.toShallowDomain(entity.getPropertyEntity()))
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .value(entity.getValue())

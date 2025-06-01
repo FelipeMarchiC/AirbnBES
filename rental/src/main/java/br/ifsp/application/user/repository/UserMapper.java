@@ -7,6 +7,7 @@ import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserMapper {
@@ -28,6 +29,16 @@ public class UserMapper {
         }
 
         return user;
+    }
+
+    public static User toDomainShallow(UserEntity entity) {
+        return User.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .lastname(entity.getLastname())
+                .email(entity.getEmail())
+                .ownedProperties(List.of())
+                .build();
     }
 
     public static UserEntity toEntity(User user, String password) {

@@ -18,15 +18,27 @@ public class PropertyMapper {
                 .description(entity.getDescription())
                 .dailyRate(entity.getDailyRate())
                 .address(entity.getAddress())
-                .owner(UserMapper.toDomain(entity.getOwner()))
+                .owner(UserMapper.toDomainShallow(entity.getOwner()))
                 .rentals(entity.getRentals().stream()
-                        .map(r -> RentalMapper.toDomain(r, null))
+                        .map(r -> RentalMapper.toDomain(r, clock))
                         .collect(Collectors.toList()))
                 .build();
     }
 
     public static Property toDomain(PropertyEntity entity) {
         return toDomain(entity, null);
+    }
+
+    public static Property toShallowDomain(PropertyEntity entity) {
+        return Property.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .dailyRate(entity.getDailyRate())
+                .address(entity.getAddress())
+                .owner(UserMapper.toDomainShallow(entity.getOwner()))
+                .rentals(List.of())
+                .build();
     }
 
     public static PropertyEntity toEntity(Property property) {

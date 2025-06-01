@@ -52,6 +52,10 @@ public class CreateRentalService implements ICreateRentalService {
         if (presenter.isDone()) return;
 
         try {
+            if (user.getOwnedProperties().stream().anyMatch(p -> p.getId() == request.propertyId())) {
+                throw new IllegalArgumentException("Owner cannot rent its property");
+            }
+
             validateRequestedDates(request.startDate(), request.endDate());
 
             PropertyEntity propertyEntity = propertyRepository.findById(request.propertyId())

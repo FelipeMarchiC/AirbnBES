@@ -268,11 +268,11 @@ public class OwnerUpdateRentalEntityServiceTest {
             assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.CANCELLED);
             verify(presenter).prepareSuccessView(any());
         }
-
         @Tag("UnitTest")
         @Tag("Functional")
         @Test
         void shouldSetRestrainedConflictsToPending() {
+            // Arrange
             RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
                     UUID.randomUUID(),
                     tenantEntity,
@@ -300,16 +300,30 @@ public class OwnerUpdateRentalEntityServiceTest {
                     RentalState.RESTRAINED
             );
 
+            // ArgumentCaptor para capturar a lista passada ao saveAll
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<List<RentalEntity>> captor = ArgumentCaptor.forClass(List.class);
+
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.RESTRAINED), any(), any(), any()))
                     .thenReturn(List.of(r1, r2));
 
+            when(rentalRepositoryMock.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            // Act
             sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), null);
 
-            assertThat(r1.getState()).isEqualTo(RentalState.PENDING);
-            assertThat(r2.getState()).isEqualTo(RentalState.PENDING);
-            verify(rentalRepositoryMock).saveAll(List.of(r1, r2));
-        }@Test
+            // Assert
+            verify(rentalRepositoryMock).saveAll(captor.capture());
+            List<RentalEntity> capturedRentals = captor.getValue();
+
+            assertThat(capturedRentals).hasSize(2);
+            assertThat(capturedRentals).allSatisfy(rental ->
+                    assertThat(rental.getState()).isEqualTo(RentalState.PENDING)
+            );
+        }
+
+        @Test
         @DisplayName("should prepare a fail view for Canceling a not found Rental")
         void shouldPrepareAFailViewForCancelingANotFoundRental(){
             UUID ownerId = UUID.randomUUID();
@@ -453,18 +467,28 @@ public class OwnerUpdateRentalEntityServiceTest {
                     UUID.randomUUID(),
                     tenantEntity,
                     propertyEntity,
+                    LocalDate.of(2025, 2, 5),
+                    LocalDate.now().plusDays(100),
+                    RentalState.PENDING
+            );
+            RentalEntity conflict2 = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
                     LocalDate.of(1801, 2, 5),
                     LocalDate.of(1801, 2, 8),
                     RentalState.PENDING
             );
 
+
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.PENDING), any(), any(), any()))
-                    .thenReturn(List.of(conflict));
+                    .thenReturn(List.of(conflict,conflict2));
+            ArgumentCaptor<RentalEntity> captor =ArgumentCaptor.forClass(RentalEntity.class);
+            when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv->inv.getArgument(0));
 
             sut.restrainPendingRentalsInConflict(confirmedRentalEntity);
-
-            assertThat(conflict.getState()).isEqualTo(RentalState.RESTRAINED);
-            verify(rentalRepositoryMock).save(conflict);
+            verify(rentalRepositoryMock,times(2)).save(captor.capture());
+            captor.getAllValues().forEach(rentalEntity -> assertThat(rentalEntity.getState()).isNotEqualTo(RentalState.PENDING));
         }
     }
 

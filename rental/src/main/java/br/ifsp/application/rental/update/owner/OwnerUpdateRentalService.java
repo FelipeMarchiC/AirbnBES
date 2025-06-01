@@ -130,6 +130,7 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
         );
 
         pendingConflicts.forEach(r -> {
+
             var rental = RentalMapper.toDomain(r, clock);
 
             if (rental.getState() != RentalState.EXPIRED) {

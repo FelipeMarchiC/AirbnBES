@@ -1,6 +1,7 @@
 package br.ifsp.vvts.security.auth;
 
 import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.user.UserEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ public class AuthenticationInfoService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated())
             throw new IllegalStateException("Unauthorized user request.");
-        var applicationUser = (User) authentication.getPrincipal();
+        var applicationUser = (UserEntity) authentication.getPrincipal();
         return applicationUser.getId();
     }
 }

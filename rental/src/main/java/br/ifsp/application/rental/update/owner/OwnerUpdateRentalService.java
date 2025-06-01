@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
@@ -103,11 +104,15 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
 
             rental.setState(RentalState.CANCELLED);
 
-            List<RentalEntity> restrainedConflicts = findRestrainedConflictingRentals(RentalMapper.toEntity(rental));
+            List<Rental> restrainedConflicts = findRestrainedConflictingRentals(RentalMapper.toEntity(rental));
             restrainedConflicts.forEach(r -> r.setState(RentalState.PENDING));
 
             rentalRepository.save(RentalMapper.toEntity(rental));
-            rentalRepository.saveAll(restrainedConflicts);
+            rentalRepository.saveAll(
+                    restrainedConflicts.stream()
+                            .map(RentalMapper::toEntity)
+                            .collect(Collectors.toList())
+            );
 
             presenter.prepareSuccessView(new ResponseModel(request.ownerId(), rental.getUser().getId()));
         } catch (Exception e) {
@@ -125,19 +130,24 @@ public class OwnerUpdateRentalService implements IOwnerUpdateRentalService {
         );
 
         pendingConflicts.forEach(r -> {
-            r.setState(RentalState.RESTRAINED);
-            rentalRepository.save(r);
+            var rental = RentalMapper.toDomain(r, clock);
+
+            if (rental.getState() != RentalState.EXPIRED) {
+                rental.setState(RentalState.RESTRAINED);
+            }
+
+            rentalRepository.save(RentalMapper.toEntity(rental));
         });
     }
 
-    private List<RentalEntity> findRestrainedConflictingRentals(RentalEntity rentalEntity) {
+    private List<Rental> findRestrainedConflictingRentals(RentalEntity rentalEntity) {
         return rentalRepository.findRentalsByOverlapAndState(
                 rentalEntity.getPropertyEntity().getId(),
                 RentalState.RESTRAINED,
                 rentalEntity.getStartDate(),
                 rentalEntity.getEndDate(),
                 rentalEntity.getId()
-        );
+        ).stream().map(r -> RentalMapper.toDomain(r, clock)).collect(Collectors.toList());
     }
 
     private Optional<Rental> getRental(RequestModel requestModel) {

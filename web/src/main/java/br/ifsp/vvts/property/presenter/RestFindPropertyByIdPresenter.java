@@ -1,32 +1,32 @@
 package br.ifsp.vvts.property.presenter;
 
-import br.ifsp.application.property.find.FindPropertyPresenter;
+import br.ifsp.application.property.find.FindPropertyByIdPresenter;
 import br.ifsp.application.property.find.IFindPropertyService;
+import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.UUID;
 
 import static br.ifsp.vvts.shared.error.ErrorResponseFactory.createErrorResponseFrom;
 
-public class RestFindPropertyPresenter implements FindPropertyPresenter {
+public class RestFindPropertyByIdPresenter implements FindPropertyByIdPresenter {
     private ResponseEntity<?> responseEntity;
 
     @Override
-    public void prepareSuccessView(IFindPropertyService.PropertyListResponseModel response) {
-        List<PropertyViewModel> viewModelList = response.properties().stream()
-                .map(property -> new PropertyViewModel(
-                        property.getId(),
-                        property.getName(),
-                        property.getDescription(),
-                        property.getDailyRate().getAmount().doubleValue(),
-                        property.getOwner().getName() + " " + property.getOwner().getLastname(),
-                        property.getOwner().getId()
-                ))
-                .toList();
+    public void prepareSuccessView(IFindPropertyService.PropertyResponseModel response) {
+        val property = response.property();
 
-        this.responseEntity = ResponseEntity.status(HttpStatus.OK).body(viewModelList);
+        PropertyViewModel viewModel = new PropertyViewModel(
+                property.getId(),
+                property.getName(),
+                property.getDescription(),
+                property.getDailyRate().getAmount().doubleValue(),
+                property.getOwner().getName(),
+                property.getOwner().getId()
+        );
+
+        this.responseEntity = ResponseEntity.status(HttpStatus.OK).body(viewModel);
     }
 
     @Override

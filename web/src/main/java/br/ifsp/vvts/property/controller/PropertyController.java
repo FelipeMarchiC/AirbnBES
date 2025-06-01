@@ -1,6 +1,7 @@
 package br.ifsp.vvts.property.controller;
 
 import br.ifsp.application.property.find.IFindPropertyService;
+import br.ifsp.vvts.property.presenter.RestFindPropertyByIdPresenter;
 import br.ifsp.vvts.property.presenter.RestFindPropertyPresenter;
 import br.ifsp.vvts.property.requests.GetRequest;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,6 +11,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:5173/")
 @RestController
@@ -25,6 +28,19 @@ public class PropertyController {
         var presenter = new RestFindPropertyPresenter();
 
         findPropertyService.findAll(presenter);
+
+        return presenter.responseEntity() != null ?
+                presenter.responseEntity()
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping("/{propertyId}")
+    public ResponseEntity<?> FindByPropertyId(@PathVariable UUID propertyId) {
+        var presenter = new RestFindPropertyByIdPresenter();
+        var request = new GetRequest();
+        var requestModel = request.toFindByPropertyId(propertyId);
+
+        findPropertyService.findById(presenter, requestModel);
 
         return presenter.responseEntity() != null ?
                 presenter.responseEntity()

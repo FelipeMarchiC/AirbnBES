@@ -1,8 +1,10 @@
 package br.ifsp.application.property.find;
 
 import br.ifsp.application.property.repository.JpaPropertyRepository;
+import br.ifsp.application.property.repository.PropertyMapper;
 import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
@@ -22,20 +24,19 @@ class FindPropertyEntityServiceTest {
     private JpaPropertyRepository jpaPropertyRepository;
 
     @Mock
-    private FindPropertyService findPropertyService;
-
-    @Mock
-    private FindPropertyPresenter presenter;
-
-    @Mock
     private TestDataFactory factory;
+
+    private FindPropertyService findPropertyService;
 
     private IFindPropertyService.PropertyListResponseModel capturedResponse;
     private Exception capturedException;
 
+    private FindPropertyPresenter presenter;
+
     @BeforeEach
     void setup() {
         jpaPropertyRepository = mock(JpaPropertyRepository.class);
+
         presenter = new FindPropertyPresenter() {
             @Override
             public void prepareSuccessView(IFindPropertyService.PropertyListResponseModel responseModel) {
@@ -67,18 +68,20 @@ class FindPropertyEntityServiceTest {
         @Test
         @DisplayName("Should return available properties in period")
         void shouldReturnAvailablePropertiesInPeriod() {
-            PropertyEntity property = factory.generatePropertyEntity();
+            PropertyEntity propertyEntity = factory.generatePropertyEntity();
+            Property expected = PropertyMapper.toDomain(propertyEntity);
+
             LocalDate startDate = LocalDate.of(2025, 5, 4);
             LocalDate endDate = startDate.plusDays(7);
 
-            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate, endDate)).thenReturn(List.of(property));
+            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate, endDate)).thenReturn(List.of(propertyEntity));
 
             var request = new IFindPropertyService.PeriodRequestModel(startDate, endDate);
             findPropertyService.findByPeriod(presenter, request);
 
-            assertThat(capturedResponse).isNotNull();
             assertThat(capturedException).isNull();
-            assertThat(capturedResponse.properties()).containsExactly(property);
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).containsExactly(expected);
         }
 
         @Test
@@ -86,6 +89,7 @@ class FindPropertyEntityServiceTest {
         void shouldThrowEntityNotFoundWhenEmptyList() {
             LocalDate startDate = LocalDate.of(2025, 5, 4);
             LocalDate endDate = startDate.plusDays(7);
+
             when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate, endDate)).thenReturn(List.of());
 
             var request = new IFindPropertyService.PeriodRequestModel(startDate, endDate);
@@ -104,15 +108,19 @@ class FindPropertyEntityServiceTest {
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {
             String location = "São Paulo";
-            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
-            when(jpaPropertyRepository.findByLocation(location)).thenReturn(mockProperties);
+            PropertyEntity entity1 = factory.generatePropertyEntity();
+            PropertyEntity entity2 = factory.generatePropertyEntity();
+            List<PropertyEntity> entityList = List.of(entity1, entity2);
+            List<Property> expected = entityList.stream().map(PropertyMapper::toDomain).toList();
+
+            when(jpaPropertyRepository.findByLocation(location)).thenReturn(entityList);
 
             var request = new IFindPropertyService.LocationRequestModel(location);
             findPropertyService.findByLocation(presenter, request);
 
             assertThat(capturedException).isNull();
             assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
 
         @Test
@@ -149,15 +157,20 @@ class FindPropertyEntityServiceTest {
         void shouldReturnPropertiesWithinGivenPriceRange() {
             double min = 100.0;
             double max = 300.0;
-            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            PropertyEntity e1 = factory.generatePropertyEntity();
+            PropertyEntity e2 = factory.generatePropertyEntity();
+            List<PropertyEntity> entityList = List.of(e1, e2);
+            List<Property> expected = entityList.stream().map(PropertyMapper::toDomain).toList();
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(entityList);
 
             var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
             findPropertyService.findByPriceRange(presenter, request);
 
             assertThat(capturedException).isNull();
             assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
 
         @Test
@@ -204,13 +217,17 @@ class FindPropertyEntityServiceTest {
         @Test
         @DisplayName("Should return all properties from repository")
         void shouldReturnAllProperties() {
-            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class), mock(PropertyEntity.class));
-            when(jpaPropertyRepository.findAll()).thenReturn(mockProperties);
+            PropertyEntity e1 = factory.generatePropertyEntity();
+            PropertyEntity e2 = factory.generatePropertyEntity();
+            List<PropertyEntity> entityList = List.of(e1, e2);
+            List<Property> expected = entityList.stream().map(PropertyMapper::toDomain).toList();
+
+            when(jpaPropertyRepository.findAll()).thenReturn(entityList);
             findPropertyService.findAll(presenter);
 
             assertThat(capturedException).isNull();
             assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
 
         @Test
@@ -224,6 +241,7 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Database error");
         }
     }
+
     @Nested
     @DisplayName("Mutation Tests")
     class MutationTests {
@@ -233,31 +251,39 @@ class FindPropertyEntityServiceTest {
         void shouldAllowPriceRangeWhenMinEqualsMax() {
             double min = 150.0;
             double max = 150.0;
-            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            PropertyEntity e = factory.generatePropertyEntity();
+            List<Property> expected = List.of(PropertyMapper.toDomain(e));
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
 
             var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
             findPropertyService.findByPriceRange(presenter, request);
 
             assertThat(capturedException).isNull();
             assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
+
         @Test
         @DisplayName("Should allow zero values for price range")
         void shouldAllowZeroValuesForPriceRange() {
             double min = 0.0;
             double max = 0.0;
-            List<PropertyEntity> mockProperties = List.of(mock(PropertyEntity.class));
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(mockProperties);
+
+            PropertyEntity e = factory.generatePropertyEntity();
+            List<Property> expected = List.of(PropertyMapper.toDomain(e));
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
 
             var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
             findPropertyService.findByPriceRange(presenter, request);
 
             assertThat(capturedException).isNull();
             assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).isEqualTo(mockProperties);
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
+
         @Test
         @DisplayName("Should reject negative min and zero max")
         void shouldRejectNegativeMinWithZeroMax() {
@@ -269,6 +295,7 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Prices must be non-negative");
         }
+
         @Test
         @DisplayName("Should reject zero min and negative max")
         void shouldRejectZeroMinWithNegativeMax() {

@@ -20,7 +20,6 @@ class FindRentalEntityServiceTest {
 
     @InjectMocks
     private FindRentalService findRentalService;
-    @Mock
     private FindRentalPresenter presenter;
 
     private IFindRentalService.FindByPropertyIdRequestModel findByPropertyIdRequestModel;
@@ -73,6 +72,19 @@ class FindRentalEntityServiceTest {
             assertThat(response).isNotNull();
             verify(jpaRentalRepository).findByPropertyEntityId(propertyId);
         }
+        @Test
+        @Tag("Structural")
+        @DisplayName("should prepare a fail view for exceptiont")
+        void shouldPrepareAFailViewForException() {
+            FindRentalPresenter fakePresenter= mock(FindRentalPresenter.class);
+            UUID propertyId = UUID.randomUUID();
+            findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
+            RuntimeException runtimeException = new RuntimeException();
+            when(jpaRentalRepository.findByPropertyEntityId(findByPropertyIdRequestModel.propertyId())).thenThrow(runtimeException);
+            findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel,fakePresenter);
+            verify(jpaRentalRepository).findByPropertyEntityId(findByPropertyIdRequestModel.propertyId());
+            verify(fakePresenter).prepareFailView(runtimeException);
+        }
     }
 
     @Nested
@@ -95,6 +107,22 @@ class FindRentalEntityServiceTest {
             assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserEntityId(tenantId);
+        }
+
+        @Test
+        @Tag("Structural")
+        @DisplayName("Should prepare a fail view")
+        void shouldPrepareAFailView(){
+            UUID tenantId = UUID.randomUUID();
+            IFindRentalService.FindByTenantIdRequestModel request = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
+            RuntimeException runtimeException = new RuntimeException();
+            FindRentalPresenter fakePresenter = mock(FindRentalPresenter.class);
+            when(jpaRentalRepository.findByUserEntityId(request.tenantId())).thenThrow(runtimeException);
+
+            findRentalService.getRentalHistoryByTenant(request,fakePresenter);
+            verify(fakePresenter).prepareFailView(runtimeException);
+
+
         }
     }
 
@@ -185,5 +213,6 @@ class FindRentalEntityServiceTest {
                     .hasMessageContaining("There are no rentals registered");
             verify(jpaRentalRepository).findAll();
         }
+
     }
 }

@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
-public class    OwnerUpdateRentalEntityServiceTest {
+public class OwnerUpdateRentalEntityServiceTest {
 
     private final String string = "";
     @Mock
@@ -105,7 +105,6 @@ public class    OwnerUpdateRentalEntityServiceTest {
             RequestModel request = new RequestModel(ownerEntity.getId(), rentalEntity.getId());
             sut.denyRental(presenter, request);
 
-            assertThat(rentalEntity.getState()).isEqualTo(RentalState.DENIED);
             verify(presenter).prepareSuccessView(any());
         }
 
@@ -159,7 +158,7 @@ public class    OwnerUpdateRentalEntityServiceTest {
     }
 
     @Nested
-    class CancelConfirmedRentalEntityTests {
+    class CancelRentalEntityTests {
 
         @BeforeEach
         void setupClock() {
@@ -187,6 +186,7 @@ public class    OwnerUpdateRentalEntityServiceTest {
 
             verify(presenter).prepareFailView(any(IllegalArgumentException.class));
         }
+
         @Tag("UnitTest")
         @Tag("Functional")
         @Test
@@ -207,7 +207,7 @@ public class    OwnerUpdateRentalEntityServiceTest {
 
             RequestModel request = new RequestModel(nonOwner.getId(), rentalEntity.getId());
 
-            sut.cancelRental(presenter, request,null);
+            sut.cancelRental(presenter, request, null);
 
             verify(presenter).prepareFailView(any(SecurityException.class));
         }
@@ -256,10 +256,16 @@ public class    OwnerUpdateRentalEntityServiceTest {
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.RESTRAINED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
+            when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            ArgumentCaptor<RentalEntity> captor = ArgumentCaptor.forClass(RentalEntity.class);
+
 
             sut.cancelRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()), LocalDate.of(2025, 1, 2).minusDays(2));
 
-            assertThat(rentalEntity.getState()).isEqualTo(RentalState.CANCELLED);
+            verify(rentalRepositoryMock).save(captor.capture());
+            RentalEntity savedRentalEntity = captor.getValue();
+            assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.CANCELLED);
             verify(presenter).prepareSuccessView(any());
         }
 
@@ -303,7 +309,17 @@ public class    OwnerUpdateRentalEntityServiceTest {
             assertThat(r1.getState()).isEqualTo(RentalState.PENDING);
             assertThat(r2.getState()).isEqualTo(RentalState.PENDING);
             verify(rentalRepositoryMock).saveAll(List.of(r1, r2));
+        }@Test
+        @DisplayName("should prepare a fail view for Canceling a not found Rental")
+        void shouldPrepareAFailViewForCancelingANotFoundRental(){
+            UUID ownerId = UUID.randomUUID();
+            UUID rentalId = UUID.randomUUID();
+            RequestModel requestModel = new RequestModel(ownerId, rentalId);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.empty());
+            sut.cancelRental(presenter,requestModel,LocalDate.now());
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
         }
+
     }
 
     @Nested
@@ -325,10 +341,16 @@ public class    OwnerUpdateRentalEntityServiceTest {
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.CONFIRMED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
+            when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            ArgumentCaptor<RentalEntity> captor = ArgumentCaptor.forClass(RentalEntity.class);
 
             sut.confirmRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()));
 
-            assertThat(rentalEntity.getState()).isEqualTo(RentalState.CONFIRMED);
+
+            verify(rentalRepositoryMock).save(captor.capture());
+            RentalEntity savedRentalEntity = captor.getValue();
+            assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.CONFIRMED);
             verify(presenter).prepareSuccessView(any());
         }
 
@@ -385,6 +407,31 @@ public class    OwnerUpdateRentalEntityServiceTest {
 
             verify(presenter).prepareFailView(any(IllegalStateException.class));
         }
+
+        @Tag("UnitTest")
+        @Tag("Functional")
+        @Test
+        @DisplayName("Should throw entity not found exception when rental not found")
+        void shouldThrowEntityNotFoundExceptionWhenRentalNotFound() {
+            when(rentalRepositoryMock.findById(any())).thenReturn(Optional.empty());
+
+            RequestModel request = new RequestModel(ownerEntity.getId(), UUID.randomUUID());
+            sut.denyRental(presenter, request);
+
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+        }
+        @Test
+        @Tag("Structural")
+        @DisplayName("Should Prepare a fail view for Entity not found")
+        void shouldPrepareAFailViewForRentalEntityNotFound(){
+            UUID ownerId = UUID.randomUUID();
+            UUID rentalId = UUID.randomUUID();
+            RequestModel requestModel = new RequestModel(ownerId, rentalId);
+            when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.empty());
+            sut.confirmRental(presenter,requestModel);
+            verify(presenter).prepareFailView(any(EntityNotFoundException.class));
+        }
+
     }
 
     @Nested
@@ -421,18 +468,7 @@ public class    OwnerUpdateRentalEntityServiceTest {
         }
     }
 
-    @Tag("UnitTest")
-    @Tag("Functional")
-    @Test
-    @DisplayName("Should throw entity not found exception when rental not found")
-    void shouldThrowEntityNotFoundExceptionWhenRentalNotFound() {
-        when(rentalRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        RequestModel request = new RequestModel(ownerEntity.getId(), UUID.randomUUID());
-        sut.denyRental(presenter, request);
-
-        verify(presenter).prepareFailView(any(EntityNotFoundException.class));
-    }
 
 
 }

@@ -58,11 +58,11 @@ class DeleteRentalEntityServiceTest {
         tenantId = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
         UserEntity tenant = mock(UserEntity.class);
-        lenient().when(tenant.getId()).thenReturn(tenantId);
+        rentalEntity = mock(RentalEntity.class);
 
-        rentalEntity = new RentalEntity();
-        rentalEntity.setId(rentalId);
-        rentalEntity.setUserEntity(tenant);
+        lenient().when(tenant.getId()).thenReturn(tenantId);
+        lenient().when(rentalEntity.getId()).thenReturn(rentalId);
+        lenient().when(rentalEntity.getUserEntity()).thenReturn(tenant);
     }
 
     @Nested
@@ -120,7 +120,6 @@ class DeleteRentalEntityServiceTest {
         @Test
         @DisplayName("Should throw exception when state is not PENDING or DENIED")
         void shouldThrowWhenStateIsInvalid() {
-            rentalEntity.setState(RentalState.CONFIRMED);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
@@ -171,7 +170,6 @@ class DeleteRentalEntityServiceTest {
         @Test
         @DisplayName("Should handle exception during deletion")
         void shouldHandleExceptionDuringDeletion() {
-            rentalEntity.setState(RentalState.DENIED);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
@@ -199,7 +197,6 @@ class DeleteRentalEntityServiceTest {
         @Test
         @DisplayName("Should handle unexpected exception in presenter")
         void shouldHandleUnexpectedPresenterException() {
-            rentalEntity.setState(RentalState.PENDING);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 
@@ -235,7 +232,6 @@ class DeleteRentalEntityServiceTest {
         @Test
         @DisplayName("Should throw exception when start date is not in the future")
         void shouldThrowWhenStartDateIsNotInFuture() {
-            rentalEntity.setState(RentalState.PENDING);
             when(rentalRepositoryMock.findById(rentalId)).thenReturn(Optional.of(rentalEntity));
             when(userRepositoryMock.findById(ownerId)).thenReturn(Optional.of(mock(UserEntity.class)));
 

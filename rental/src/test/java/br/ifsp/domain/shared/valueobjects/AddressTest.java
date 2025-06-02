@@ -160,5 +160,12 @@ class AddressTest {
             Address address = createDefaultAddress();
             assertThat(address).isNotEqualTo(new Object());
         }
+        @Test
+        @DisplayName("Should be equal to another Address with same values")
+        void shouldBeEqualToAnotherAddressWithSameValues() {
+            Address address1 = createDefaultAddress();
+            Address address2 = createDefaultAddress();
+            assertThat(address1).isEqualTo(address2);
+        }
     }
 }

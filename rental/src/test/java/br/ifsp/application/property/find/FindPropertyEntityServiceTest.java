@@ -157,6 +157,32 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Database error during findById");
         }
+    }
+
+    @Nested
+    @Tag("Mutation")
+    @Tag("UnitTest")
+    @DisplayName("Mutation Tests")
+    class MutationTests {
+
+        @Test
+        @DisplayName("Should allow price range when min equals max")
+        void shouldAllowPriceRangeWhenMinEqualsMax() {
+            double min = 150.0;
+            double max = 150.0;
+
+            PropertyEntity e = factory.generatePropertyEntity();
+            List<Property> expected = List.of(PropertyMapper.toDomain(e));
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
+        }
 
 
     }

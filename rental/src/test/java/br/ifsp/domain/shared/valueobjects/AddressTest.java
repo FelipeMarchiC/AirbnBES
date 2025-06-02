@@ -154,6 +154,11 @@ class AddressTest {
             Address address = createDefaultAddress();
             assertThat(address).isNotEqualTo(null);
         }
-
+        @Test
+        @DisplayName("Should not be equal to a different type of object")
+        void shouldNotBeEqualToDifferentTypeOfObject() {
+            Address address = createDefaultAddress();
+            assertThat(address).isNotEqualTo(new Object());
+        }
     }
 }

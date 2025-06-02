@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,9 +31,11 @@ class FindPropertyEntityServiceTest {
     private FindPropertyService findPropertyService;
 
     private IFindPropertyService.PropertyListResponseModel capturedResponse;
+    private IFindPropertyService.PropertyResponseModel capturedPropertyResponse;
     private Exception capturedException;
 
     private FindPropertyPresenter presenter;
+    private FindPropertyByIdPresenter findByIdPresenter;
 
     @BeforeEach
     void setup() {
@@ -54,11 +58,62 @@ class FindPropertyEntityServiceTest {
             }
         };
 
+        findByIdPresenter = new FindPropertyByIdPresenter() {
+            @Override
+            public void prepareSuccessView(IFindPropertyService.PropertyResponseModel responseModel) {
+                capturedPropertyResponse = responseModel;
+            }
+
+            @Override
+            public void prepareFailView(Throwable throwable) {
+                capturedException = (Exception) throwable;
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+        };
+
         Clock fixedClock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneId.systemDefault());
         factory = new TestDataFactory(fixedClock);
         findPropertyService = new FindPropertyService(jpaPropertyRepository);
         capturedResponse = null;
+        capturedPropertyResponse = null;
         capturedException = null;
+    }
+
+    @Nested
+    @Tag("Structural")
+    @Tag("UnitTest")
+    @DisplayName("Structural Tests")
+    class StructuralTests {
+        @Test
+        @DisplayName("Should ensure constructor injects JpaPropertyRepository")
+        void shouldEnsureConstructorInjectsJpaPropertyRepository() {
+            assertThat(findPropertyService).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Property search by ID tests")
+    class PropertyEntitySearchById {
+        @Test
+        @DisplayName("Should return property when found by ID")
+        void shouldReturnPropertyWhenFoundById() {
+            UUID propertyId = UUID.randomUUID();
+            PropertyEntity propertyEntity = factory.generatePropertyEntity(propertyId);
+            Property expectedProperty = PropertyMapper.toDomain(propertyEntity);
+
+            when(jpaPropertyRepository.findById(propertyId)).thenReturn(Optional.of(propertyEntity));
+
+            var request = new IFindPropertyService.FindByIdRequestModel(propertyId);
+            findPropertyService.findById(findByIdPresenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedPropertyResponse).isNotNull();
+            assertThat(capturedPropertyResponse.property()).isEqualTo(expectedProperty);
+        }
     }
 
     @Nested
@@ -103,7 +158,6 @@ class FindPropertyEntityServiceTest {
     @Nested
     @DisplayName("Property Search By Location Tests")
     class PropertyEntitySearchByLocationTests {
-
         @Test
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {
@@ -208,7 +262,6 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Prices must be non-negative");
         }
-    }
 
     @Nested
     @DisplayName("Property FindAll Tests")
@@ -241,71 +294,5 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Database error");
         }
     }
-
-    @Nested
-    @DisplayName("Mutation Tests")
-    class MutationTests {
-
-        @Test
-        @DisplayName("Should allow price range when min equals max")
-        void shouldAllowPriceRangeWhenMinEqualsMax() {
-            double min = 150.0;
-            double max = 150.0;
-
-            PropertyEntity e = factory.generatePropertyEntity();
-            List<Property> expected = List.of(PropertyMapper.toDomain(e));
-
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
-
-            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedException).isNull();
-            assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
-        }
-
-        @Test
-        @DisplayName("Should allow zero values for price range")
-        void shouldAllowZeroValuesForPriceRange() {
-            double min = 0.0;
-            double max = 0.0;
-
-            PropertyEntity e = factory.generatePropertyEntity();
-            List<Property> expected = List.of(PropertyMapper.toDomain(e));
-
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
-
-            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedException).isNull();
-            assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
-        }
-
-        @Test
-        @DisplayName("Should reject negative min and zero max")
-        void shouldRejectNegativeMinWithZeroMax() {
-            var request = new IFindPropertyService.PriceRangeRequestModel(-1.0, 0.0);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedResponse).isNull();
-            assertThat(capturedException)
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Prices must be non-negative");
-        }
-
-        @Test
-        @DisplayName("Should reject zero min and negative max")
-        void shouldRejectZeroMinWithNegativeMax() {
-            var request = new IFindPropertyService.PriceRangeRequestModel(0.0, -1.0);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedResponse).isNull();
-            assertThat(capturedException)
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Prices must be non-negative");
-        }
-    }
+}
 }

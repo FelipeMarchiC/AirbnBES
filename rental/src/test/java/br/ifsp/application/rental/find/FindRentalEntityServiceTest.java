@@ -235,16 +235,32 @@ class FindRentalEntityServiceTest {
         @DisplayName("Should return all rentals when list is not empty")
         @Test
         void shouldReturnAllRentals() {
-            List<RentalEntity> mockRentalEntities = List.of(
-                    mock(RentalEntity.class),
-                    mock(RentalEntity.class)
+            RentalEntity rentalEntity = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
+            );
+            RentalEntity rentalEntity1 = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
+            );
+            List<RentalEntity> rentalEntities = List.of(
+                    rentalEntity,
+                    rentalEntity1
             );
 
-            when(jpaRentalRepository.findAll()).thenReturn(mockRentalEntities);
+            when(jpaRentalRepository.findAll()).thenReturn(rentalEntities);
             findRentalService.findAll(presenter);
 
             assertThat(response).isNotNull();
-           // assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
+            assertThat(response.rentalList()).hasSize(rentalEntities.size());
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findAll();
         }

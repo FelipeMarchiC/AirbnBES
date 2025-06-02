@@ -43,4 +43,16 @@ class PriceTest {
                     .hasMessage("Price cannot be null or negative.");
         }
     }
+    @Nested
+    @DisplayName("Equals Method Tests")
+    class EqualsMethodTests {
+
+        @Test
+        @DisplayName("Should return true when comparing with itself")
+        void shouldReturnTrueWhenComparingWithItself() {
+            Price price = new Price(new BigDecimal("10.00"));
+            assertThat(price).isEqualTo(price);
+        }
+
+    }
 }

@@ -236,4 +236,18 @@ class AddressTest {
     }
 
 
+    @Test
+    @Tag("“Mutation”")
+    @Tag("“UnitTest”")
+    @DisplayName("Builder toString should include class name and fields")
+    void builderToStringShouldIncludeClassNameAndFields() {
+        String toString = Address.builder().toString();
+        assertThat(toString)
+                .startsWith("Address.AddressBuilder(")
+                .contains("number=")
+                .contains("street=")
+                .contains("city=")
+                .contains("state=")
+                .contains("postalCode=");
+    }
 }

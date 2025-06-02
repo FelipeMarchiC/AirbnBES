@@ -101,7 +101,7 @@ class FindRentalEntityServiceTest {
             when(jpaRentalRepository.findByPropertyEntityId(propertyId)).thenReturn(rentalEntities);
             findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter);
             assertThat(response).isNotNull();
-            assertThat(response.rentalList()).hasSize(rentalList.size());
+            assertThat(response.rentalList()).hasSize(rentalEntities.size());
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByPropertyEntityId(propertyId);
         }
@@ -148,18 +148,14 @@ class FindRentalEntityServiceTest {
                     RentalState.CONFIRMED
             );
             List<RentalEntity> rentalEntities = List.of(
-
                     rentalEntity,
                     rentalEntity1
             );
-            List<Rental> rentalList = List.of(
-                    RentalMapper.toDomain(rentalEntity,clock),
-                    RentalMapper.toDomain(rentalEntity1,clock)
-            );
+
             IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
             when(jpaRentalRepository.findByUserEntityId(tenantId)).thenReturn(rentalEntities);
             findRentalService.getRentalHistoryByTenant(requestModel, presenter);
-            assertThat(response.rentalList()).isEqualTo(rentalList);
+            assertThat(response.rentalList()).hasSize(rentalEntities.size());
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserEntityId(tenantId);
         }

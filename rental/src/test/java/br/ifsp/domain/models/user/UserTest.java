@@ -229,4 +229,24 @@ class UserTest {
             assertTrue(user.getOwnedProperties().contains(existingProperty));
         }
     }
+    @Tag("Mutation")
+    @Tag("UnitTest")
+    @Test
+    @DisplayName("Should return meaningful toString from UserBuilder")
+    void shouldReturnMeaningfulToStringFromBuilder() {
+        User.UserBuilder builder = User.builder()
+                .id(userId)
+                .name(name)
+                .lastname(lastname)
+                .email(email);
+
+        String toStringResult = builder.toString();
+
+        assertNotNull(toStringResult);
+        assertFalse(toStringResult.isBlank());
+        assertTrue(toStringResult.contains("User.UserBuilder"));
+        assertTrue(toStringResult.contains("name=" + name));
+        assertTrue(toStringResult.contains("lastname=" + lastname));
+        assertTrue(toStringResult.contains("email=" + email));
+    }
 }

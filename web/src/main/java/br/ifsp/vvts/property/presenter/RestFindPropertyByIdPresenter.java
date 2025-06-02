@@ -22,7 +22,9 @@ public class RestFindPropertyByIdPresenter implements FindPropertyByIdPresenter 
                 property.getName(),
                 property.getDescription(),
                 property.getDailyRate().getAmount().doubleValue(),
-                property.getOwner().getName(),
+                property.getAddress().getCity(),
+                property.getAddress().getState(),
+                property.getOwner().getName() + " " + property.getOwner().getLastname(),
                 property.getOwner().getId()
         );
 
@@ -48,6 +50,8 @@ public class RestFindPropertyByIdPresenter implements FindPropertyByIdPresenter 
             String name,
             String description,
             Double dailyRate,
+            String city,
+            String state,
             String ownerName,
             UUID ownerId
     ) {}

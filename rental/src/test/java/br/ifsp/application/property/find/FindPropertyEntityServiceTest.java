@@ -412,6 +412,25 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
         }
 
+        @Test
+        @DisplayName("Should allow zero values for price range")
+        void shouldAllowZeroValuesForPriceRange() {
+            double min = 0.0;
+            double max = 0.0;
+
+            PropertyEntity e = factory.generatePropertyEntity();
+            List<Property> expected = List.of(PropertyMapper.toDomain(e));
+
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
+
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
+        }
+
 
     }
 }

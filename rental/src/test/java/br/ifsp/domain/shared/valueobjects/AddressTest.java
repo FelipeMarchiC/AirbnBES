@@ -73,5 +73,20 @@ class AddressTest {
                 fail("Failed to instantiate Address using no-args constructor: " + e.getMessage());
             }
         }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when building Address with null number")
+        void shouldThrowNullPointerExceptionWhenBuildingWithNullNumber() {
+            assertThatThrownBy(() -> Address.builder()
+                    .street(DEFAULT_STREET)
+                    .city(DEFAULT_CITY)
+                    .state(DEFAULT_STATE)
+                    .postalCode(DEFAULT_POSTAL_CODE)
+                    .build())
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("number is marked non-null but is null");
+        }
+
+
     }
 }

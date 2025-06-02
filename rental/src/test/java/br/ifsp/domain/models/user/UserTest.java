@@ -185,6 +185,27 @@ class UserTest {
             assertTrue(ownedProperties.contains(newProperty));
         }
 
+        @Test
+        @DisplayName("Should add a new property to owned properties")
+        void shouldAddOwnedProperty() {
+            Property propertyToAdd = Property.builder()
+                    .id(propertyId)
+                    .name(propertyName)
+                    .description(description)
+                    .dailyRate(dailyRate)
+                    .address(address)
+                    .owner(user)
+                    .rentals(new ArrayList<>())
+                    .build();
+
+            assertTrue(user.getOwnedProperties().isEmpty());
+            user.addOwnedProperty(propertyToAdd);
+
+            List<Property> ownedProperties = user.getOwnedProperties();
+            assertFalse(ownedProperties.isEmpty());
+            assertEquals(1, ownedProperties.size());
+            assertTrue(ownedProperties.contains(propertyToAdd));
+        }
 
     }
 }

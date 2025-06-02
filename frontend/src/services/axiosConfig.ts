@@ -1,6 +1,7 @@
 import api from './api';
 import toast from 'react-hot-toast';
 
+// Interceptador de requisições
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('@AirbnBES:token');
@@ -27,6 +28,7 @@ api.interceptors.response.use(
       const { status } = error.response;
       
       if (status === 401) {
+        // Token expirado ou inválido
         localStorage.removeItem('@AirbnBES:token');
         localStorage.removeItem('@AirbnBES:user');
         
@@ -43,8 +45,10 @@ api.interceptors.response.use(
         toast.error('Erro no servidor. Tente novamente mais tarde.');
       }
     } else if (error.request) {
+      // A requisição foi feita mas não houve resposta
       toast.error('Não foi possível conectar ao servidor. Verifique sua conexão.');
     } else {
+      // Erro ao configurar a requisição
       toast.error('Erro ao processar sua solicitação.');
     }
     

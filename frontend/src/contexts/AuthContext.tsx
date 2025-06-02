@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+// Tipos
 type User = {
   id: string;
   name: string;
@@ -21,8 +22,10 @@ type AuthContextType = {
   logout: () => void;
 };
 
+// Contexto
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
+// Provider
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,8 +50,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
 
+      // Chamada real à API
       const response = await api.post('/authenticate', {
-        username: email,
+        username: email, // o backend espera "username"
         password,
       });
 
@@ -58,9 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const payload = JSON.parse(atob(token.split('.')[1]));
 
       const user: User = {
-        id: payload.id || '',
+        id: payload.id || '', // Certifique-se de que o payload contém o campo 'id'
         name: payload.name || 'Usuário',
-        email: payload.sub, 
+        email: payload.sub, // O campo 'sub' normalmente representa o e-mail ou username
         role: payload.role === 'ADMIN' ? 'ADMIN' : 'USER',
       };
       
@@ -96,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
 
+      // Simulação de API de registro
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast.success('Cadastro realizado com sucesso!');
@@ -107,8 +112,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
- 
 
+  
+
+  // Logout
   const logout = () => {
     localStorage.removeItem('@AirbnBES:token');
     localStorage.removeItem('@AirbnBES:user');
@@ -135,6 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// Hook personalizado para usar o contexto
 export const useAuth = () => {
   const context = useContext(AuthContext);
 

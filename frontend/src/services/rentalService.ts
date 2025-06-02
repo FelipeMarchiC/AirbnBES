@@ -11,13 +11,13 @@ export type Rental = {
   id: string;
   propertyId: string;
   tenantId: string;
-  ownerId: string;
+  ownerId: string; // Adicionado ownerId
   startDate: string;
   endDate: string;
   totalPrice: number;
   status: RentalStatus;
   tenantName: string;
-  property?: Property;
+  property?: Property; // Propriedade aninhada
   createdAt: string;
   updatedAt: string;
 };

@@ -59,5 +59,12 @@ class PriceTest {
             Price price = new Price(new BigDecimal("10.00"));
             assertThat(price).isNotEqualTo(null);
         }
+        @Test
+        @DisplayName("Should return false when comparing with different class object")
+        void shouldReturnFalseWhenComparingWithDifferentClassObject() {
+            Price price = new Price(new BigDecimal("10.00"));
+            Object otherObject = new Object();
+            assertThat(price).isNotEqualTo(otherObject);
+        }
     }
 }

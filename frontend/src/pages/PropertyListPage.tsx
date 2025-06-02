@@ -8,7 +8,7 @@ const PropertyListPage = () => {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<PropertyFiltersType>({});
-  
+
   // Buscar todas as propriedades ao carregar a página
   useEffect(() => {
     const fetchProperties = async () => {
@@ -16,33 +16,59 @@ const PropertyListPage = () => {
         setIsLoading(true);
         const data = await propertyService.getAllProperties();
         setProperties(data);
-        setFilteredProperties(data);
+        setFilteredProperties(data); // Initially, all properties are displayed
       } catch (error) {
         console.error('Erro ao buscar propriedades:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchProperties();
   }, []);
-  
+
   // Lidar com mudanças nos filtros
   const handleFilterChange = async (filters: PropertyFiltersType) => {
     setActiveFilters(filters);
     setIsLoading(true);
-    
+
     try {
       let results: Property[];
-      
-      if (Object.keys(filters).length === 0) {
-        // Sem filtros, mostrar todas as propriedades
+
+      if (Object.keys(filters).length === 0 || (
+        !filters.state && !filters.city &&
+        filters.minPrice === undefined && filters.maxPrice === undefined
+      )) {
+        // Sem filtros ativos, mostrar todas as propriedades carregadas
         results = properties;
       } else {
-        // Aplicar filtros
-        results = await propertyService.filterProperties(filters);
+        // Aplicar filtros localmente no estado 'properties' para combinar preço e localização
+        results = properties.filter(property => {
+          let matches = true;
+
+          // Filter by state
+          if (filters.state && property.state) {
+            matches = matches && property.state.toLowerCase() === filters.state.toLowerCase();
+          }
+
+          // Filter by city (location field)
+          if (filters.city && property.location) {
+            matches = matches && property.location.toLowerCase().includes(filters.city.toLowerCase());
+          }
+
+          // Filter by min price
+          if (filters.minPrice !== undefined) {
+            matches = matches && property.price >= filters.minPrice;
+          }
+
+          // Filter by max price
+          if (filters.maxPrice !== undefined) {
+            matches = matches && property.price <= filters.maxPrice;
+          }
+          return matches;
+        });
       }
-      
+
       setFilteredProperties(results);
     } catch (error) {
       console.error('Erro ao filtrar propriedades:', error);
@@ -50,7 +76,7 @@ const PropertyListPage = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="page-transition">
       {/* Cabeçalho da página */}
@@ -63,36 +89,41 @@ const PropertyListPage = () => {
           </p>
         </div>
       </div>
-      
+
       {/* Conteúdo principal */}
       <div className="container-custom py-8">
         {/* Filtros */}
         <PropertyFilters onFilterChange={handleFilterChange} isLoading={isLoading} />
-        
+
         {/* Lista de propriedades */}
         <div>
           {/* Indicador de filtros ativos */}
           {Object.keys(activeFilters).length > 0 && (
-            <div className="mb-4 flex items-center text-sm text-gray-500">
+            <div className="mb-4 flex flex-wrap items-center text-sm text-gray-500">
               <span className="mr-2">Filtros ativos:</span>
-              {activeFilters.location && (
-                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
-                  Localização: {activeFilters.location}
+              {activeFilters.state && (
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2 mb-2">
+                  Estado: {activeFilters.state}
+                </span>
+              )}
+              {activeFilters.city && (
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2 mb-2">
+                  Cidade: {activeFilters.city}
                 </span>
               )}
               {activeFilters.minPrice !== undefined && (
-                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2 mb-2">
                   Preço mínimo: R$ {activeFilters.minPrice}
                 </span>
               )}
               {activeFilters.maxPrice !== undefined && (
-                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2 mb-2">
                   Preço máximo: R$ {activeFilters.maxPrice}
                 </span>
               )}
             </div>
           )}
-          
+
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (

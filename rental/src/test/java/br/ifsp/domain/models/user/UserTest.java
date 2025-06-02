@@ -119,6 +119,13 @@ class UserTest {
             assertEquals(userId, user.getId());
         }
 
+        @Test
+        @DisplayName("Should return the correct username")
+        void shouldReturnCorrectName() {
+            assertEquals(name, user.getName());
+        }
+
+
     }
 
 }

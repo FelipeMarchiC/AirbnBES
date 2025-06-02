@@ -151,10 +151,20 @@ public class DataLoader implements CommandLineRunner {
                 createProperty("84e89a9a-2c9e-4ec1-8904-112b679e4715", "Estúdio Moderno", "Estúdio compacto e funcional", user1, "1000", "12", "Rua Bela Cintra", "São Paulo", "SP", "01415-000"),
                 createProperty("d30a5ae6-df95-42d0-8c5f-5e1a10f7f2ea", "Casa na Serra", "Casa aconchegante na serra", user1, "1600", "77", "Estrada da Serra", "Petrópolis", "RJ", "25680-000"),
                 createProperty("3fa11c74-79cc-499f-9f08-3e1f1c1d66e2", "Apartamento Beira-Mar", "Apartamento com varanda de frente para o mar", user1, "2200", "501", "Av. Atlântica", "Rio de Janeiro", "RJ", "22070-000"),
-                createProperty("4efb93c6-263d-47c1-9e38-e40a4d2d9627", "Loft Industrial", "Loft com decoração industrial e open space", user1, "2000", "888", "Rua Harmonia", "São Paulo", "SP", "05435-000")
+                createProperty("4efb93c6-263d-47c1-9e38-e40a4d2d9627", "Loft Industrial", "Loft com decoração industrial e open space", user1, "2000", "888", "Rua Harmonia", "São Paulo", "SP", "05435-000"),
+
+                // Novas propriedades do Roberto em outros estados e cidades
+                createProperty("a1c2b3d4-e5f6-7890-1234-567890abcdef", "Casa Histórica", "Casa charmosa no centro histórico", user1, "1900", "50", "Rua das Flores", "Ouro Preto", "MG", "35400-000"),
+                createProperty("b2c3d4e5-f6a7-8901-2345-67890abcdef0", "Fazenda com Gado", "Ampla fazenda para pecuária e lazer", user1, "4000", "S/N", "Rodovia do Gado", "Campo Grande", "MS", "79000-000"),
+                createProperty("c3d4e5f6-a7b8-9012-3456-7890abcdef12", "Bangalô na Lagoa", "Bangalô com acesso direto à lagoa", user1, "2800", "10", "Avenida Beira Mar", "Florianópolis", "SC", "88000-000"),
+                createProperty("d4e5f6a7-b8c9-0123-4567-890abcdef34", "Loja Comercial", "Espaço amplo para comércio", user1, "3000", "123", "Praça Central", "Salvador", "BA", "40000-000"),
+                createProperty("e5f6a7b8-c9d0-1234-5678-90abcdef56", "Apartamento de Luxo", "Apartamento com acabamento de alto padrão", user1, "5000", "1500", "Rua da Alta", "Belo Horizonte", "MG", "30000-000"),
+                createProperty("f6a7b8c9-d0e1-2345-6789-0abcdef789", "Chácara Arborizada", "Chácara com vasta área verde e piscina", user1, "1700", "20", "Estrada da Água", "Goiânia", "GO", "74000-000")
         );
 
         propertyRepository.saveAll(properties);
+
+        // Rentals for Uriel, ending by end of 2025, and no future rentals marked as EXPIRED
         RentalEntity r1 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4) // Uriel
@@ -204,7 +214,7 @@ public class DataLoader implements CommandLineRunner {
                 .state(RentalState.DENIED)
                 .build();
 
-// Aluguéis futuros
+// Aluguéis futuros (todos terminam até o fim de 2025 e não são EXPIRED se a data for futura)
         RentalEntity r6 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
@@ -228,11 +238,11 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r8 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(8)) // Apartamento Beira-Mar
-                .startDate(LocalDate.of(2026, 1, 5))
-                .endDate(LocalDate.of(2026, 1, 10))
-                .value(new Price(properties.get(8).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
-                .state(RentalState.EXPIRED)
+                .propertyEntity(properties.get(8)) // Apartamento Beira-Mar (ajustado para 2025)
+                .startDate(LocalDate.of(2025, 12, 20))
+                .endDate(LocalDate.of(2025, 12, 27))
+                .value(new Price(properties.get(8).getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
+                .state(RentalState.CONFIRMED) // Changed to CONFIRMED as it's a future rental
                 .build();
 
         rentalRepository.saveAll(List.of(r1, r2, r3,r4,r5,r6,r7,r8));

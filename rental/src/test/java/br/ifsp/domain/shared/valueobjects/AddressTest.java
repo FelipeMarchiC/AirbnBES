@@ -87,6 +87,17 @@ class AddressTest {
                     .hasMessageContaining("number is marked non-null but is null");
         }
 
-
+        @Test
+        @DisplayName("Should throw NullPointerException when building Address with null street")
+        void shouldThrowNullPointerExceptionWhenBuildingWithNullStreet() {
+            assertThatThrownBy(() -> Address.builder()
+                    .number(DEFAULT_NUMBER)
+                    .city(DEFAULT_CITY)
+                    .state(DEFAULT_STATE)
+                    .postalCode(DEFAULT_POSTAL_CODE)
+                    .build())
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("street is marked non-null but is null");
+        }
     }
 }

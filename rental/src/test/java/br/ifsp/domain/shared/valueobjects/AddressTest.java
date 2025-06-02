@@ -222,5 +222,18 @@ class AddressTest {
             assertThat(address1.hashCode()).isNotEqualTo(address2.hashCode());
         }
     }
+    @Nested
+    @DisplayName("ToString Method Tests")
+    class ToStringMethodTests {
+
+        @Test
+        @DisplayName("Should return the formatted string representation")
+        void shouldReturnFormattedStringRepresentation() {
+            Address address = createDefaultAddress();
+            String expectedString = String.format("%s, %s - %s, %s, %s", DEFAULT_STREET, DEFAULT_NUMBER, DEFAULT_CITY, DEFAULT_STATE, DEFAULT_POSTAL_CODE);
+            assertThat(address.toString()).isEqualTo(expectedString);
+        }
+    }
+
 
 }

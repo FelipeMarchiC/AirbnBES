@@ -188,5 +188,12 @@ class AddressTest {
             Address address2 = new Address(DEFAULT_NUMBER, DEFAULT_STREET, "Capital City", DEFAULT_STATE, DEFAULT_POSTAL_CODE);
             assertThat(address1).isNotEqualTo(address2);
         }
+        @Test
+        @DisplayName("Should not be equal if states are different")
+        void shouldNotBeEqualIfStatesAreDifferent() {
+            Address address1 = createDefaultAddress();
+            Address address2 = new Address(DEFAULT_NUMBER, DEFAULT_STREET, DEFAULT_CITY, "CA", DEFAULT_POSTAL_CODE);
+            assertThat(address1).isNotEqualTo(address2);
+        }
     }
 }

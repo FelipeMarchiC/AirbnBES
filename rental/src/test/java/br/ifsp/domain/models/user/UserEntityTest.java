@@ -185,5 +185,70 @@ class UserEntityTest {
         }
     }
 
+    @Nested
+    @DisplayName("UserDetails Interface Tests")
+    @Tag("UnitTest")
+    class UserDetailsInterfaceTests {
 
+        private UserEntity user;
+
+        @BeforeEach
+        void setupUserDetails() {
+            user = UserEntity.builder()
+                    .id(userId)
+                    .name(name)
+                    .lastname(lastname)
+                    .email(email)
+                    .password(password)
+                    .role(role)
+                    .ownedProperties(ownedProperties)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("Should return correct authorities based on role")
+        void shouldReturnCorrectAuthorities() {
+            Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
+            assertThat(authorities).hasSize(1);
+            assertThat(authorities.stream()
+                    .anyMatch(authority -> authority.getAuthority().equals(role.name())))
+                    .isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return correct password")
+        void shouldReturnCorrectPassword() {
+            assertThat(user.getPassword()).isEqualTo(password);
+        }
+
+        @Test
+        @DisplayName("Should return email as username")
+        void shouldReturnEmailAsUsername() {
+            assertThat(user.getUsername()).isEqualTo(email);
+        }
+
+        @Test
+        @DisplayName("Should return true for isAccountNonExpired by default")
+        void shouldReturnTrueForIsAccountNonExpired() {
+            assertThat(user.isAccountNonExpired()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return true for isAccountNonLocked by default")
+        void shouldReturnTrueForIsAccountNonLocked() {
+            assertThat(user.isAccountNonLocked()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return true for isCredentialsNonExpired by default")
+        void shouldReturnTrueForIsCredentialsNonExpired() {
+            assertThat(user.isCredentialsNonExpired()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should return true for isEnabled by default")
+        void shouldReturnTrueForIsEnabled() {
+            assertThat(user.isEnabled()).isTrue();
+        }
+    }
 }

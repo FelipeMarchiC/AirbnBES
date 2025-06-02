@@ -26,7 +26,6 @@ class PriceTest {
             assertThat(price).isNotNull();
             assertThat(price.getAmount()).isEqualTo(amount);
         }
-
         @Test
         @DisplayName("Should create Price with zero amount")
         void shouldCreatePriceWithZeroAmount() {
@@ -34,6 +33,14 @@ class PriceTest {
             Price price = new Price(amount);
             assertThat(price).isNotNull();
             assertThat(price.getAmount()).isEqualTo(amount);
+        }
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when amount is null")
+        void shouldThrowExceptionWhenAmountIsNull() {
+            BigDecimal amount = null;
+            assertThatThrownBy(() -> new Price(amount))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Price cannot be null or negative.");
         }
     }
 }

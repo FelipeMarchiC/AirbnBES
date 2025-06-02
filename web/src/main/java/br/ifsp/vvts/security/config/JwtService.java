@@ -1,5 +1,6 @@
 package br.ifsp.vvts.security.config;
 
+import br.ifsp.domain.models.user.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -28,7 +29,14 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        if (userDetails instanceof UserEntity user) {
+            extraClaims.put("id", user.getId().toString());
+            extraClaims.put("role", user.getRole().name());
+        }
+
+        return generateToken(extraClaims, userDetails);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

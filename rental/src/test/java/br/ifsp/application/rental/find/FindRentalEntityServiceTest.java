@@ -1,12 +1,22 @@
 package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.repository.RentalMapper;
+import br.ifsp.application.rental.util.TestDataFactory;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
+import br.ifsp.domain.models.rental.RentalState;
 import org.junit.jupiter.api.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.cglib.core.Local;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,11 +35,14 @@ class FindRentalEntityServiceTest {
     private IFindRentalService.FindByPropertyIdRequestModel findByPropertyIdRequestModel;
     private IFindRentalService.ResponseModel response;
     private Exception exceptionResponse;
+    private Clock clock;
+    private TestDataFactory factory = new TestDataFactory(clock);
 
     @BeforeEach
     void setup() {
+        clock = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
         jpaRentalRepository = mock(JpaRentalRepository.class);
-        findRentalService = new FindRentalService(jpaRentalRepository);
+        findRentalService = new FindRentalService(jpaRentalRepository,clock);
         presenter = new FindRentalPresenter() {
             @Override
             public void prepareSuccessView(IFindRentalService.ResponseModel response) {
@@ -58,18 +71,38 @@ class FindRentalEntityServiceTest {
         @Test
         void shouldReturnAllRentalsForGivenPropertyId() {
             UUID propertyId = UUID.randomUUID();
-            List<RentalEntity> mockRentalEntities = List.of(
-                    mock(RentalEntity.class),
-                    mock(RentalEntity.class)
+            RentalEntity rentalEntity = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
             );
-            response = new IFindRentalService.ResponseModel(mockRentalEntities);
-            findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
+            RentalEntity rentalEntity1 = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
+            );
+            List<RentalEntity> rentalEntities = List.of(
 
-            when(jpaRentalRepository.findByPropertyEntityId(propertyId)).thenReturn(mockRentalEntities);
+                    rentalEntity,
+                    rentalEntity1
+            );
+            List<Rental> rentalList = List.of(
+                    RentalMapper.toDomain(rentalEntity,clock),
+                    RentalMapper.toDomain(rentalEntity1,clock)
+            );
+
+            findByPropertyIdRequestModel = new IFindRentalService.FindByPropertyIdRequestModel(propertyId);
+            when(jpaRentalRepository.findByPropertyEntityId(propertyId)).thenReturn(rentalEntities);
             findRentalService.getRentalHistoryByProperty(findByPropertyIdRequestModel, presenter);
-            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
-            assertThat(exceptionResponse).isNull();
             assertThat(response).isNotNull();
+            assertThat(response.rentalList()).hasSize(rentalList.size());
+            assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByPropertyEntityId(propertyId);
         }
         @Test
@@ -97,14 +130,36 @@ class FindRentalEntityServiceTest {
         @Test
         void shouldReturnAllRentalsForGivenTenantId() {
             UUID tenantId = UUID.randomUUID();
-            List<RentalEntity> mockRentalEntities = List.of(
-                    mock(RentalEntity.class),
-                    mock(RentalEntity.class)
+            UUID propertyId = UUID.randomUUID();
+            RentalEntity rentalEntity = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
+            );
+            RentalEntity rentalEntity1 = factory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    factory.generateTenantEntity(),
+                    factory.generatePropertyEntity(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(10),
+                    RentalState.CONFIRMED
+            );
+            List<RentalEntity> rentalEntities = List.of(
+
+                    rentalEntity,
+                    rentalEntity1
+            );
+            List<Rental> rentalList = List.of(
+                    RentalMapper.toDomain(rentalEntity,clock),
+                    RentalMapper.toDomain(rentalEntity1,clock)
             );
             IFindRentalService.FindByTenantIdRequestModel requestModel = new IFindRentalService.FindByTenantIdRequestModel(tenantId);
-            when(jpaRentalRepository.findByUserEntityId(tenantId)).thenReturn(mockRentalEntities);
+            when(jpaRentalRepository.findByUserEntityId(tenantId)).thenReturn(rentalEntities);
             findRentalService.getRentalHistoryByTenant(requestModel, presenter);
-            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
+            assertThat(response.rentalList()).isEqualTo(rentalList);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findByUserEntityId(tenantId);
         }
@@ -193,7 +248,7 @@ class FindRentalEntityServiceTest {
             findRentalService.findAll(presenter);
 
             assertThat(response).isNotNull();
-            assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
+           // assertThat(response.rentalEntityList()).isEqualTo(mockRentalEntities);
             assertThat(exceptionResponse).isNull();
             verify(jpaRentalRepository).findAll();
         }

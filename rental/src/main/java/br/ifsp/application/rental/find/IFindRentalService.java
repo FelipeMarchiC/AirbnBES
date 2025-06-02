@@ -1,5 +1,6 @@
 package br.ifsp.application.rental.find;
 
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 
 import java.util.List;
@@ -11,6 +12,6 @@ public interface IFindRentalService {
     void findAll(FindRentalPresenter presenter);
     record FindByPropertyIdRequestModel(UUID propertyId) {}
     record FindByTenantIdRequestModel(UUID tenantId){}
-    record ResponseModel(List<RentalEntity> rentalEntityList) {}
+    record ResponseModel(List<Rental> rentalList) {}
 
 }

@@ -4,8 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -13,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Tag("UnitTest")
 @DisplayName("Price Value Object Tests")
 class PriceTest {
+
     @Nested
     @DisplayName("Constructor Tests")
     class ConstructorTests {
@@ -147,6 +150,14 @@ class PriceTest {
             assertThat(actualAmount).isEqualTo(expectedAmount);
         }
 
+        @Test
+        @DisplayName("Should return expected String representation via toString()")
+        void shouldReturnExpectedStringRepresentation() {
+            BigDecimal amount = new BigDecimal("99.99");
+            Price price = new Price(amount);
+            String toStringResult = price.toString();
+            assertThat(toStringResult).contains("amount=" + amount.toString());
+        }
     }
 
 }

@@ -53,6 +53,11 @@ class PriceTest {
             Price price = new Price(new BigDecimal("10.00"));
             assertThat(price).isEqualTo(price);
         }
-
+        @Test
+        @DisplayName("Should return false when comparing with null")
+        void shouldReturnFalseWhenComparingWithNull() {
+            Price price = new Price(new BigDecimal("10.00"));
+            assertThat(price).isNotEqualTo(null);
+        }
     }
 }

@@ -50,12 +50,7 @@ const HomePage = () => {
               >
                 Encontrar propriedades
               </Link>
-              <Link
-                to="/cadastro"
-                className="btn-outline bg-transparent border-white text-white hover:bg-white/10 text-lg py-3 px-6"
-              >
-                Criar uma conta
-              </Link>
+
             </div>
           </div>
         </div>
@@ -153,12 +148,7 @@ const HomePage = () => {
               >
                 Explorar propriedades
               </Link>
-              <Link
-                to="/cadastro"
-                className="btn-outline border-white text-terracota hover:bg-white/10 text-lg py-3 px-6"
-              >
-                Criar conta
-              </Link>
+
             </div>
           </div>
         </div>

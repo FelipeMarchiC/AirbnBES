@@ -17,11 +17,11 @@ public class RestFindRentalPresenter implements FindRentalPresenter {
 
     @Override
     public void prepareSuccessView(IFindRentalService.ResponseModel response) {
-        List<RentalViewModel> viewModelList = response.rentalEntityList().stream()
+        List<RentalViewModel> viewModelList = response.rentalList().stream()
                 .map(rental -> new RentalViewModel(
                         rental.getId(),
-                        rental.getUserEntity().getUsername(),
-                        rental.getPropertyEntity().getName(),
+                        rental.getUser().getName(),
+                        rental.getProperty().getName(),
                         rental.getStartDate(),
                         rental.getEndDate(),
                         rental.getValue().getAmount().doubleValue(),

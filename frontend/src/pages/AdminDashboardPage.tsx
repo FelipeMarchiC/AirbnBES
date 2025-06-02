@@ -50,8 +50,15 @@ const AdminDashboardPage = () => {
         const pending = rentals.filter(r => r.state === 'PENDING' || r.state === 'PENDENTE');
         setPendingRentals(pending.length);
 
-        // Aluguéis recentes (últimos 5)
-        setRecentRentals(rentals.slice(0, 5));
+        // **Modificação aqui:** Ordenar aluguéis por data decrescente e pegar os últimos 5
+        const sortedRentals = [...rentals].sort((a, b) => {
+          // Supondo que 'startDate' ou 'createdAt' exista e seja uma string de data
+          // Se sua API retornar um campo 'createdAt' que é mais adequado para "recentes", use-o.
+          // Caso contrário, 'startDate' pode ser uma opção.
+          return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+        });
+        setRecentRentals(sortedRentals.slice(0, 5));
+
       } catch (error) {
         console.error('Erro ao buscar dados do dashboard:', error);
       } finally {
@@ -63,11 +70,11 @@ const AdminDashboardPage = () => {
   }, []);
 
   // Componente de card para estatísticas
-  const StatCard = ({ title, value, icon, color }: { 
-    title: string; 
-    value: string | number; 
-    icon: React.ReactNode; 
-    color: string; 
+  const StatCard = ({ title, value, icon, color }: {
+    title: string;
+    value: string | number;
+    icon: React.ReactNode;
+    color: string;
   }) => (
     <div className="bg-white rounded-xl shadow-md p-6">
       <div className="flex items-center">
@@ -121,22 +128,22 @@ const AdminDashboardPage = () => {
     <div className="space-y-6 animate-fade-in">
       {/* Cards de estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-          title="Total de Propriedades" 
-          value={totalProperties} 
-          icon={<Building className="h-6 w-6" />} 
+        <StatCard
+          title="Total de Propriedades"
+          value={totalProperties}
+          icon={<Building className="h-6 w-6" />}
           color="bg-azul-colonial-600"
         />
-        <StatCard 
-          title="Total de Aluguéis" 
-          value={totalRentals} 
-          icon={<Calendar className="h-6 w-6" />} 
+        <StatCard
+          title="Total de Aluguéis"
+          value={totalRentals}
+          icon={<Calendar className="h-6 w-6" />}
           color="bg-verde-mata-600"
         />
-        <StatCard 
-          title="Aluguéis Pendentes" 
-          value={pendingRentals} 
-          icon={<Users className="h-6 w-6" />} 
+        <StatCard
+          title="Aluguéis Pendentes"
+          value={pendingRentals}
+          icon={<Users className="h-6 w-6" />}
           color="bg-areia-600"
         />
       </div>
@@ -145,8 +152,8 @@ const AdminDashboardPage = () => {
       <div className="bg-white rounded-xl shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-800">Aluguéis Recentes</h2>
-          <Link 
-            to="/admin/alugueis" 
+          <Link
+            to="/admin/alugueis"
             className="text-sm text-azul-colonial-600 hover:text-azul-colonial-700 flex items-center"
           >
             Ver todos
@@ -159,7 +166,7 @@ const AdminDashboardPage = () => {
         ) : (
           <div className="space-y-4">
             {recentRentals.map((rental) => (
-              <div 
+              <div
                 key={rental.id}
                 className="flex justify-between items-center pb-4 border-b border-gray-100"
               >
@@ -185,8 +192,8 @@ const AdminDashboardPage = () => {
 
       {/* Links rápidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link 
-          to="/admin/alugueis" 
+        <Link
+          to="/admin/alugueis"
           className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
         >
           <div className="flex items-center">
@@ -203,8 +210,8 @@ const AdminDashboardPage = () => {
           </div>
         </Link>
 
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
         >
           <div className="flex items-center">

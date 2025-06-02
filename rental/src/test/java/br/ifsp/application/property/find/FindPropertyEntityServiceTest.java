@@ -215,6 +215,17 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Prices must be non-negative");
         }
 
+        @Test
+        @DisplayName("Should reject zero min and negative max")
+        void shouldRejectZeroMinWithNegativeMax() {
+            var request = new IFindPropertyService.PriceRangeRequestModel(0.0, -1.0);
+            findPropertyService.findByPriceRange(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Prices must be non-negative");
+        }
     }
 
     @Nested

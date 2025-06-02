@@ -1,3 +1,4 @@
+// pages/PropertyListPage.tsx
 import { useState, useEffect } from 'react';
 import propertyService, { Property, PropertyFilters as PropertyFiltersType } from '../services/propertyService';
 import PropertyCard from '../components/PropertyCard';
@@ -9,7 +10,7 @@ const PropertyListPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<PropertyFiltersType>({});
 
-  // Buscar todas as propriedades ao carregar a página
+  // Fetch all properties on page load
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -27,7 +28,7 @@ const PropertyListPage = () => {
     fetchProperties();
   }, []);
 
-  // Lidar com mudanças nos filtros
+  // Handle filter changes
   const handleFilterChange = async (filters: PropertyFiltersType) => {
     setActiveFilters(filters);
     setIsLoading(true);
@@ -35,25 +36,26 @@ const PropertyListPage = () => {
     try {
       let results: Property[];
 
+      // If no filters are active, show all properties
       if (Object.keys(filters).length === 0 || (
         !filters.state && !filters.city &&
         filters.minPrice === undefined && filters.maxPrice === undefined
       )) {
-        // Sem filtros ativos, mostrar todas as propriedades carregadas
         results = properties;
       } else {
-        // Aplicar filtros localmente no estado 'properties' para combinar preço e localização
+        // Apply filters locally on the 'properties' state
         results = properties.filter(property => {
           let matches = true;
 
           // Filter by state
-          if (filters.state && property.state) {
+          if (filters.state) {
             matches = matches && property.state.toLowerCase() === filters.state.toLowerCase();
           }
 
-          // Filter by city (location field)
-          if (filters.city && property.location) {
-            matches = matches && property.location.toLowerCase().includes(filters.city.toLowerCase());
+          // Filter by city
+          // Assuming 'property.city' exists and 'filters.city' is the input value
+          if (filters.city) {
+            matches = matches && property.city.toLowerCase().includes(filters.city.toLowerCase());
           }
 
           // Filter by min price
@@ -79,7 +81,7 @@ const PropertyListPage = () => {
 
   return (
     <div className="page-transition">
-      {/* Cabeçalho da página */}
+      {/* Page Header */}
       <div className="bg-azul-colonial-700 text-white py-12">
         <div className="container-custom">
           <h1 className="text-3xl font-bold mb-4">Encontre a propriedade ideal</h1>
@@ -90,14 +92,14 @@ const PropertyListPage = () => {
         </div>
       </div>
 
-      {/* Conteúdo principal */}
+      {/* Main content */}
       <div className="container-custom py-8">
-        {/* Filtros */}
+        {/* Filters */}
         <PropertyFilters onFilterChange={handleFilterChange} isLoading={isLoading} />
 
-        {/* Lista de propriedades */}
+        {/* Property List */}
         <div>
-          {/* Indicador de filtros ativos */}
+          {/* Active filters indicator */}
           {Object.keys(activeFilters).length > 0 && (
             <div className="mb-4 flex flex-wrap items-center text-sm text-gray-500">
               <span className="mr-2">Filtros ativos:</span>

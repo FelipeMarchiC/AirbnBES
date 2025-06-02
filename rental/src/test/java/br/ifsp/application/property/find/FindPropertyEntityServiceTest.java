@@ -142,6 +142,23 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("PropertyId cannot be null");
         }
+
+        @Test
+        @DisplayName("Should handle generic exception during findById")
+        void shouldHandleGenericExceptionDuringFindById() {
+            UUID propertyId = UUID.randomUUID();
+            when(jpaPropertyRepository.findById(propertyId)).thenThrow(new RuntimeException("Database error during findById"));
+
+            var request = new IFindPropertyService.FindByIdRequestModel(propertyId);
+            findPropertyService.findById(findByIdPresenter, request);
+
+            assertThat(capturedPropertyResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Database error during findById");
+        }
+
+
     }
 
     @Nested

@@ -27,5 +27,13 @@ class PriceTest {
             assertThat(price.getAmount()).isEqualTo(amount);
         }
 
+        @Test
+        @DisplayName("Should create Price with zero amount")
+        void shouldCreatePriceWithZeroAmount() {
+            BigDecimal amount = BigDecimal.ZERO;
+            Price price = new Price(amount);
+            assertThat(price).isNotNull();
+            assertThat(price.getAmount()).isEqualTo(amount);
+        }
     }
 }

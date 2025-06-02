@@ -1,18 +1,24 @@
 package br.ifsp.application.rental.find;
 
 import br.ifsp.application.rental.repository.JpaRentalRepository;
+import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.shared.exceptions.EntityNotFoundException;
+import br.ifsp.domain.models.rental.Rental;
 import br.ifsp.domain.models.rental.RentalEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class FindRentalService implements IFindRentalService {
     private final JpaRentalRepository jpaRentalRepository;
+    private final Clock clock;
 
-    public FindRentalService(JpaRentalRepository jpaRentalRepository) {
+    public FindRentalService(JpaRentalRepository jpaRentalRepository, Clock clock) {
         this.jpaRentalRepository = jpaRentalRepository;
+        this.clock= clock;
     }
 
     @Override
@@ -22,7 +28,11 @@ public class FindRentalService implements IFindRentalService {
 
         try {
             List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByPropertyEntityId(findByPropertyIdRequestModel.propertyId());
-            presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
+            List<Rental> rentals = new ArrayList<>();
+            rentalEntityHistory.forEach(rentalEntity ->
+                    rentals.add(RentalMapper.toDomain(rentalEntity,clock))
+                    );
+            presenter.prepareSuccessView(new ResponseModel(rentals));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -34,7 +44,12 @@ public class FindRentalService implements IFindRentalService {
 
         try {
             List<RentalEntity> rentalEntityHistory = jpaRentalRepository.findByUserEntityId(requestModel.tenantId());
-            presenter.prepareSuccessView(new ResponseModel(rentalEntityHistory));
+            List<Rental> rentals = new ArrayList<>();
+            rentalEntityHistory.forEach(rentalEntity ->
+                    rentals.add(RentalMapper.toDomain(rentalEntity,clock))
+            );
+            presenter.prepareSuccessView(new ResponseModel(rentals));
+
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }
@@ -43,8 +58,11 @@ public class FindRentalService implements IFindRentalService {
     public void findAll(FindRentalPresenter presenter) {
         try {
             List<RentalEntity> allRentalEntities = jpaRentalRepository.findAll();
+            List<Rental> allRentals = new ArrayList<>();
+            allRentalEntities.forEach(rentalEntity ->
+                    allRentals.add(RentalMapper.toDomain(rentalEntity,clock)));
             if (allRentalEntities.isEmpty()) throw new EntityNotFoundException("There are no rentals registered");
-            presenter.prepareSuccessView(new ResponseModel(allRentalEntities));
+            presenter.prepareSuccessView(new ResponseModel(allRentals));
         } catch (Exception e) {
             presenter.prepareFailView(e);
         }

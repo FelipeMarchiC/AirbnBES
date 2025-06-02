@@ -203,5 +203,17 @@ class AddressTest {
             assertThat(address1).isNotEqualTo(address2);
         }
     }
+    @Nested
+    @DisplayName("HashCode Method Tests")
+    class HashCodeMethodTests {
+
+        @Test
+        @DisplayName("Should return same hash code for equal objects")
+        void shouldReturnSameHashCodeForEqualObjects() {
+            Address address1 = createDefaultAddress();
+            Address address2 = createDefaultAddress();
+            assertThat(address1.hashCode()).isEqualTo(address2.hashCode());
+        }
+    }
 
 }

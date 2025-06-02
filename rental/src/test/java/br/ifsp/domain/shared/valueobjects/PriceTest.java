@@ -66,5 +66,12 @@ class PriceTest {
             Object otherObject = new Object();
             assertThat(price).isNotEqualTo(otherObject);
         }
+        @Test
+        @DisplayName("Should return true when amounts are equal")
+        void shouldReturnTrueWhenAmountsAreEqual() {
+            Price price1 = new Price(new BigDecimal("10.00"));
+            Price price2 = new Price(new BigDecimal("10.00"));
+            assertThat(price1).isEqualTo(price2);
+        }
     }
 }

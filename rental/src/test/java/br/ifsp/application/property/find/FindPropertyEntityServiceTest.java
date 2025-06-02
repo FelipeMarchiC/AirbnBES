@@ -260,6 +260,21 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Location cannot be null or blank");
         }
+
+        @Test
+        @DisplayName("Should handle generic exception during findByLocation")
+        void shouldHandleGenericExceptionDuringFindByLocation() {
+            String location = "São Paulo";
+            when(jpaPropertyRepository.findByLocation(location)).thenThrow(new RuntimeException("Database error during location search"));
+
+            var request = new IFindPropertyService.LocationRequestModel(location);
+            findPropertyService.findByLocation(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Database error during location search");
+        }
     }
 
     @Nested

@@ -375,36 +375,52 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Prices must be non-negative");
         }
 
-        @Nested
-        @DisplayName("Property FindAll Tests")
-        class PropertyEntityFindAllTests {
+        @Test
+        @DisplayName("Should handle generic exception during findByPriceRange")
+        void shouldHandleGenericExceptionDuringFindByPriceRange() {
+            double min = 100.0;
+            double max = 300.0;
+            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenThrow(new RuntimeException("Database error during price range search"));
 
-            @Test
-            @DisplayName("Should return all properties from repository")
-            void shouldReturnAllProperties() {
-                PropertyEntity e1 = factory.generatePropertyEntity();
-                PropertyEntity e2 = factory.generatePropertyEntity();
-                List<PropertyEntity> entityList = List.of(e1, e2);
-                List<Property> expected = entityList.stream().map(PropertyMapper::toDomain).toList();
+            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
+            findPropertyService.findByPriceRange(presenter, request);
 
-                when(jpaPropertyRepository.findAll()).thenReturn(entityList);
-                findPropertyService.findAll(presenter);
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Database error during price range search");
+        }
+    }
 
-                assertThat(capturedException).isNull();
-                assertThat(capturedResponse).isNotNull();
-                assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
-            }
+    @Nested
+    @DisplayName("Property FindAll Tests")
+    class PropertyEntityFindAllTests {
 
-            @Test
-            @DisplayName("Should handle exception from repository in findAll")
-            void shouldHandleExceptionInFindAll() {
-                when(jpaPropertyRepository.findAll()).thenThrow(new RuntimeException("Database error"));
-                findPropertyService.findAll(presenter);
+        @Test
+        @DisplayName("Should return all properties from repository")
+        void shouldReturnAllProperties() {
+            PropertyEntity e1 = factory.generatePropertyEntity();
+            PropertyEntity e2 = factory.generatePropertyEntity();
+            List<PropertyEntity> entityList = List.of(e1, e2);
+            List<Property> expected = entityList.stream().map(PropertyMapper::toDomain).toList();
 
-                assertThat(capturedResponse).isNull();
-                assertThat(capturedException).isInstanceOf(RuntimeException.class)
-                        .hasMessageContaining("Database error");
-            }
+            when(jpaPropertyRepository.findAll()).thenReturn(entityList);
+            findPropertyService.findAll(presenter);
+
+            assertThat(capturedException).isNull();
+            assertThat(capturedResponse).isNotNull();
+            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
+        }
+
+        @Test
+        @DisplayName("Should handle exception from repository in findAll")
+        void shouldHandleExceptionInFindAll() {
+            when(jpaPropertyRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+            findPropertyService.findAll(presenter);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException).isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Database error");
         }
     }
 }

@@ -88,4 +88,17 @@ class PriceTest {
             assertThat(price1).isNotEqualTo(price2);
         }
     }
+    @Nested
+    @DisplayName("HashCode Method Tests")
+    class HashCodeMethodTests {
+
+        @Test
+        @DisplayName("Should return same hash code for equal objects")
+        void shouldReturnSameHashCodeForEqualObjects() {
+            Price price1 = new Price(new BigDecimal("10.00"));
+            Price price2 = new Price(new BigDecimal("10.00"));
+            assertThat(price1.hashCode()).isEqualTo(price2.hashCode());
+        }
+
+    }
 }

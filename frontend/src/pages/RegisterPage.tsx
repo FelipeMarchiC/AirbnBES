@@ -41,8 +41,6 @@ const RegisterPage = () => {
     
     if (!password) {
       newErrors.password = 'Senha é obrigatória';
-    } else if (password.length < 6) {
-      newErrors.password = 'A senha deve ter pelo menos 6 caracteres';
     }
     
     if (!confirmPassword) {

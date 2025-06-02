@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
-
   // Verificar se o usuário está autenticado ao carregar a página
   useEffect(() => {
     const token = localStorage.getItem('@AirbnBES:token');
@@ -68,7 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         role: payload.role === 'ADMIN' ? 'ADMIN' : 'USER',
       };
       
-
       // Armazenar token e usuário no localStorage
       localStorage.setItem('@AirbnBES:token', token);
       localStorage.setItem('@AirbnBES:user', JSON.stringify(user));
@@ -94,27 +92,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   
-
   // Registro
-  const register = async (_name: string, _email: string, _password: string) => {
+  const register = async (name: string, email: string, password: string) => {
     try {
       setLoading(true);
 
-      // Simulação de API de registro
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Chamada real à API de registro
+      const response = await api.post('/register', {
+        name,
+        email,
+        password,
+        lastname: name.split(' ').slice(1).join(' ') || '', // Assuming name might contain first and last, or just first. Adjust as needed.
+      });
 
-      toast.success('Cadastro realizado com sucesso!');
+      // Se o registro for bem-sucedido, o backend pode retornar um ID ou uma mensagem.
+      // Neste caso, a sua API de backend para registro retorna um UUID do usuário registrado.
+      // Não há token de autenticação retornado no registro, apenas no login.
+      console.log('Registro bem-sucedido:', response.data);
+
+      toast.success('Cadastro realizado com sucesso! Agora você pode fazer login.');
       navigate('/login', { replace: true });
-    } catch (error) {
-      toast.error('Erro ao criar conta. Tente novamente.');
-      console.error(error);
+    } catch (error: any) {
+      let errorMessage = 'Erro ao criar conta. Tente novamente.';
+      if (error.response && error.response.status === 409) {
+        errorMessage = 'Este e-mail já está cadastrado. Por favor, faça login ou use outro e-mail.';
+      } else if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+      toast.error(errorMessage);
+      console.error('Erro ao cadastrar:', error);
     } finally {
       setLoading(false);
     }
   };
 
   
-
   // Logout
   const logout = () => {
     localStorage.removeItem('@AirbnBES:token');

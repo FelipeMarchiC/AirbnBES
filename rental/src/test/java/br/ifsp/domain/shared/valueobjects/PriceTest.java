@@ -114,4 +114,18 @@ class PriceTest {
             assertThat(price1.hashCode()).isNotEqualTo(price2.hashCode());
         }
     }
+    @Nested
+    @DisplayName("Getter and ToString Tests")
+    class GetterAndToStringTests {
+
+        @Test
+        @DisplayName("Should return the correct amount via getAmount()")
+        void shouldReturnCorrectAmount() {
+            BigDecimal expectedAmount = new BigDecimal("123.45");
+            Price price = new Price(expectedAmount);
+            BigDecimal actualAmount = price.getAmount();
+            assertThat(actualAmount).isEqualTo(expectedAmount);
+        }
+
+    }
 }

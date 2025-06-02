@@ -207,5 +207,26 @@ class UserTest {
             assertTrue(ownedProperties.contains(propertyToAdd));
         }
 
+        @Test
+        @DisplayName("Should not add a property if it's already in owned properties")
+        void shouldNotAddExistingOwnedProperty() {
+            Property existingProperty = Property.builder()
+                    .id(propertyId)
+                    .name(propertyName)
+                    .description(description)
+                    .dailyRate(dailyRate)
+                    .address(address)
+                    .owner(user)
+                    .rentals(new ArrayList<>())
+                    .build();
+
+            user.addOwnedProperty(existingProperty);
+            assertEquals(1, user.getOwnedProperties().size());
+
+            user.addOwnedProperty(existingProperty);
+
+            assertEquals(1, user.getOwnedProperties().size());
+            assertTrue(user.getOwnedProperties().contains(existingProperty));
+        }
     }
 }

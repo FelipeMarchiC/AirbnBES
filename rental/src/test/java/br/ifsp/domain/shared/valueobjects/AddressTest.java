@@ -214,6 +214,13 @@ class AddressTest {
             Address address2 = createDefaultAddress();
             assertThat(address1.hashCode()).isEqualTo(address2.hashCode());
         }
+        @Test
+        @DisplayName("Should return different hash code for different objects")
+        void shouldReturnDifferentHashCodeForDifferentObjects() {
+            Address address1 = createDefaultAddress();
+            Address address2 = new Address("456", DEFAULT_STREET, DEFAULT_CITY, DEFAULT_STATE, DEFAULT_POSTAL_CODE);
+            assertThat(address1.hashCode()).isNotEqualTo(address2.hashCode());
+        }
     }
 
 }

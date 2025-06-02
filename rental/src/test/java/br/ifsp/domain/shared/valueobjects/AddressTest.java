@@ -57,5 +57,21 @@ class AddressTest {
             assertThat(address.getPostalCode()).isEqualTo(DEFAULT_POSTAL_CODE);
         }
 
+        @Test
+        @DisplayName("Should instantiate Address using no-args constructor (for JPA/Lombok)")
+        void shouldInstantiateAddressUsingNoArgsConstructor() {
+            try {
+                Address address = Address.class.getDeclaredConstructor().newInstance();
+                assertThat(address).isNotNull();
+                // Asserts para campos nulos, pois @NonNull não é validado no construtor padrão
+                assertThat(address.getNumber()).isNull();
+                assertThat(address.getStreet()).isNull();
+                assertThat(address.getCity()).isNull();
+                assertThat(address.getState()).isNull();
+                assertThat(address.getPostalCode()).isNull();
+            } catch (Exception e) {
+                fail("Failed to instantiate Address using no-args constructor: " + e.getMessage());
+            }
+        }
     }
 }

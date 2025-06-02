@@ -1,0 +1,86 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        'azul-colonial': {
+          50: '#eef5ff',
+          100: '#d9e7ff',
+          200: '#bcd4ff',
+          300: '#8bb7ff',
+          400: '#5590ff',
+          500: '#306bff',
+          600: '#1a47f5',
+          700: '#1737e0',
+          800: '#192fb6',
+          900: '#1b2e8e',
+          950: '#151c54',
+        },
+        'verde-mata': {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
+          950: '#022c22',
+        },
+        'areia': {
+          50: '#fdf8ed',
+          100: '#f8ecd3',
+          200: '#f1d8a6',
+          300: '#e9c072',
+          400: '#e2a548',
+          500: '#db8b2c',
+          600: '#c36d21',
+          700: '#a14f1d',
+          800: '#83401d',
+          900: '#6c361c',
+          950: '#3d1c0e',
+        },
+        'terracota': {
+          50: '#fcf5f0',
+          100: '#f9e8de',
+          200: '#f3d0bd',
+          300: '#eab095',
+          400: '#e08868',
+          500: '#d6613d',
+          600: '#c84727',
+          700: '#a63721',
+          800: '#882f22',
+          900: '#712a20',
+          950: '#3d1310',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        heading: ['Montserrat', 'sans-serif'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.5s ease-out',
+        'slide-in': 'slideIn 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideIn: {
+          '0%': { transform: 'translateX(-20px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+      },
+    },
+  },
+  plugins: [],
+};

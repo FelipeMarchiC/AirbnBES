@@ -38,6 +38,24 @@ class AddressTest {
             assertThat(address.getState()).isEqualTo(DEFAULT_STATE);
             assertThat(address.getPostalCode()).isEqualTo(DEFAULT_POSTAL_CODE);
         }
+        @Test
+        @DisplayName("Should create an Address using builder pattern")
+        void shouldCreateAddressUsingBuilderPattern() {
+            Address address = Address.builder()
+                    .number(DEFAULT_NUMBER)
+                    .street(DEFAULT_STREET)
+                    .city(DEFAULT_CITY)
+                    .state(DEFAULT_STATE)
+                    .postalCode(DEFAULT_POSTAL_CODE)
+                    .build();
+
+            assertThat(address).isNotNull();
+            assertThat(address.getNumber()).isEqualTo(DEFAULT_NUMBER);
+            assertThat(address.getStreet()).isEqualTo(DEFAULT_STREET);
+            assertThat(address.getCity()).isEqualTo(DEFAULT_CITY);
+            assertThat(address.getState()).isEqualTo(DEFAULT_STATE);
+            assertThat(address.getPostalCode()).isEqualTo(DEFAULT_POSTAL_CODE);
+        }
 
     }
 }

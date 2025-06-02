@@ -148,7 +148,12 @@ class AddressTest {
             Address address = createDefaultAddress();
             assertThat(address).isEqualTo(address);
         }
-
+        @Test
+        @DisplayName("Should not be equal to null")
+        void shouldNotBeEqualToNull() {
+            Address address = createDefaultAddress();
+            assertThat(address).isNotEqualTo(null);
+        }
 
     }
 }

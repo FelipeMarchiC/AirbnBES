@@ -2,11 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
-// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 
-// Pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -17,10 +15,8 @@ import AdminRentalsPage from './pages/AdminRentalsPage';
 import UserRentalsPage from './pages/UserRentalsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-// Interceptor de Requisições
 import './services/axiosConfig';
 
-// Rotas Protegidas
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
   
@@ -42,7 +38,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.Re
 function App() {
   return (
     <Routes>
-      {/* Rotas Públicas */}
+      {}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
@@ -50,7 +46,7 @@ function App() {
         <Route path="propriedades" element={<PropertyListPage />} />
         <Route path="propriedades/:id" element={<PropertyDetailsPage />} />
         
-        {/* Rotas de Usuário Autenticado */}
+        {}
         <Route path="meus-alugueis" element={
           <ProtectedRoute>
             <UserRentalsPage />
@@ -58,7 +54,7 @@ function App() {
         } />
       </Route>
       
-      {/* Rotas de Admin */}
+      {}
       <Route path="/admin" element={
         <ProtectedRoute requireAdmin={true}>
           <AdminLayout />
@@ -68,7 +64,7 @@ function App() {
         <Route path="alugueis" element={<AdminRentalsPage />} />
       </Route>
       
-      {/* Rota 404 */}
+      {}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

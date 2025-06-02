@@ -12,7 +12,6 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ onFilterChange, isLoa
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
 
-  // Example list of Brazilian states - you might fetch this from an API
   const brazilianStates = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'BR', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
   ];
@@ -31,7 +30,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ onFilterChange, isLoa
     setCity('');
     setMinPrice('');
     setMaxPrice('');
-    onFilterChange({}); // Clear all filters
+    onFilterChange({});
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -27,9 +27,9 @@ const AdminLayout = () => {
   
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar para desktop */}
+      {}
       <aside className="hidden md:flex flex-col w-64 bg-azul-colonial-800 text-white">
-        {/* Logo */}
+        {}
         <div className="p-6 border-b border-azul-colonial-700">
           <Link to="/" className="flex items-center">
             <Building className="h-8 w-8 text-white" />
@@ -39,7 +39,7 @@ const AdminLayout = () => {
           </Link>
         </div>
         
-        {/* Links de navegação */}
+        {}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
           <Link 
             to="/admin" 
@@ -74,7 +74,7 @@ const AdminLayout = () => {
           </Link>
         </nav>
         
-        {/* Rodapé com logout */}
+        {}
         <div className="p-4 border-t border-azul-colonial-700">
           <button 
             onClick={handleLogout}
@@ -86,9 +86,9 @@ const AdminLayout = () => {
         </div>
       </aside>
       
-      {/* Conteúdo principal */}
+      {}
       <div className="flex-1 flex flex-col">
-        {/* Header mobile */}
+        {}
         <header className="md:hidden bg-azul-colonial-800 text-white shadow-md">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
@@ -107,16 +107,16 @@ const AdminLayout = () => {
           </div>
         </header>
         
-        {/* Sidebar mobile */}
+        {}
         {sidebarOpen && (
           <div className="fixed inset-0 z-40 md:hidden">
-            {/* Overlay */}
+            {}
             <div 
               className="fixed inset-0 bg-black opacity-30"
               onClick={() => setSidebarOpen(false)}
             ></div>
             
-            {/* Sidebar content */}
+            {}
             <div className="fixed inset-y-0 left-0 w-64 bg-azul-colonial-800 text-white shadow-lg">
               <div className="flex items-center justify-between p-6 border-b border-azul-colonial-700">
                 <Link to="/" className="flex items-center">
@@ -183,7 +183,7 @@ const AdminLayout = () => {
           </div>
         )}
         
-        {/* Cabeçalho de página para desktop */}
+        {}
         <header className="hidden md:block bg-white shadow-sm px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -195,7 +195,7 @@ const AdminLayout = () => {
           </div>
         </header>
         
-        {/* Conteúdo principal */}
+        {}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="hidden md:flex items-center text-sm text-gray-500 mb-6">
             <Link to="/admin" className="hover:text-azul-colonial-600 transition-colors">

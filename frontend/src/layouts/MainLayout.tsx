@@ -9,12 +9,10 @@ const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   
-  // Fechar menu ao mudar de rota
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
   
-  // Detectar scroll para mudar a aparência do header
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -26,14 +24,14 @@ const MainLayout = () => {
   
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
+      {}
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
         }`}
       >
         <div className="container-custom flex items-center justify-between">
-          {/* Logo */}
+          {}
           <Link to="/" className="flex items-center">
             <Building className="h-8 w-8 text-azul-colonial-600" />
             <span className="ml-2 text-2xl font-bold font-heading text-azul-colonial-800">
@@ -41,7 +39,7 @@ const MainLayout = () => {
             </span>
           </Link>
           
-          {/* Menu para desktop */}
+          {}
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
               to="/" 
@@ -106,7 +104,7 @@ const MainLayout = () => {
             )}
           </nav>
           
-          {/* Botão de menu para mobile */}
+          {}
           <button 
             className="md:hidden text-gray-700 focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -116,7 +114,7 @@ const MainLayout = () => {
         </div>
       </header>
       
-      {/* Menu mobile */}
+      {}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-white pt-16 md:hidden animate-fade-in">
           <div className="container-custom py-6 flex flex-col space-y-4">
@@ -190,12 +188,12 @@ const MainLayout = () => {
         </div>
       )}
       
-      {/* Conteúdo principal */}
+      {}
       <main className="flex-grow pt-16 page-transition">
         <Outlet />
       </main>
       
-      {/* Footer */}
+      {}
       <footer className="bg-gray-900 text-white py-10">
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -237,14 +235,15 @@ const MainLayout = () => {
             
             <div>
               <h4 className="text-lg font-semibold mb-4">Contato</h4>
-              <p className="text-gray-400 mb-2">contato@airbnbes.com.br</p>
-              <p className="text-gray-400 mb-2">+55 (11) 1234-5678</p>
-              <p className="text-gray-400">São Paulo, SP - Brasil</p>
+              <p className="text-gray-400 mb-2">superbes@airbnbes.com.br</p>
+              <p className="text-gray-400 mb-2">+55 (99) 9999-999</p>
+              <p className="text-gray-400">São Carlos, SP - Brasil</p>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500">
             <p>&copy; {new Date().getFullYear()} AirbnBES. Todos os direitos reservados.</p>
+            <p>Feito Por Fefeu(Gabriel Henrique), Kayblack(Kayky Rocha) e Doutor Bosta(Felipe Marchi)</p>
           </div>
         </div>
       </footer>

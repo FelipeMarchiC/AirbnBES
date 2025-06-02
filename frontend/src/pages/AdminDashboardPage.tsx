@@ -12,7 +12,6 @@ const AdminDashboardPage = () => {
   const [pendingRentals, setPendingRentals] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Formatador de moeda
   const formatCurrency = (value?: number) => {
     if (typeof value !== 'number') return 'R$ 0,00';
     return value.toLocaleString('pt-BR', {
@@ -21,7 +20,6 @@ const AdminDashboardPage = () => {
     });
   };
 
-  // Formatar data
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR', {
@@ -30,31 +28,23 @@ const AdminDashboardPage = () => {
       year: 'numeric',
     }).format(date);
   };
-
-  // Buscar dados para o dashboard
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
 
-        // Buscar todas as propriedades
         const properties = await propertyService.getAllProperties();
         setTotalProperties(properties.length);
 
-        // Buscar todos os aluguéis
         const rentals = await rentalService.getAllRentals();
 
         setTotalRentals(rentals.length);
 
-        // Contar aluguéis pendentes (assumindo 'PENDING' ou 'PENDENTE')
         const pending = rentals.filter(r => r.state === 'PENDING' || r.state === 'PENDENTE');
         setPendingRentals(pending.length);
 
-        // **Modificação aqui:** Ordenar aluguéis por data decrescente e pegar os últimos 5
         const sortedRentals = [...rentals].sort((a, b) => {
-          // Supondo que 'startDate' ou 'createdAt' exista e seja uma string de data
-          // Se sua API retornar um campo 'createdAt' que é mais adequado para "recentes", use-o.
-          // Caso contrário, 'startDate' pode ser uma opção.
+
           return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
         });
         setRecentRentals(sortedRentals.slice(0, 5));
@@ -69,7 +59,7 @@ const AdminDashboardPage = () => {
     fetchDashboardData();
   }, []);
 
-  // Componente de card para estatísticas
+ 
   const StatCard = ({ title, value, icon, color }: {
     title: string;
     value: string | number;
@@ -126,7 +116,7 @@ const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Cards de estatísticas */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="Total de Propriedades"
@@ -148,7 +138,7 @@ const AdminDashboardPage = () => {
         />
       </div>
 
-      {/* Aluguéis recentes */}
+      {}
       <div className="bg-white rounded-xl shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-800">Aluguéis Recentes</h2>
@@ -190,7 +180,7 @@ const AdminDashboardPage = () => {
         )}
       </div>
 
-      {/* Links rápidos */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           to="/admin/alugueis"

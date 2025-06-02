@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Search, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import rentalService, { Rental, RentalStatus } from '../services/rentalService'; // Importa os tipos e serviço corretos
+import rentalService, { Rental, RentalStatus } from '../services/rentalService';
 import RentalStatusBadge from '../components/RentalStatusBadge';
 import toast from 'react-hot-toast';
 
@@ -13,7 +13,6 @@ const AdminRentalsPage = () => {
   const [statusFilter, setStatusFilter] = useState<RentalStatus | 'TODOS'>('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Buscar todos os aluguéis
   useEffect(() => {
     const fetchAllRentals = async () => {
       try {
@@ -32,21 +31,17 @@ const AdminRentalsPage = () => {
     fetchAllRentals();
   }, []);
 
-  // Aplicar filtros
   useEffect(() => {
     let result = rentals;
 
-    // Filtrar por status
     if (statusFilter !== 'TODOS') {
-      // Ajustado para usar 'state' que é o status no JSON de exemplo
       result = result.filter(rental => rental.state === statusFilter);
     }
 
-    // Filtrar por busca
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(rental =>
-        rental.username.toLowerCase().includes(query) || // Alterado para 'username'
+        rental.username.toLowerCase().includes(query) ||
         rental.propertyName.toLowerCase().includes(query) ||
         rental.id.toLowerCase().includes(query)
       );
@@ -55,7 +50,6 @@ const AdminRentalsPage = () => {
     setFilteredRentals(result);
   }, [rentals, statusFilter, searchQuery]);
 
-  // Formatadores
   const formatCurrency = (value?: number) => {
     if (typeof value !== 'number') return 'R$ 0,00';
     return value.toLocaleString('pt-BR', {
@@ -68,7 +62,6 @@ const AdminRentalsPage = () => {
     return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
   };
 
-  // Ações de gestão
   const handleConfirmRental = async (rentalId: string) => {
     try {
       await rentalService.confirmRental(rentalId);
@@ -77,7 +70,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, state: 'CONFIRMADO' } // Atualizado para 'state'
+            ? { ...rental, state: 'CONFIRMADO' }
             : rental
         )
       );
@@ -95,7 +88,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, state: 'RECUSADO' } // Atualizado para 'state'
+            ? { ...rental, state: 'RECUSADO' }
             : rental
         )
       );
@@ -113,7 +106,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, state: 'CANCELADO' } // Atualizado para 'state'
+            ? { ...rental, state: 'CANCELADO' }
             : rental
         )
       );
@@ -125,12 +118,10 @@ const AdminRentalsPage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Filtros */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtrar Aluguéis</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Busca */}
           <div className="col-span-2">
             <label htmlFor="search" className="form-label">
               Buscar por inquilino ou propriedade
@@ -148,7 +139,6 @@ const AdminRentalsPage = () => {
             </div>
           </div>
 
-          {/* Filtro de status */}
           <div>
             <label htmlFor="statusFilter" className="form-label">
               Status
@@ -160,7 +150,7 @@ const AdminRentalsPage = () => {
               onChange={(e) => setStatusFilter(e.target.value as RentalStatus | 'TODOS')}
             >
               <option value="TODOS">Todos os status</option>
-              <option value="PENDING">Pendente</option> {/* Alterado para PENDING */}
+              <option value="PENDING">Pendente</option>
               <option value="CONFIRMADO">Confirmado</option>
               <option value="RECUSADO">Recusado</option>
               <option value="CANCELADO">Cancelado</option>
@@ -169,7 +159,6 @@ const AdminRentalsPage = () => {
         </div>
       </div>
 
-      {/* Lista de aluguéis */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-6">Gerenciar Aluguéis</h2>
 
@@ -223,11 +212,10 @@ const AdminRentalsPage = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
                     <h3 className="font-semibold text-lg mb-2">
-                      {/* Usa propertyName diretamente */}
                       {rental.propertyName}
                     </h3>
                     <p className="text-gray-600 mb-1">
-                      <span className="font-medium">Inquilino:</span> {rental.username} {/* Alterado para 'username' */}
+                      <span className="font-medium">Inquilino:</span> {rental.username}
                     </p>
                     <div className="flex items-center text-gray-600 mb-1">
                       <Calendar className="h-4 w-4 mr-1" />
@@ -236,15 +224,15 @@ const AdminRentalsPage = () => {
                       </span>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      <span className="font-medium">Valor total:</span> {formatCurrency(rental.price)} {/* Alterado para 'price' */}
+                      <span className="font-medium">Valor total:</span> {formatCurrency(rental.price)}
                     </p>
                     <div className="mb-3">
-                      <RentalStatusBadge status={rental.state} /> {/* Alterado para 'state' */}
+                      <RentalStatusBadge status={rental.state} />
                     </div>
                   </div>
 
                   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mt-3 md:mt-0">
-                    {rental.state === 'PENDING' && ( // Alterado para 'state' e 'PENDING'
+                    {rental.state === 'PENDING' && (
                       <>
                         <button
                           onClick={() => handleConfirmRental(rental.id)}
@@ -263,7 +251,7 @@ const AdminRentalsPage = () => {
                       </>
                     )}
 
-                    {rental.state === 'CONFIRMADO' && ( // Alterado para 'state'
+                    {rental.state === 'CONFIRMADO' && (
                       <button
                         onClick={() => handleCancelRental(rental.id)}
                         className="btn-outline text-terracota-600 border-terracota-600 hover:bg-terracota-50 text-sm px-3 py-1.5 flex items-center justify-center"

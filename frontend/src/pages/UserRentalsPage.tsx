@@ -11,7 +11,6 @@ const UserRentalsPage = () => {
   const [pastRentals, setPastRentals] = useState<Rental[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Buscar aluguéis do usuário
   useEffect(() => {
     const fetchUserRentals = async () => {
       if (!user) return;
@@ -26,8 +25,7 @@ const UserRentalsPage = () => {
         const past: Rental[] = [];
 
         data.forEach(rental => {
-          // Mapeia o 'state' da API para o 'status' local para a lógica de exibição
-          const mappedStatus = mapApiStatusToRentalStatus(rental.state); 
+          const mappedStatus = mapApiStatusToRentalStatus(rental.state);
           const endDate = new Date(rental.endDate);
 
           if (
@@ -53,7 +51,6 @@ const UserRentalsPage = () => {
     fetchUserRentals();
   }, [user]);
 
-  // Função para mapear o status da API para o status local
   const mapApiStatusToRentalStatus = (apiStatus: string): Rental['status'] => {
     switch (apiStatus) {
       case 'PENDING':
@@ -62,30 +59,27 @@ const UserRentalsPage = () => {
         return 'CONFIRMADO';
       case 'DENIED':
         return 'RECUSADO';
-      case 'CANCELLED': // Assumindo que a API pode retornar 'CANCELLED' ou similar
-      case 'EXPIRED': // 'EXPIRED' também é considerado passado
-        return 'CANCELADO'; // Ou crie um novo status como 'EXPIRADO' se necessário
+      case 'CANCELLED':
+      case 'EXPIRED':
+        return 'CANCELADO';
       default:
-        return 'PENDENTE'; // Status padrão, ou erro
+        return 'PENDENTE';
     }
   };
 
-  // Cancelar aluguel
   const handleCancelRental = async (rentalId: string) => {
     try {
       await rentalService.cancelRentalAsTenant(rentalId, 'Cancelado pelo inquilino');
       toast.success('Aluguel cancelado com sucesso');
 
-      // Atualizar lista de aluguéis
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, status: 'CANCELADO', state: 'CANCELLED' } // Atualizar o state também
+            ? { ...rental, status: 'CANCELADO', state: 'CANCELLED' }
             : rental
         )
       );
 
-      // Mover o aluguel cancelado para a lista de passados
       const canceledRental = activeRentals.find(r => r.id === rentalId);
       if (canceledRental) {
         setActiveRentals(prev => prev.filter(r => r.id !== rentalId));
@@ -99,7 +93,6 @@ const UserRentalsPage = () => {
 
   return (
     <div className="page-transition">
-      {/* Cabeçalho da página */}
       <div className="bg-azul-colonial-700 text-white py-12">
         <div className="container-custom">
           <h1 className="text-3xl font-bold mb-4">Meus Aluguéis</h1>
@@ -110,10 +103,8 @@ const UserRentalsPage = () => {
         </div>
       </div>
 
-      {/* Conteúdo principal */}
       <div className="container-custom py-8">
         <div className="space-y-8">
-          {/* Aluguéis ativos */}
           <RentalList
             rentals={activeRentals}
             title="Aluguéis Ativos"
@@ -123,7 +114,6 @@ const UserRentalsPage = () => {
             isLoading={isLoading}
           />
 
-          {/* Histórico de aluguéis */}
           <RentalList
             rentals={pastRentals}
             title="Histórico de Aluguéis"

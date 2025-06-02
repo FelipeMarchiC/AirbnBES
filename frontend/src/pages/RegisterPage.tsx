@@ -15,12 +15,11 @@ const RegisterPage = () => {
     password?: string;
     confirmPassword?: string;
   }>({});
-  
-  // Redirecionar se já estiver autenticado
+
   if (isAuthenticated) {
     return <Navigate to="/" />;
   }
-  
+
   const validate = () => {
     const newErrors: {
       name?: string;
@@ -28,34 +27,34 @@ const RegisterPage = () => {
       password?: string;
       confirmPassword?: string;
     } = {};
-    
+
     if (!name) {
       newErrors.name = 'Nome é obrigatório';
     }
-    
+
     if (!email) {
       newErrors.email = 'E-mail é obrigatório';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'E-mail inválido';
     }
-    
+
     if (!password) {
       newErrors.password = 'Senha é obrigatória';
     }
-    
+
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Confirmação de senha é obrigatória';
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = 'As senhas não coincidem';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validate()) {
       try {
         await register(name, email, password);
@@ -64,7 +63,7 @@ const RegisterPage = () => {
       }
     }
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white rounded-xl shadow-md p-8 space-y-8 animate-fade-in">
@@ -77,7 +76,7 @@ const RegisterPage = () => {
             Cadastre-se para começar a usar o AirbnBES
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -99,7 +98,7 @@ const RegisterPage = () => {
                 <p className="mt-1 text-sm text-terracota-600">{errors.name}</p>
               )}
             </div>
-            
+
             <div>
               <label htmlFor="email" className="form-label">
                 E-mail
@@ -119,7 +118,7 @@ const RegisterPage = () => {
                 <p className="mt-1 text-sm text-terracota-600">{errors.email}</p>
               )}
             </div>
-            
+
             <div>
               <label htmlFor="password" className="form-label">
                 Senha
@@ -139,7 +138,7 @@ const RegisterPage = () => {
                 <p className="mt-1 text-sm text-terracota-600">{errors.password}</p>
               )}
             </div>
-            
+
             <div>
               <label htmlFor="confirmPassword" className="form-label">
                 Confirme a senha
@@ -160,7 +159,7 @@ const RegisterPage = () => {
               )}
             </div>
           </div>
-          
+
           <div>
             <button
               type="submit"
@@ -169,8 +168,8 @@ const RegisterPage = () => {
             >
               {loading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white\" xmlns="http://www.w3.org/2000/svg\" fill="none\" viewBox="0 0 24 24">
-                    <circle className="opacity-25\" cx="12\" cy="12\" r="10\" stroke="currentColor\" strokeWidth="4"></circle>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Cadastrando...
@@ -183,21 +182,17 @@ const RegisterPage = () => {
               )}
             </button>
           </div>
-          
+
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Ao se cadastrar, você concorda com nossos{' '}
+              Ao se cadastrar, você concorda com o{' '}
               <Link to="#" className="font-medium text-azul-colonial-600 hover:text-azul-colonial-700">
-                Termos de Serviço
+                SUPER BES
               </Link>{' '}
-              e{' '}
-              <Link to="#" className="font-medium text-azul-colonial-600 hover:text-azul-colonial-700">
-                Política de Privacidade
-              </Link>
             </p>
           </div>
         </form>
-        
+
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
             Já tem uma conta?{' '}

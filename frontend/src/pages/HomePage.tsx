@@ -7,12 +7,11 @@ import PropertyCard from '../components/PropertyCard';
 const HomePage = () => {
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const properties = await propertyService.getAllProperties();
-        // Pegar apenas 4 propriedades para destaque
         setFeaturedProperties(properties.slice(0, 4));
       } catch (error) {
         console.error('Erro ao buscar propriedades em destaque:', error);
@@ -20,23 +19,22 @@ const HomePage = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchProperties();
   }, []);
-  
+
   return (
     <div className="page-transition">
-      {/* Hero Section */}
       <section className="relative h-[70vh] min-h-[500px] bg-gradient-to-r from-azul-colonial-800 to-azul-colonial-600 text-white">
         <div className="absolute inset-0 overflow-hidden">
-          <img 
-            src="https://images.pexels.com/photos/1643384/pexels-photo-1643384.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
-            alt="Imagem de fundo" 
+          <img
+            src="https://images.pexels.com/photos/1643384/pexels-photo-1643384.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            alt="Imagem de fundo"
             className="w-full h-full object-cover opacity-25"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-azul-colonial-900/80 to-azul-colonial-800/60"></div>
-        
+
         <div className="container-custom relative h-full flex flex-col justify-center">
           <div className="max-w-2xl animate-slide-up">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
@@ -46,14 +44,14 @@ const HomePage = () => {
               AirbnBES conecta proprietários e inquilinos em uma plataforma completa para gerenciar aluguéis de propriedades com facilidade.
             </p>
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-              <Link 
-                to="/propriedades" 
+              <Link
+                to="/propriedades"
                 className="btn-primary text-lg py-3 px-6"
               >
                 Encontrar propriedades
               </Link>
-              <Link 
-                to="/cadastro" 
+              <Link
+                to="/cadastro"
                 className="btn-outline bg-transparent border-white text-white hover:bg-white/10 text-lg py-3 px-6"
               >
                 Criar uma conta
@@ -62,20 +60,19 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
-      {/* Propriedades em destaque */}
+
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800">Propriedades em destaque</h2>
-            <Link 
-              to="/propriedades" 
+            <Link
+              to="/propriedades"
               className="text-azul-colonial-600 hover:text-azul-colonial-700 font-medium"
             >
               Ver todas
             </Link>
           </div>
-          
+
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
@@ -103,12 +100,11 @@ const HomePage = () => {
           )}
         </div>
       </section>
-      
-      {/* Como funciona */}
+
       <section className="py-16 bg-white">
         <div className="container-custom">
           <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Como funciona</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="bg-azul-colonial-100 text-azul-colonial-600 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
@@ -119,7 +115,7 @@ const HomePage = () => {
                 Busque propriedades por localização ou faixa de preço. Encontre o imóvel perfeito para suas necessidades.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-verde-mata-100 text-verde-mata-600 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
                 <Calendar className="h-8 w-8" />
@@ -129,7 +125,7 @@ const HomePage = () => {
                 Solicite a reserva informando as datas desejadas. O proprietário receberá sua solicitação para análise.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-areia-100 text-areia-600 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-8 w-8" />
@@ -142,8 +138,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
-      {/* CTA */}
+
       <section className="py-16 bg-gradient-to-r from-areia-600 to-terracota-600 text-white">
         <div className="container-custom">
           <div className="max-w-3xl mx-auto text-center">
@@ -152,15 +147,15 @@ const HomePage = () => {
               Crie sua conta agora e comece a gerenciar seus aluguéis de forma simples e eficiente.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-              <Link 
-                to="/propriedades" 
-                className="btn-primary bg-white text-terracota-600 hover:bg-gray-100 text-lg py-3 px-6"
+              <Link
+                to="/propriedades"
+                className="btn-outline border-white text-terracota hover:bg-white/10 text-lg py-3 px-6"
               >
                 Explorar propriedades
               </Link>
-              <Link 
-                to="/cadastro" 
-                className="btn-outline border-white text-white hover:bg-white/10 text-lg py-3 px-6"
+              <Link
+                to="/cadastro"
+                className="btn-outline border-white text-terracota hover:bg-white/10 text-lg py-3 px-6"
               >
                 Criar conta
               </Link>

@@ -1,0 +1,31 @@
+
+package br.ifsp.domain.shared.valueobjects;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import java.lang.reflect.Constructor;
+import java.math.BigDecimal;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@Tag("Structural")
+@Tag("UnitTest")
+@DisplayName("Price Value Object Tests")
+class PriceTest {
+    @Nested
+    @DisplayName("Constructor Tests")
+    class ConstructorTests {
+
+        @Test
+        @DisplayName("Should create Price with a positive amount")
+        void shouldCreatePriceWithPositiveAmount() {
+            BigDecimal amount = new BigDecimal("10.50");
+            Price price = new Price(amount);
+            assertThat(price).isNotNull();
+            assertThat(price.getAmount()).isEqualTo(amount);
+        }
+
+    }
+}

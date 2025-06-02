@@ -195,5 +195,12 @@ class AddressTest {
             Address address2 = new Address(DEFAULT_NUMBER, DEFAULT_STREET, DEFAULT_CITY, "CA", DEFAULT_POSTAL_CODE);
             assertThat(address1).isNotEqualTo(address2);
         }
+        @Test
+        @DisplayName("Should not be equal if postal codes are different")
+        void shouldNotBeEqualIfPostalCodesAreDifferent() {
+            Address address1 = createDefaultAddress();
+            Address address2 = new Address(DEFAULT_NUMBER, DEFAULT_STREET, DEFAULT_CITY, DEFAULT_STATE, "90210");
+            assertThat(address1).isNotEqualTo(address2);
+        }
     }
 }

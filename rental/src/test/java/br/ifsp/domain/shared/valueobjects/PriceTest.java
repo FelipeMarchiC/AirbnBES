@@ -106,5 +106,12 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1.hashCode()).isEqualTo(price2.hashCode());
         }
+        @Test
+        @DisplayName("Should return different hash code for different objects")
+        void shouldReturnDifferentHashCodeForDifferentObjects() {
+            Price price1 = new Price(new BigDecimal("10.00"));
+            Price price2 = new Price(new BigDecimal("20.00"));
+            assertThat(price1.hashCode()).isNotEqualTo(price2.hashCode());
+        }
     }
 }

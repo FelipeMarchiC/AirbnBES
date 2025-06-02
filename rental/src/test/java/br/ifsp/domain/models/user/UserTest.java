@@ -131,7 +131,11 @@ class UserTest {
             assertEquals(lastname, user.getLastname());
         }
 
-
+        @Test
+        @DisplayName("Should return the correct user email")
+        void shouldReturnCorrectEmail() {
+            assertEquals(email, user.getEmail());
+        }
 
     }
 

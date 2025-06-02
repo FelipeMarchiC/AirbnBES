@@ -110,5 +110,15 @@ class UserTest {
         }
     }
 
+    @Nested
+    @DisplayName("User Getters Tests")
+    class GettersTests {
+        @Test
+        @DisplayName("Should return the correct user ID")
+        void shouldReturnCorrectId() {
+            assertEquals(userId, user.getId());
+        }
+
+    }
 
 }

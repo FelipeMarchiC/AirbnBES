@@ -1,4 +1,3 @@
-
 package br.ifsp.domain.shared.valueobjects;
 
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +25,7 @@ class PriceTest {
             assertThat(price).isNotNull();
             assertThat(price.getAmount()).isEqualTo(amount);
         }
+
         @Test
         @DisplayName("Should create Price with zero amount")
         void shouldCreatePriceWithZeroAmount() {
@@ -34,6 +34,7 @@ class PriceTest {
             assertThat(price).isNotNull();
             assertThat(price.getAmount()).isEqualTo(amount);
         }
+
         @Test
         @DisplayName("Should throw IllegalArgumentException when amount is null")
         void shouldThrowExceptionWhenAmountIsNull() {
@@ -42,7 +43,17 @@ class PriceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Price cannot be null or negative.");
         }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when amount is negative")
+        void shouldThrowExceptionWhenAmountIsNegative() {
+            BigDecimal amount = new BigDecimal("-5.00");
+            assertThatThrownBy(() -> new Price(amount))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Price cannot be null or negative.");
+        }
     }
+
     @Nested
     @DisplayName("Equals Method Tests")
     class EqualsMethodTests {
@@ -53,12 +64,14 @@ class PriceTest {
             Price price = new Price(new BigDecimal("10.00"));
             assertThat(price).isEqualTo(price);
         }
+
         @Test
         @DisplayName("Should return false when comparing with null")
         void shouldReturnFalseWhenComparingWithNull() {
             Price price = new Price(new BigDecimal("10.00"));
             assertThat(price).isNotEqualTo(null);
         }
+
         @Test
         @DisplayName("Should return false when comparing with different class object")
         void shouldReturnFalseWhenComparingWithDifferentClassObject() {
@@ -66,6 +79,7 @@ class PriceTest {
             Object otherObject = new Object();
             assertThat(price).isNotEqualTo(otherObject);
         }
+
         @Test
         @DisplayName("Should return true when amounts are equal")
         void shouldReturnTrueWhenAmountsAreEqual() {
@@ -73,6 +87,7 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1).isEqualTo(price2);
         }
+
         @Test
         @DisplayName("Should return true when amounts are equal but different scale")
         void shouldReturnTrueWhenAmountsAreEqualButDifferentScale() {
@@ -80,6 +95,7 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1).isEqualTo(price2);
         }
+
         @Test
         @DisplayName("Should return false when amounts are different")
         void shouldReturnFalseWhenAmountsAreDifferent() {
@@ -88,6 +104,7 @@ class PriceTest {
             assertThat(price1).isNotEqualTo(price2);
         }
     }
+
     @Nested
     @DisplayName("HashCode Method Tests")
     class HashCodeMethodTests {
@@ -99,6 +116,7 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1.hashCode()).isEqualTo(price2.hashCode());
         }
+
         @Test
         @DisplayName("Should return same hash code for equal objects with different scale")
         void shouldReturnSameHashCodeForEqualObjectsWithDifferentScale() {
@@ -106,6 +124,7 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1.hashCode()).isEqualTo(price2.hashCode());
         }
+
         @Test
         @DisplayName("Should return different hash code for different objects")
         void shouldReturnDifferentHashCodeForDifferentObjects() {
@@ -114,6 +133,7 @@ class PriceTest {
             assertThat(price1.hashCode()).isNotEqualTo(price2.hashCode());
         }
     }
+
     @Nested
     @DisplayName("Getter and ToString Tests")
     class GetterAndToStringTests {
@@ -128,4 +148,5 @@ class PriceTest {
         }
 
     }
+
 }

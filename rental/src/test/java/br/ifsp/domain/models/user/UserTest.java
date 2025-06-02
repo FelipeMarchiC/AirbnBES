@@ -79,6 +79,21 @@ class UserTest {
             assertEquals(property, userWithProperties.getOwnedProperties().get(0));
         }
 
+        @Test
+        @DisplayName("Should create a User with null owned properties list")
+        void shouldCreateUserWithNullOwnedPropertiesList() {
+            User userWithNullProperties = User.builder()
+                    .id(userId)
+                    .name(name)
+                    .lastname(lastname)
+                    .email(email)
+                    .ownedProperties(null)
+                    .build();
+
+            assertNotNull(userWithNullProperties);
+            assertTrue(userWithNullProperties.getOwnedProperties().isEmpty());
+        }
+
     }
 
 

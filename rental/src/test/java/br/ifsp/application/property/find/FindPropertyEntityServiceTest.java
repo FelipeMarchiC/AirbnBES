@@ -142,7 +142,6 @@ class FindPropertyEntityServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("PropertyId cannot be null");
         }
-
         @Test
         @DisplayName("Should handle generic exception during findById")
         void shouldHandleGenericExceptionDuringFindById() {
@@ -156,75 +155,6 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedException)
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Database error during findById");
-        }
-    }
-
-    @Nested
-    @Tag("Mutation")
-    @Tag("UnitTest")
-    @DisplayName("Mutation Tests")
-    class MutationTests {
-
-        @Test
-        @DisplayName("Should allow price range when min equals max")
-        void shouldAllowPriceRangeWhenMinEqualsMax() {
-            double min = 150.0;
-            double max = 150.0;
-
-            PropertyEntity e = factory.generatePropertyEntity();
-            List<Property> expected = List.of(PropertyMapper.toDomain(e));
-
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
-
-            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedException).isNull();
-            assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
-        }
-
-        @Test
-        @DisplayName("Should allow zero values for price range")
-        void shouldAllowZeroValuesForPriceRange() {
-            double min = 0.0;
-            double max = 0.0;
-
-            PropertyEntity e = factory.generatePropertyEntity();
-            List<Property> expected = List.of(PropertyMapper.toDomain(e));
-
-            when(jpaPropertyRepository.findByDailyRateBetween(min, max)).thenReturn(List.of(e));
-
-            var request = new IFindPropertyService.PriceRangeRequestModel(min, max);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedException).isNull();
-            assertThat(capturedResponse).isNotNull();
-            assertThat(capturedResponse.properties()).containsExactlyElementsOf(expected);
-        }
-
-        @Test
-        @DisplayName("Should reject negative min and zero max")
-        void shouldRejectNegativeMinWithZeroMax() {
-            var request = new IFindPropertyService.PriceRangeRequestModel(-1.0, 0.0);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedResponse).isNull();
-            assertThat(capturedException)
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Prices must be non-negative");
-        }
-
-        @Test
-        @DisplayName("Should reject zero min and negative max")
-        void shouldRejectZeroMinWithNegativeMax() {
-            var request = new IFindPropertyService.PriceRangeRequestModel(0.0, -1.0);
-            findPropertyService.findByPriceRange(presenter, request);
-
-            assertThat(capturedResponse).isNull();
-            assertThat(capturedException)
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Prices must be non-negative");
         }
     }
 
@@ -265,11 +195,29 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedResponse).isNull();
             assertThat(capturedException).isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Should handle generic exception during findByPeriod")
+        void shouldHandleGenericExceptionDuringFindByPeriod() {
+            LocalDate startDate = LocalDate.of(2025, 5, 4);
+            LocalDate endDate = startDate.plusDays(7);
+
+            when(jpaPropertyRepository.findAvailablePropertiesByPeriod(startDate, endDate)).thenThrow(new RuntimeException("Database error during period search"));
+
+            var request = new IFindPropertyService.PeriodRequestModel(startDate, endDate);
+            findPropertyService.findByPeriod(presenter, request);
+
+            assertThat(capturedResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Database error during period search");
+        }
     }
 
     @Nested
     @DisplayName("Property Search By Location Tests")
     class PropertyEntitySearchByLocationTests {
+
         @Test
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {

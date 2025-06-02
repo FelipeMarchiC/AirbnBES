@@ -114,6 +114,23 @@ class FindPropertyEntityServiceTest {
             assertThat(capturedPropertyResponse).isNotNull();
             assertThat(capturedPropertyResponse.property()).isEqualTo(expectedProperty);
         }
+
+        @Test
+        @DisplayName("Should throw EntityNotFoundException when property not found by ID")
+        void shouldThrowEntityNotFoundExceptionWhenPropertyNotFoundById() {
+            UUID propertyId = UUID.randomUUID();
+
+            when(jpaPropertyRepository.findById(propertyId)).thenReturn(Optional.empty());
+
+            var request = new IFindPropertyService.FindByIdRequestModel(propertyId);
+            findPropertyService.findById(findByIdPresenter, request);
+
+            assertThat(capturedPropertyResponse).isNull();
+            assertThat(capturedException)
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Property not found");
+        }
+
     }
 
     @Nested
@@ -294,5 +311,5 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("Database error");
         }
     }
-}
+    }
 }

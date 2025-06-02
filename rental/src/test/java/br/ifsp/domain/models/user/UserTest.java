@@ -147,4 +147,44 @@ class UserTest {
         }
     }
 
+    @Nested
+    @DisplayName("User Property Management Tests")
+    class PropertyManagementTests {
+        private UUID propertyId;
+        private String propertyName;
+        private String description;
+        private Price dailyRate;
+        private Address address;
+
+        @BeforeEach
+        void setUpProperties() {
+            propertyId = UUID.randomUUID();
+            propertyName = "Cozy Apartment";
+            description = "A lovely apartment in the city center.";
+            dailyRate = new Price(new BigDecimal("100.00"));
+            address = new Address("456", "Main St", "Metropolis", "NY", "98765-432");
+        }
+
+        @Test
+        @DisplayName("Should create a new property and add it to owned properties")
+        void shouldCreatePropertyAndAddToOwnedProperties() {
+            Property newProperty = user.createProperty(propertyId, propertyName, description, dailyRate, address);
+
+            assertNotNull(newProperty);
+            assertEquals(propertyId, newProperty.getId());
+            assertEquals(propertyName, newProperty.getName());
+            assertEquals(description, newProperty.getDescription());
+            assertEquals(dailyRate, newProperty.getDailyRate());
+            assertEquals(address, newProperty.getAddress());
+            assertEquals(user, newProperty.getOwner());
+            assertTrue(newProperty.getRentals().isEmpty());
+
+            List<Property> ownedProperties = user.getOwnedProperties();
+            assertFalse(ownedProperties.isEmpty());
+            assertEquals(1, ownedProperties.size());
+            assertTrue(ownedProperties.contains(newProperty));
+        }
+
+
+    }
 }

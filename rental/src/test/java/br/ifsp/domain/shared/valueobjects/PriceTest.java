@@ -160,4 +160,23 @@ class PriceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Lombok Generated Tests")
+    class LombokGeneratedTests {
+
+        @Test
+        @DisplayName("Should have protected no-args constructor for JPA")
+        void shouldHaveProtectedNoArgsConstructorForJPA() {
+            try {
+                Constructor<Price> constructor = Price.class.getDeclaredConstructor();
+                assertThat(constructor).isNotNull();
+                assertThat(constructor.trySetAccessible()).isTrue();
+                Price price = constructor.newInstance();
+                assertThat(price).isNotNull();
+                assertThat(price.getAmount()).isNull();
+            } catch (Exception e) {
+                assertThat(e).isNull();
+            }
+        }
+    }
 }

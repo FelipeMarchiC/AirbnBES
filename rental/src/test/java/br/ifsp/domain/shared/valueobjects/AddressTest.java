@@ -137,4 +137,18 @@ class AddressTest {
                     .hasMessageContaining("postalCode is marked non-null but is null");
         }
     }
+
+    @Nested
+    @DisplayName("Equals Method Tests")
+    class EqualsMethodTests {
+
+        @Test
+        @DisplayName("Should be equal to itself")
+        void shouldBeEqualToItself() {
+            Address address = createDefaultAddress();
+            assertThat(address).isEqualTo(address);
+        }
+
+
+    }
 }

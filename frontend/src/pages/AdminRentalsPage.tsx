@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Search, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import rentalService, { Rental, RentalStatus } from '../services/rentalService';
+import rentalService, { Rental, RentalStatus } from '../services/rentalService'; // Importa os tipos e serviço corretos
 import RentalStatusBadge from '../components/RentalStatusBadge';
 import toast from 'react-hot-toast';
 
@@ -12,7 +12,7 @@ const AdminRentalsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<RentalStatus | 'TODOS'>('TODOS');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Buscar todos os aluguéis
   useEffect(() => {
     const fetchAllRentals = async () => {
@@ -28,32 +28,32 @@ const AdminRentalsPage = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchAllRentals();
   }, []);
-  
+
   // Aplicar filtros
   useEffect(() => {
     let result = rentals;
-    
+
     // Filtrar por status
     if (statusFilter !== 'TODOS') {
       result = result.filter(rental => rental.status === statusFilter);
     }
-    
+
     // Filtrar por busca
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(rental => 
+      result = result.filter(rental =>
         rental.tenantName.toLowerCase().includes(query) ||
-        (rental.property?.name || '').toLowerCase().includes(query) ||
+        (rental.propertyName || '').toLowerCase().includes(query) || // Usa propertyName
         rental.id.toLowerCase().includes(query)
       );
     }
-    
+
     setFilteredRentals(result);
   }, [rentals, statusFilter, searchQuery]);
-  
+
   // Formatadores
   const formatCurrency = (value?: number) => {
     if (typeof value !== 'number') return 'R$ 0,00';
@@ -62,22 +62,21 @@ const AdminRentalsPage = () => {
       currency: 'BRL'
     });
   };
-  
+
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
   };
-  
+
   // Ações de gestão
   const handleConfirmRental = async (rentalId: string) => {
     try {
       await rentalService.confirmRental(rentalId);
       toast.success('Aluguel confirmado com sucesso');
-      
-      // Atualizar lista de aluguéis
-      setRentals(prevRentals => 
-        prevRentals.map(rental => 
-          rental.id === rentalId 
-            ? { ...rental, status: 'CONFIRMADO' } 
+
+      setRentals(prevRentals =>
+        prevRentals.map(rental =>
+          rental.id === rentalId
+            ? { ...rental, status: 'CONFIRMADO' }
             : rental
         )
       );
@@ -86,17 +85,16 @@ const AdminRentalsPage = () => {
       toast.error('Erro ao confirmar aluguel');
     }
   };
-  
+
   const handleDenyRental = async (rentalId: string) => {
     try {
       await rentalService.denyRental(rentalId);
       toast.success('Aluguel recusado com sucesso');
-      
-      // Atualizar lista de aluguéis
-      setRentals(prevRentals => 
-        prevRentals.map(rental => 
-          rental.id === rentalId 
-            ? { ...rental, status: 'RECUSADO' } 
+
+      setRentals(prevRentals =>
+        prevRentals.map(rental =>
+          rental.id === rentalId
+            ? { ...rental, status: 'RECUSADO' }
             : rental
         )
       );
@@ -105,17 +103,16 @@ const AdminRentalsPage = () => {
       toast.error('Erro ao recusar aluguel');
     }
   };
-  
+
   const handleCancelRental = async (rentalId: string) => {
     try {
       await rentalService.cancelRentalAsOwner(rentalId);
       toast.success('Aluguel cancelado com sucesso');
-      
-      // Atualizar lista de aluguéis
-      setRentals(prevRentals => 
-        prevRentals.map(rental => 
-          rental.id === rentalId 
-            ? { ...rental, status: 'CANCELADO' } 
+
+      setRentals(prevRentals =>
+        prevRentals.map(rental =>
+          rental.id === rentalId
+            ? { ...rental, status: 'CANCELADO' }
             : rental
         )
       );
@@ -124,13 +121,13 @@ const AdminRentalsPage = () => {
       toast.error('Erro ao cancelar aluguel');
     }
   };
-  
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Filtros */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Filtrar Aluguéis</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Busca */}
           <div className="col-span-2">
@@ -149,7 +146,7 @@ const AdminRentalsPage = () => {
               />
             </div>
           </div>
-          
+
           {/* Filtro de status */}
           <div>
             <label htmlFor="statusFilter" className="form-label">
@@ -170,11 +167,11 @@ const AdminRentalsPage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Lista de aluguéis */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-6">Gerenciar Aluguéis</h2>
-        
+
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -198,11 +195,11 @@ const AdminRentalsPage = () => {
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-lg font-medium text-gray-600">Nenhum aluguel encontrado</p>
             <p className="text-gray-500">
-              {searchQuery || statusFilter !== 'TODOS' 
-                ? 'Tente ajustar seus filtros para ver mais resultados.' 
+              {searchQuery || statusFilter !== 'TODOS'
+                ? 'Tente ajustar seus filtros para ver mais resultados.'
                 : 'Não há aluguéis registrados no sistema.'}
             </p>
-            
+
             {(searchQuery || statusFilter !== 'TODOS') && (
               <button
                 onClick={() => {
@@ -218,14 +215,15 @@ const AdminRentalsPage = () => {
         ) : (
           <div className="space-y-4">
             {filteredRentals.map((rental) => (
-              <div 
+              <div
                 key={rental.id}
                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
                     <h3 className="font-semibold text-lg mb-2">
-                      {rental.property?.name || `Propriedade #${rental.propertyId}`}
+                      {/* Usa propertyName diretamente */}
+                      {rental.propertyName || `Propriedade #${rental.propertyId}`}
                     </h3>
                     <p className="text-gray-600 mb-1">
                       <span className="font-medium">Inquilino:</span> {rental.tenantName}
@@ -243,7 +241,7 @@ const AdminRentalsPage = () => {
                       <RentalStatusBadge status={rental.status} />
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mt-3 md:mt-0">
                     {rental.status === 'PENDENTE' && (
                       <>
@@ -263,7 +261,7 @@ const AdminRentalsPage = () => {
                         </button>
                       </>
                     )}
-                    
+
                     {rental.status === 'CONFIRMADO' && (
                       <button
                         onClick={() => handleCancelRental(rental.id)}

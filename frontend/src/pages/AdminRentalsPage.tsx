@@ -38,15 +38,16 @@ const AdminRentalsPage = () => {
 
     // Filtrar por status
     if (statusFilter !== 'TODOS') {
-      result = result.filter(rental => rental.status === statusFilter);
+      // Ajustado para usar 'state' que é o status no JSON de exemplo
+      result = result.filter(rental => rental.state === statusFilter);
     }
 
     // Filtrar por busca
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(rental =>
-        rental.tenantName.toLowerCase().includes(query) ||
-        (rental.propertyName || '').toLowerCase().includes(query) || // Usa propertyName
+        rental.username.toLowerCase().includes(query) || // Alterado para 'username'
+        rental.propertyName.toLowerCase().includes(query) ||
         rental.id.toLowerCase().includes(query)
       );
     }
@@ -76,7 +77,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, status: 'CONFIRMADO' }
+            ? { ...rental, state: 'CONFIRMADO' } // Atualizado para 'state'
             : rental
         )
       );
@@ -94,7 +95,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, status: 'RECUSADO' }
+            ? { ...rental, state: 'RECUSADO' } // Atualizado para 'state'
             : rental
         )
       );
@@ -112,7 +113,7 @@ const AdminRentalsPage = () => {
       setRentals(prevRentals =>
         prevRentals.map(rental =>
           rental.id === rentalId
-            ? { ...rental, status: 'CANCELADO' }
+            ? { ...rental, state: 'CANCELADO' } // Atualizado para 'state'
             : rental
         )
       );
@@ -159,7 +160,7 @@ const AdminRentalsPage = () => {
               onChange={(e) => setStatusFilter(e.target.value as RentalStatus | 'TODOS')}
             >
               <option value="TODOS">Todos os status</option>
-              <option value="PENDENTE">Pendente</option>
+              <option value="PENDING">Pendente</option> {/* Alterado para PENDING */}
               <option value="CONFIRMADO">Confirmado</option>
               <option value="RECUSADO">Recusado</option>
               <option value="CANCELADO">Cancelado</option>
@@ -223,10 +224,10 @@ const AdminRentalsPage = () => {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">
                       {/* Usa propertyName diretamente */}
-                      {rental.propertyName || `Propriedade #${rental.propertyId}`}
+                      {rental.propertyName}
                     </h3>
                     <p className="text-gray-600 mb-1">
-                      <span className="font-medium">Inquilino:</span> {rental.tenantName}
+                      <span className="font-medium">Inquilino:</span> {rental.username} {/* Alterado para 'username' */}
                     </p>
                     <div className="flex items-center text-gray-600 mb-1">
                       <Calendar className="h-4 w-4 mr-1" />
@@ -235,15 +236,15 @@ const AdminRentalsPage = () => {
                       </span>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      <span className="font-medium">Valor total:</span> {formatCurrency(rental.totalPrice)}
+                      <span className="font-medium">Valor total:</span> {formatCurrency(rental.price)} {/* Alterado para 'price' */}
                     </p>
                     <div className="mb-3">
-                      <RentalStatusBadge status={rental.status} />
+                      <RentalStatusBadge status={rental.state} /> {/* Alterado para 'state' */}
                     </div>
                   </div>
 
                   <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mt-3 md:mt-0">
-                    {rental.status === 'PENDENTE' && (
+                    {rental.state === 'PENDING' && ( // Alterado para 'state' e 'PENDING'
                       <>
                         <button
                           onClick={() => handleConfirmRental(rental.id)}
@@ -262,7 +263,7 @@ const AdminRentalsPage = () => {
                       </>
                     )}
 
-                    {rental.status === 'CONFIRMADO' && (
+                    {rental.state === 'CONFIRMADO' && ( // Alterado para 'state'
                       <button
                         onClick={() => handleCancelRental(rental.id)}
                         className="btn-outline text-terracota-600 border-terracota-600 hover:bg-terracota-50 text-sm px-3 py-1.5 flex items-center justify-center"

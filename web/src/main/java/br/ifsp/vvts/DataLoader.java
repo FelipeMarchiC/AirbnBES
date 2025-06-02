@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.math.BigDecimal;
 
-import static java.util.Collections.emptyList ;
+import static java.util.Collections.emptyList;
 
 @Component
 public class DataLoader implements CommandLineRunner {
@@ -43,15 +43,25 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         UserEntity user1 = UserEntity.builder()
-                .id(UUID.fromString("9b96aa7e-4f1b-4c2f-b273-3b9f7c9b1a01"))
-                .name("Amiya").lastname("Rhodes")
-                .email("amiya@rhodesisland.com")
+                .id(UUID.fromString("a7e6f768-b8cb-4a14-9205-84fd94961cb1"))
+                .name("Roberto")
+                .lastname("Abadia")
+                .email("roberto-abadia@gmail.com")
                 .password(encoder.encode("bes"))
                 .role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
 
         UserEntity user2 = UserEntity.builder()
+                .id(UUID.fromString("9b96aa7e-4f1b-4c2f-b273-3b9f7c9b1a01"))
+                .name("Amiya").lastname("Rhodes")
+                .email("amiya@rhodesisland.com")
+                .password(encoder.encode("bes"))
+                .role(Role.USER)
+                .ownedProperties(emptyList())
+                .build();
+
+        UserEntity user3 = UserEntity.builder()
                 .id(UUID.fromString("2e13c4b8-b5a2-4af4-b881-c0298bfe5132"))
                 .name("Catherine")
                 .lastname("Earnshaw")
@@ -61,21 +71,12 @@ public class DataLoader implements CommandLineRunner {
                 .ownedProperties(emptyList())
                 .build();
 
-        UserEntity user3 = UserEntity.builder()
+        UserEntity user4 = UserEntity.builder()
                 .id(UUID.fromString("8dfc6c64-1e7b-4ec1-8450-d20e160c7092"))
                 .name("Coragem").lastname("o Cão Covarde")
                 .email("uriel@eustacio.com")
                 .password(encoder.encode("bes"))
                 .role(Role.USER)
-                .ownedProperties(emptyList())
-                .build();
-
-        UserEntity user4 = UserEntity.builder()
-                .id(UUID.fromString("a7e6f768-b8cb-4a14-9205-84fd94961cb1"))
-                .name("Roberto")
-                .lastname("Abadia")
-                .email("roberto-abadia@gmail.com")
-                .password(encoder.encode("bes")).role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
 
@@ -104,8 +105,8 @@ public class DataLoader implements CommandLineRunner {
                 .lastname("Bruno")
                 .email("macarrao@penguinlogistics.com")
                 .password(encoder.encode("bes"))
-                .ownedProperties(emptyList())
                 .role(Role.USER)
+                .ownedProperties(emptyList())
                 .build();
 
         UserEntity user8 = UserEntity.builder()
@@ -124,8 +125,8 @@ public class DataLoader implements CommandLineRunner {
                 .lastname("Assassino")
                 .email("lazaromanhunter@realoficial.com")
                 .password(encoder.encode("bes"))
-                .ownedProperties(emptyList())
                 .role(Role.USER)
+                .ownedProperties(emptyList())
                 .build();
 
         UserEntity user10 = UserEntity.builder()
@@ -134,299 +135,128 @@ public class DataLoader implements CommandLineRunner {
                 .lastname("Back")
                 .email("photograph@faraway.com")
                 .password(encoder.encode("bes"))
-                .ownedProperties(emptyList())
                 .role(Role.USER)
+                .ownedProperties(emptyList())
                 .build();
 
         userRepository.saveAll(List.of(user1, user2, user3, user4, user5, user6, user7, user8, user9, user10));
 
+        List<PropertyEntity> properties = List.of(
+                createProperty("f0d6c22f-3e9a-44c4-b4b5-fd67e5edacfc", "Apartamento Central", "Apartamento de 2 quartos no centro da cidade", user1, "1500", "101", "Rua da Liberdade", "São Paulo", "SP", "01000-000"),
+                createProperty("8dfc6c64-1e7b-4ec1-8450-d20e160c7093", "Casa de Praia", "Casa de frente para o mar", user1, "2500", "202", "Rua da Liberdade", "Rio de Janeiro", "RJ", "22000-000"),
+                createProperty("6a1f9b3e-0d42-4a6d-ae7d-12b50a0b9c77", "Cobertura Luxuosa", "Cobertura com vista panorâmica", user1, "3500", "303", "Av. Paulista", "São Paulo", "SP", "01311-000"),
+                createProperty("b8de4a91-e9d9-4f6a-9481-ccf74cf71b01", "Sítio Tranquilo", "Sítio com lago e área verde", user1, "1200", "1", "Estrada do Campo", "Campinas", "SP", "13000-000"),
+                createProperty("c51f5172-bc2c-4bb4-9841-12b3933c94e0", "Flat Executivo", "Flat próximo ao centro financeiro", user1, "1800", "405", "Rua Augusta", "São Paulo", "SP", "01413-000"),
+                createProperty("25f913ed-0326-4633-b4ac-32b9477c3edb", "Chalé na Montanha", "Chalé com lareira e vista para as montanhas", user1, "1400", "99", "Alameda das Neves", "Campos do Jordão", "SP", "12460-000"),
+                createProperty("84e89a9a-2c9e-4ec1-8904-112b679e4715", "Estúdio Moderno", "Estúdio compacto e funcional", user1, "1000", "12", "Rua Bela Cintra", "São Paulo", "SP", "01415-000"),
+                createProperty("d30a5ae6-df95-42d0-8c5f-5e1a10f7f2ea", "Casa na Serra", "Casa aconchegante na serra", user1, "1600", "77", "Estrada da Serra", "Petrópolis", "RJ", "25680-000"),
+                createProperty("3fa11c74-79cc-499f-9f08-3e1f1c1d66e2", "Apartamento Beira-Mar", "Apartamento com varanda de frente para o mar", user1, "2200", "501", "Av. Atlântica", "Rio de Janeiro", "RJ", "22070-000"),
+                createProperty("4efb93c6-263d-47c1-9e38-e40a4d2d9627", "Loft Industrial", "Loft com decoração industrial e open space", user1, "2000", "888", "Rua Harmonia", "São Paulo", "SP", "05435-000")
+        );
 
-        PropertyEntity p1 = PropertyEntity.builder()
-                .id(UUID.fromString("f0d6c22f-3e9a-44c4-b4b5-fd67e5edacfc"))
-                .name("Apartamento Central")
-                .description("Apartamento de 2 quartos no centro da cidade")
-                .owner(user1)
-                .dailyRate(new Price(new BigDecimal("1500")))
-                .address(
-                        Address.builder()
-                                .number("101")
-                                .street("Rua da Liberdade")
-                                .city("São Paulo")
-                                .state("SP")
-                                .postalCode("01000-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p2 = PropertyEntity.builder()
-                .id(UUID.fromString("8dfc6c64-1e7b-4ec1-8450-d20e160c7093"))
-                .name("Casa de Praia").description("Casa de frente para o mar")
-                .owner(user2)
-                .dailyRate(new Price(new BigDecimal("2500")))
-                .address(
-                        Address.builder()
-                                .number("202")
-                                .street("Rua da Liberdade")
-                                .city("Rio de Janeiro")
-                                .state("RJ")
-                                .postalCode("22000-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p3 = PropertyEntity.builder()
-                .id(UUID.fromString("6a1f9b3e-0d42-4a6d-ae7d-12b50a0b9c77"))
-                .name("Cobertura Luxuosa")
-                .description("Cobertura com vista panorâmica")
-                .owner(user3)
-                .dailyRate(new Price(new BigDecimal("3500")))
-                .address(
-                        Address.builder()
-                                .number("303")
-                                .street("Av. Paulista")
-                                .city("São Paulo")
-                                .state("SP")
-                                .postalCode("01311-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p4 = PropertyEntity.builder()
-                .id(UUID.fromString("b8de4a91-e9d9-4f6a-9481-ccf74cf71b01"))
-                .name("Sítio Tranquilo")
-                .description("Sítio com lago e área verde")
-                .owner(user4)
-                .dailyRate(new Price(new BigDecimal("1200")))
-                .address(
-                        Address.builder()
-                                .number("1")
-                                .street("Estrada do Campo")
-                                .city("Campinas")
-                                .state("SP")
-                                .postalCode("13000-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p5 = PropertyEntity.builder()
-                .id(UUID.fromString("c51f5172-bc2c-4bb4-9841-12b3933c94e0"))
-                .name("Flat Executivo")
-                .description("Flat próximo ao centro financeiro")
-                .owner(user1)
-                .dailyRate(new Price(new BigDecimal("1800")))
-                .address(
-                        Address.builder()
-                                .number("405")
-                                .street("Rua Augusta")
-                                .city("São Paulo")
-                                .state("SP")
-                                .postalCode("01413-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p6 = PropertyEntity.builder()
-                .id(UUID.fromString("25f913ed-0326-4633-b4ac-32b9477c3edb"))
-                .name("Chalé na Montanha")
-                .description("Chalé com lareira e vista para as montanhas")
-                .owner(user2)
-                .dailyRate(new Price(new BigDecimal("1400")))
-                .address(
-                        Address.builder()
-                                .number("99")
-                                .street("Alameda das Neves")
-                                .city("Campos do Jordão")
-                                .state("SP")
-                                .postalCode("12460-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p7 = PropertyEntity.builder()
-                .id(UUID.fromString("84e89a9a-2c9e-4ec1-8904-112b679e4715"))
-                .name("Estúdio Moderno")
-                .description("Estúdio compacto e funcional")
-                .owner(user3)
-                .dailyRate(new Price(new BigDecimal("1000")))
-                .address(
-                        Address.builder()
-                                .number("12")
-                                .street("Rua Bela Cintra")
-                                .city("São Paulo")
-                                .state("SP")
-                                .postalCode("01415-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p8 = PropertyEntity.builder()
-                .id(UUID.fromString("d30a5ae6-df95-42d0-8c5f-5e1a10f7f2ea"))
-                .name("Casa na Serra")
-                .description("Casa aconchegante na serra")
-                .owner(user4)
-                .dailyRate(new Price(new BigDecimal("1600")))
-                .address(
-                        Address.builder()
-                                .number("77")
-                                .street("Estrada da Serra")
-                                .city("Petrópolis")
-                                .state("RJ")
-                                .postalCode("25680-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p9 = PropertyEntity.builder()
-                .id(UUID.fromString("3fa11c74-79cc-499f-9f08-3e1f1c1d66e2"))
-                .name("Apartamento Beira-Mar")
-                .description("Apartamento com varanda de frente para o mar")
-                .owner(user1)
-                .dailyRate(new Price(new BigDecimal("2200")))
-                .address(
-                        Address.builder()
-                                .number("501")
-                                .street("Av. Atlântica")
-                                .city("Rio de Janeiro")
-                                .state("RJ")
-                                .postalCode("22070-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        PropertyEntity p10 = PropertyEntity.builder()
-                .id(UUID.fromString("4efb93c6-263d-47c1-9e38-e40a4d2d9627"))
-                .name("Loft Industrial")
-                .description("Loft com decoração industrial e open space")
-                .owner(user2)
-                .dailyRate(new Price(new BigDecimal("2000")))
-                .address(
-                        Address.builder()
-                                .number("888")
-                                .street("Rua Harmonia")
-                                .city("São Paulo")
-                                .state("SP")
-                                .postalCode("05435-000")
-                                .build()
-                )
-                .rentals(emptyList())
-                .build();
-
-        propertyRepository.saveAll(List.of(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10));
-
+        propertyRepository.saveAll(properties);
         RentalEntity r1 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user5)
-                .propertyEntity(p1)
-                .startDate(LocalDate.of(2025, 3, 10))
-                .endDate(LocalDate.of(2025, 3, 15))
-                .value(new Price(p1.getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
+                .userEntity(user4) // Uriel
+                .propertyEntity(properties.get(0)) // Apartamento Central
+                .startDate(LocalDate.of(2025, 8, 5))
+                .endDate(LocalDate.of(2025, 8, 10))
+                .value(new Price(properties.get(0).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
                 .state(RentalState.CONFIRMED)
                 .build();
 
         RentalEntity r2 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user6)
-                .propertyEntity(p2)
-                .startDate(LocalDate.of(2025, 4, 5))
-                .endDate(LocalDate.of(2025, 4, 12))
-                .value(new Price(p2.getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
-                .state(RentalState.DENIED)
+                .userEntity(user4) // Uriel
+                .propertyEntity(properties.get(3)) // Sítio Tranquilo
+                .startDate(LocalDate.of(2025, 9, 15))
+                .endDate(LocalDate.of(2025, 9, 22))
+                .value(new Price(properties.get(3).getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
+                .state(RentalState.CONFIRMED)
                 .build();
 
         RentalEntity r3 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user7)
-                .propertyEntity(p3)
-                .startDate(LocalDate.of(2025, 5, 1))
-                .endDate(LocalDate.of(2025, 5, 6))
-                .state(RentalState.CONFIRMED)
-                .value(new Price(p3.getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
+                .userEntity(user4) // Uriel
+                .propertyEntity(properties.get(5)) // Chalé na Montanha
+                .startDate(LocalDate.of(2025, 10, 1))
+                .endDate(LocalDate.of(2025, 10, 4))
+                .value(new Price(properties.get(5).getDailyRate().getAmount().multiply(BigDecimal.valueOf(3))))
+                .state(RentalState.PENDING)
                 .build();
-
         RentalEntity r4 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user8)
-                .propertyEntity(p4)
-                .startDate(LocalDate.of(2025, 6, 20))
-                .endDate(LocalDate.of(2025, 6, 30))
-                .value(new Price(p4.getDailyRate().getAmount().multiply(BigDecimal.valueOf(10))))
+                .userEntity(user4)
+                .propertyEntity(properties.get(2)) // Cobertura Luxuosa
+                .startDate(LocalDate.of(2024, 12, 1))
+                .endDate(LocalDate.of(2024, 12, 5))
+                .value(new Price(properties.get(2).getDailyRate().getAmount().multiply(BigDecimal.valueOf(4))))
                 .state(RentalState.CONFIRMED)
                 .build();
 
         RentalEntity r5 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user9)
-                .propertyEntity(p5)
-                .startDate(LocalDate.of(2025, 7, 1))
-                .endDate(LocalDate.of(2025, 7, 10))
-                .value(new Price(p5.getDailyRate().getAmount().multiply(BigDecimal.valueOf(9))))
+                .userEntity(user4)
+                .propertyEntity(properties.get(4)) // Flat Executivo
+                .startDate(LocalDate.of(2025, 1, 10))
+                .endDate(LocalDate.of(2025, 1, 12))
+                .value(new Price(properties.get(4).getDailyRate().getAmount().multiply(BigDecimal.valueOf(2))))
                 .state(RentalState.DENIED)
                 .build();
 
+// Aluguéis futuros
         RentalEntity r6 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user10)
-                .propertyEntity(p6)
-                .startDate(LocalDate.of(2025, 8, 15))
-                .endDate(LocalDate.of(2025, 8, 20))
-                .value(new Price(p6.getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
-                .state(RentalState.CONFIRMED)
+                .userEntity(user4)
+                .propertyEntity(properties.get(6)) // Estúdio Moderno
+                .startDate(LocalDate.of(2025, 11, 20))
+                .endDate(LocalDate.of(2025, 11, 25))
+                .value(new Price(properties.get(6).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
+                .state(RentalState.PENDING)
                 .build();
 
         RentalEntity r7 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user1)
-                .propertyEntity(p7)
-                .startDate(LocalDate.of(2025, 9, 10))
-                .endDate(LocalDate.of(2025, 9, 18))
-                .value(new Price(p7.getDailyRate().getAmount().multiply(BigDecimal.valueOf(9))))
+                .userEntity(user4)
+                .propertyEntity(properties.get(7)) // Casa na Serra
+                .startDate(LocalDate.of(2025, 12, 10))
+                .endDate(LocalDate.of(2025, 12, 15))
+                .value(new Price(properties.get(7).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
                 .state(RentalState.CONFIRMED)
                 .build();
 
         RentalEntity r8 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user2)
-                .propertyEntity(p8)
-                .startDate(LocalDate.of(2025, 10, 2))
-                .endDate(LocalDate.of(2025, 10, 7))
-                .value(new Price(p8.getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
-
-                .state(RentalState.CONFIRMED)
-                .build();
-
-        RentalEntity r9 = RentalEntity.builder()
-                .id(UUID.randomUUID())
-                .userEntity(user3)
-                .propertyEntity(p9)
-                .startDate(LocalDate.of(2025, 11, 12))
-                .endDate(LocalDate.of(2025, 11, 19))
-                .value(new Price(p9.getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
-                .state(RentalState.PENDING)
-                .build();
-
-        RentalEntity r10 = RentalEntity
-                .builder()
-                .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(p10)
-                .startDate(LocalDate.of(2024, 12, 1))
-                .endDate(LocalDate.of(2024, 12, 5))
-                .value(new Price(p10.getDailyRate().getAmount().multiply(BigDecimal.valueOf(4))))
-                .state(RentalState.PENDING).build();
+                .propertyEntity(properties.get(8)) // Apartamento Beira-Mar
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 10))
+                .value(new Price(properties.get(8).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
+                .state(RentalState.EXPIRED)
+                .build();
 
-        rentalRepository.saveAll(List.of(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10));
+        rentalRepository.saveAll(List.of(r1, r2, r3,r4,r5,r6,r7,r8));
+
+    }
+
+    private PropertyEntity createProperty(
+            String id, String name, String desc, UserEntity owner, String price,
+            String number, String street, String city, String state, String cep
+    ) {
+        return PropertyEntity.builder()
+                .id(UUID.fromString(id))
+                .name(name)
+                .description(desc)
+                .owner(owner)
+                .dailyRate(new Price(new BigDecimal(price)))
+                .address(Address.builder()
+                        .number(number)
+                        .street(street)
+                        .city(city)
+                        .state(state)
+                        .postalCode(cep)
+                        .build())
+                .rentals(emptyList())
+                .build();
     }
 }
-
-
-
-

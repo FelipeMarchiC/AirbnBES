@@ -137,6 +137,14 @@ class UserTest {
             assertEquals(email, user.getEmail());
         }
 
+        @Test
+        @DisplayName("Should return an unmodifiable list of owned properties")
+        void shouldReturnUnmodifiableOwnedPropertiesList() {
+            List<Property> ownedProperties = user.getOwnedProperties();
+            assertNotNull(ownedProperties);
+            assertTrue(ownedProperties.isEmpty());
+            assertThrows(UnsupportedOperationException.class, () -> ownedProperties.add(null));
+        }
     }
 
 }

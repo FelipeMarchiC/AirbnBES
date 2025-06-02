@@ -203,4 +203,5 @@ class AddressTest {
             assertThat(address1).isNotEqualTo(address2);
         }
     }
+
 }

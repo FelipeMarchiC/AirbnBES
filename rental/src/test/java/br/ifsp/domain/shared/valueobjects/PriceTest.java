@@ -73,5 +73,12 @@ class PriceTest {
             Price price2 = new Price(new BigDecimal("10.00"));
             assertThat(price1).isEqualTo(price2);
         }
+        @Test
+        @DisplayName("Should return true when amounts are equal but different scale")
+        void shouldReturnTrueWhenAmountsAreEqualButDifferentScale() {
+            Price price1 = new Price(new BigDecimal("10.0"));
+            Price price2 = new Price(new BigDecimal("10.00"));
+            assertThat(price1).isEqualTo(price2);
+        }
     }
 }

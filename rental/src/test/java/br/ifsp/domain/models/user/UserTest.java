@@ -120,10 +120,17 @@ class UserTest {
         }
 
         @Test
-        @DisplayName("Should return the correct username")
+        @DisplayName("Should return the correct user name")
         void shouldReturnCorrectName() {
             assertEquals(name, user.getName());
         }
+
+        @Test
+        @DisplayName("Should return the correct user lastname")
+        void shouldReturnCorrectLastname() {
+            assertEquals(lastname, user.getLastname());
+        }
+
 
 
     }

@@ -371,22 +371,37 @@ public class OwnerUpdateRentalEntityServiceTest {
 
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.PENDING), any(), any(), any()))
                     .thenReturn(List.of(conflict));
+
             when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-            when(rentalRepositoryMock.save(conflict)).thenAnswer(inv->inv.getArgument(0));
-            ArgumentCaptor<RentalEntity> conflictCaptor = ArgumentCaptor.forClass(RentalEntity.class);
+
+            // Capture todas as chamadas de save()
             ArgumentCaptor<RentalEntity> captor = ArgumentCaptor.forClass(RentalEntity.class);
 
+            // Executa
             sut.confirmRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()));
 
-            verify(rentalRepositoryMock).save(conflictCaptor.capture());
-            verify(rentalRepositoryMock).save(captor.capture());
+            // Verifica: deve ter havido dois saves
+            verify(rentalRepositoryMock, times(2)).save(captor.capture());
+            List<RentalEntity> savedEntities = captor.getAllValues();
 
-            RentalEntity savedRentalEntity = captor.getValue();
-            RentalEntity conflictRentalEntity = conflictCaptor.getValue();
-            assertThat(conflictRentalEntity.getState()).isNotEqualTo(RentalState.PENDING);
-            assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.CONFIRMED);
+            // Checa os estados
+            RentalEntity confirmed = savedEntities.stream()
+                    .filter(e -> e.getId().equals(rentalEntity.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("Confirmed rental not saved"));
+
+            RentalEntity restrained = savedEntities.stream()
+                    .filter(e -> e.getId().equals(conflict.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("Restrained rental not saved"));
+
+            assertThat(confirmed.getState()).isEqualTo(RentalState.CONFIRMED);
+            assertThat(restrained.getState()).isEqualTo(RentalState.RESTRAINED);
+
+            // Checa presenter
             verify(presenter).prepareSuccessView(any());
         }
+
 
         @Tag("UnitTest")
         @Tag("Functional")

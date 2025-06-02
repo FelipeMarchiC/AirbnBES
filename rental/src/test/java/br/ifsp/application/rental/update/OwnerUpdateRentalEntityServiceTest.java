@@ -11,6 +11,7 @@ import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.UserEntity;
+import org.codehaus.plexus.util.cli.Arg;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -99,11 +100,14 @@ public class OwnerUpdateRentalEntityServiceTest {
                     LocalDate.now().plusDays(7),
                     RentalState.PENDING
             );
-
+            ArgumentCaptor<RentalEntity> captor = ArgumentCaptor.forClass(RentalEntity.class);
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
-
+            when(rentalRepositoryMock.save(any())).thenAnswer(inv->inv.getArgument(0));
             RequestModel request = new RequestModel(ownerEntity.getId(), rentalEntity.getId());
             sut.denyRental(presenter, request);
+            verify(rentalRepositoryMock).save(captor.capture());
+            RentalEntity entity= captor.getValue();
+            assertThat(entity.getState()).isEqualTo(RentalState.DENIED);
 
             verify(presenter).prepareSuccessView(any());
         }
@@ -342,6 +346,7 @@ public class OwnerUpdateRentalEntityServiceTest {
         @Tag("UnitTest")
         @Tag("Functional")
         @Test
+        @DisplayName("should confirm pending rental without conflict")
         void shouldConfirmPendingRentalWithoutConflict() {
             RentalEntity rentalEntity = testDataFactory.generateRentalEntity(
                     UUID.randomUUID(),
@@ -351,19 +356,34 @@ public class OwnerUpdateRentalEntityServiceTest {
                     LocalDate.of(2025, 10, 10),
                     RentalState.PENDING
             );
+            RentalEntity conflict = testDataFactory.generateRentalEntity(
+                    UUID.randomUUID(),
+                    tenantEntity,
+                    propertyEntity,
+                    LocalDate.of(2025, 2, 5),
+                    LocalDate.of(2025, 10, 10),
+                    RentalState.PENDING
+            );
 
             when(rentalRepositoryMock.findById(rentalEntity.getId())).thenReturn(Optional.of(rentalEntity));
             when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.CONFIRMED), any(), any(), any()))
                     .thenReturn(Collections.emptyList());
-            when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
+            when(rentalRepositoryMock.findRentalsByOverlapAndState(any(), eq(RentalState.PENDING), any(), any(), any()))
+                    .thenReturn(List.of(conflict));
+            when(rentalRepositoryMock.save(any(RentalEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(rentalRepositoryMock.save(conflict)).thenAnswer(inv->inv.getArgument(0));
+            ArgumentCaptor<RentalEntity> conflictCaptor = ArgumentCaptor.forClass(RentalEntity.class);
             ArgumentCaptor<RentalEntity> captor = ArgumentCaptor.forClass(RentalEntity.class);
 
             sut.confirmRental(presenter, new RequestModel(ownerEntity.getId(), rentalEntity.getId()));
 
-
+            verify(rentalRepositoryMock).save(conflictCaptor.capture());
             verify(rentalRepositoryMock).save(captor.capture());
+
             RentalEntity savedRentalEntity = captor.getValue();
+            RentalEntity conflictRentalEntity = conflictCaptor.getValue();
+            assertThat(conflictRentalEntity.getState()).isNotEqualTo(RentalState.PENDING);
             assertThat(savedRentalEntity.getState()).isEqualTo(RentalState.CONFIRMED);
             verify(presenter).prepareSuccessView(any());
         }

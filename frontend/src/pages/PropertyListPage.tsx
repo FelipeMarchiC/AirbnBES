@@ -1,0 +1,140 @@
+import { useState, useEffect } from 'react';
+import propertyService, { Property, PropertyFilters as PropertyFiltersType } from '../services/propertyService';
+import PropertyCard from '../components/PropertyCard';
+import PropertyFilters from '../components/PropertyFilters';
+
+const PropertyListPage = () => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeFilters, setActiveFilters] = useState<PropertyFiltersType>({});
+  
+  // Buscar todas as propriedades ao carregar a página
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setIsLoading(true);
+        const data = await propertyService.getAllProperties();
+        setProperties(data);
+        setFilteredProperties(data);
+      } catch (error) {
+        console.error('Erro ao buscar propriedades:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProperties();
+  }, []);
+  
+  // Lidar com mudanças nos filtros
+  const handleFilterChange = async (filters: PropertyFiltersType) => {
+    setActiveFilters(filters);
+    setIsLoading(true);
+    
+    try {
+      let results: Property[];
+      
+      if (Object.keys(filters).length === 0) {
+        // Sem filtros, mostrar todas as propriedades
+        results = properties;
+      } else {
+        // Aplicar filtros
+        results = await propertyService.filterProperties(filters);
+      }
+      
+      setFilteredProperties(results);
+    } catch (error) {
+      console.error('Erro ao filtrar propriedades:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="page-transition">
+      {/* Cabeçalho da página */}
+      <div className="bg-azul-colonial-700 text-white py-12">
+        <div className="container-custom">
+          <h1 className="text-3xl font-bold mb-4">Encontre a propriedade ideal</h1>
+          <p className="text-lg text-gray-100 max-w-2xl">
+            Explore nossa seleção de propriedades e encontre a melhor opção para seu próximo aluguel.
+            Use os filtros abaixo para refinar sua busca.
+          </p>
+        </div>
+      </div>
+      
+      {/* Conteúdo principal */}
+      <div className="container-custom py-8">
+        {/* Filtros */}
+        <PropertyFilters onFilterChange={handleFilterChange} isLoading={isLoading} />
+        
+        {/* Lista de propriedades */}
+        <div>
+          {/* Indicador de filtros ativos */}
+          {Object.keys(activeFilters).length > 0 && (
+            <div className="mb-4 flex items-center text-sm text-gray-500">
+              <span className="mr-2">Filtros ativos:</span>
+              {activeFilters.location && (
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
+                  Localização: {activeFilters.location}
+                </span>
+              )}
+              {activeFilters.minPrice !== undefined && (
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
+                  Preço mínimo: R$ {activeFilters.minPrice}
+                </span>
+              )}
+              {activeFilters.maxPrice !== undefined && (
+                <span className="bg-azul-colonial-100 text-azul-colonial-700 px-2 py-1 rounded-full mr-2">
+                  Preço máximo: R$ {activeFilters.maxPrice}
+                </span>
+              )}
+            </div>
+          )}
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+                  <div className="h-48 bg-gray-300"></div>
+                  <div className="p-4">
+                    <div className="h-5 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2 mb-4"></div>
+                    <div className="flex justify-between mb-4">
+                      <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                      <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                      <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                    </div>
+                    <div className="h-8 bg-gray-300 rounded w-full mt-4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredProperties.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Nenhuma propriedade encontrada</h3>
+              <p className="text-gray-500">
+                Tente ajustar seus filtros ou buscar por outros termos.
+              </p>
+              <button
+                onClick={() => handleFilterChange({})}
+                className="mt-4 btn-outline"
+              >
+                Limpar todos os filtros
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PropertyListPage;

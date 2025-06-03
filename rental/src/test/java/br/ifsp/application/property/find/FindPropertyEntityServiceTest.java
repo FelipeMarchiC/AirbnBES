@@ -96,9 +96,11 @@ class FindPropertyEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Property search by ID tests")
     class PropertyEntitySearchById {
         @Test
+        @Tag("Functional")
         @DisplayName("Should return property when found by ID")
         void shouldReturnPropertyWhenFoundById() {
             UUID propertyId = UUID.randomUUID();
@@ -116,6 +118,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw EntityNotFoundException when property not found by ID")
         void shouldThrowEntityNotFoundExceptionWhenPropertyNotFoundById() {
             UUID propertyId = UUID.randomUUID();
@@ -132,6 +135,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw IllegalArgumentException when property ID is null")
         void shouldThrowIllegalArgumentExceptionWhenPropertyIdIsNull() {
             var request = new IFindPropertyService.FindByIdRequestModel(null);
@@ -143,6 +147,7 @@ class FindPropertyEntityServiceTest {
                     .hasMessageContaining("PropertyId cannot be null");
         }
         @Test
+        @Tag("Structural")
         @DisplayName("Should handle generic exception during findById")
         void shouldHandleGenericExceptionDuringFindById() {
             UUID propertyId = UUID.randomUUID();
@@ -159,10 +164,12 @@ class FindPropertyEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Property search by period tests")
     class PropertyEntitySearchByPeriod {
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should return available properties in period")
         void shouldReturnAvailablePropertiesInPeriod() {
             PropertyEntity propertyEntity = factory.generatePropertyEntity();
@@ -182,6 +189,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw EntityNotFoundException when no property is found")
         void shouldThrowEntityNotFoundWhenEmptyList() {
             LocalDate startDate = LocalDate.of(2025, 5, 4);
@@ -197,6 +205,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should handle generic exception during findByPeriod")
         void shouldHandleGenericExceptionDuringFindByPeriod() {
             LocalDate startDate = LocalDate.of(2025, 5, 4);
@@ -215,10 +224,12 @@ class FindPropertyEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Property Search By Location Tests")
     class PropertyEntitySearchByLocationTests {
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should return all properties for a given location")
         void shouldReturnAllPropertiesForGivenLocation() {
             String location = "São Paulo";
@@ -238,6 +249,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw exception when location is null")
         void shouldThrowExceptionWhenLocationIsNull() {
             var request = new IFindPropertyService.LocationRequestModel(null);
@@ -250,6 +262,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw exception when location is blank")
         void shouldThrowExceptionWhenLocationIsBlank() {
             var request = new IFindPropertyService.LocationRequestModel("   ");
@@ -262,6 +275,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should handle generic exception during findByLocation")
         void shouldHandleGenericExceptionDuringFindByLocation() {
             String location = "São Paulo";
@@ -278,10 +292,12 @@ class FindPropertyEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Property Search By Price Range Tests")
     class PropertyEntitySearchByPriceRangeTests {
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should return properties within given price range")
         void shouldReturnPropertiesWithinGivenPriceRange() {
             double min = 100.0;
@@ -303,6 +319,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should throw exception if min > max")
         void shouldThrowExceptionIfMinGreaterThanMax() {
             var request = new IFindPropertyService.PriceRangeRequestModel(500.0, 100.0);
@@ -315,6 +332,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should throw exception if min < 0")
         void shouldThrowExceptionIfMinIsNegative() {
             var request = new IFindPropertyService.PriceRangeRequestModel(-50.0, 200.0);
@@ -327,6 +345,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should throw exception if max < 0")
         void shouldThrowExceptionIfMaxIsNegative() {
             var request = new IFindPropertyService.PriceRangeRequestModel(50.0, -200.0);
@@ -339,6 +358,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should handle generic exception during findByPriceRange")
         void shouldHandleGenericExceptionDuringFindByPriceRange() {
             double min = 100.0;
@@ -356,10 +376,12 @@ class FindPropertyEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Property FindAll Tests")
     class PropertyEntityFindAllTests {
 
         @Test
+        @Tag("Functional")
         @DisplayName("Should return all properties from repository")
         void shouldReturnAllProperties() {
             PropertyEntity e1 = factory.generatePropertyEntity();
@@ -376,6 +398,7 @@ class FindPropertyEntityServiceTest {
         }
 
         @Test
+        @Tag("Structural")
         @DisplayName("Should handle exception from repository in findAll")
         void shouldHandleExceptionInFindAll() {
             when(jpaPropertyRepository.findAll()).thenThrow(new RuntimeException("Database error"));

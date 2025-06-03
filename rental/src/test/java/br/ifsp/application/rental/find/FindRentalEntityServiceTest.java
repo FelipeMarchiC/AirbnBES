@@ -62,6 +62,7 @@ class FindRentalEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Rental History Retrieval Tests")
     class RentalEntityHistoryRetrievalTests {
         @Tag("TDD")
@@ -121,6 +122,7 @@ class FindRentalEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Tenant Rental History Retrieval Tests")
     class TenantRentalEntityHistoryRetrievalTests {
         @Tag("TDD")
@@ -178,6 +180,7 @@ class FindRentalEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Null Input Validation Tests")
     class NullInputValidationTests {
 
@@ -227,6 +230,7 @@ class FindRentalEntityServiceTest {
     }
 
     @Nested
+    @Tag("UnitTest")
     @DisplayName("Find All Rentals Tests")
     class FindAllRentalsTests {
 

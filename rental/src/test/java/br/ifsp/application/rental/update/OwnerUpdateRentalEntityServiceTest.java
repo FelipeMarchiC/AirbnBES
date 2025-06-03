@@ -470,6 +470,7 @@ public class OwnerUpdateRentalEntityServiceTest {
             verify(presenter).prepareFailView(any(EntityNotFoundException.class));
         }
         @Test
+        @Tag("UnitTest")
         @Tag("Structural")
         @DisplayName("Should Prepare a fail view for Entity not found")
         void shouldPrepareAFailViewForRentalEntityNotFound(){

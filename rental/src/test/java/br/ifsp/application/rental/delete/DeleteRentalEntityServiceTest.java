@@ -225,7 +225,7 @@ class DeleteRentalEntityServiceTest {
 
     @Nested
     @Tag("UnitTest")
-    @Tag("Coverage")
+    @Tag("Structural")
     @DisplayName("Tests for 100% Coverage")
     class FullCoverageCases {
 

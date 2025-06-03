@@ -39,9 +39,12 @@ const RegisterPage = () => {
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'E-mail inválido';
     }
-
     if (!password) {
       newErrors.password = 'Senha é obrigatória';
+    } else if (password.length < 8) {
+      newErrors.password = 'A senha deve ter pelo menos 8 caracteres.';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-!@#$%^&*])/.test(password)) {
+      newErrors.password = 'A senha deve conter maiúscula, minúscula, número e caractere especial.';
     }
 
     if (!confirmPassword) {

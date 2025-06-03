@@ -88,7 +88,7 @@ Para rodar o projeto localmente, é necessário ter:
 
 ---
 
-### 🖥️ Front-end (Vue.js ou outro framework)
+### 🖥️ Front-end
 
 1. Acesse a pasta do frontend:
 
@@ -110,4 +110,4 @@ Para rodar o projeto localmente, é necessário ter:
 
 4. Acesse no navegador:
 
-    * **Frontend:** [http://localhost:5173](http://localhost:5173) (ou a porta mostrada no terminal)
+    * **Frontend:** [http://localhost:5173](http://localhost:5173) 

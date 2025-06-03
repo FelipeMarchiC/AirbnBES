@@ -47,7 +47,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Roberto")
                 .lastname("Abadia")
                 .email("roberto-abadia@gmail.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
@@ -56,7 +56,7 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("9b96aa7e-4f1b-4c2f-b273-3b9f7c9b1a01"))
                 .name("Amiya").lastname("Rhodes")
                 .email("amiya@rhodesisland.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -66,7 +66,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Catherine")
                 .lastname("Earnshaw")
                 .email("cathy@wuthering-heights.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -75,7 +75,7 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("8dfc6c64-1e7b-4ec1-8450-d20e160c7092"))
                 .name("Coragem").lastname("o Cão Covarde")
                 .email("uriel@eustacio.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -84,7 +84,7 @@ public class DataLoader implements CommandLineRunner {
                 .id(UUID.fromString("1a8a419c-4d84-4a7a-9c18-282df27819d3"))
                 .name("Vin").lastname("Diesel")
                 .email("familia@outlook.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -94,7 +94,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Pedro")
                 .lastname("Bosta")
                 .email("barro@gmail.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -104,7 +104,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Goleiro")
                 .lastname("Bruno")
                 .email("macarrao@penguinlogistics.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -114,7 +114,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Rock")
                 .lastname("Roll")
                 .email("rock@roll.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -124,7 +124,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Lazaro")
                 .lastname("Assassino")
                 .email("lazaromanhunter@realoficial.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -134,7 +134,7 @@ public class DataLoader implements CommandLineRunner {
                 .name("Nickel")
                 .lastname("Back")
                 .email("photograph@faraway.com")
-                .password(encoder.encode("bes"))
+                .password(encoder.encode("superBES10%"))
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
@@ -152,8 +152,6 @@ public class DataLoader implements CommandLineRunner {
                 createProperty("d30a5ae6-df95-42d0-8c5f-5e1a10f7f2ea", "Casa na Serra", "Casa aconchegante na serra", user1, "1600", "77", "Estrada da Serra", "Petrópolis", "RJ", "25680-000"),
                 createProperty("3fa11c74-79cc-499f-9f08-3e1f1c1d66e2", "Apartamento Beira-Mar", "Apartamento com varanda de frente para o mar", user1, "2200", "501", "Av. Atlântica", "Rio de Janeiro", "RJ", "22070-000"),
                 createProperty("4efb93c6-263d-47c1-9e38-e40a4d2d9627", "Loft Industrial", "Loft com decoração industrial e open space", user1, "2000", "888", "Rua Harmonia", "São Paulo", "SP", "05435-000"),
-
-                // Novas propriedades do Roberto em outros estados e cidades
                 createProperty("a1c2b3d4-e5f6-7890-1234-567890abcdef", "Casa Histórica", "Casa charmosa no centro histórico", user1, "1900", "50", "Rua das Flores", "Ouro Preto", "MG", "35400-000"),
                 createProperty("b2c3d4e5-f6a7-8901-2345-67890abcdef0", "Fazenda com Gado", "Ampla fazenda para pecuária e lazer", user1, "4000", "S/N", "Rodovia do Gado", "Campo Grande", "MS", "79000-000"),
                 createProperty("c3d4e5f6-a7b8-9012-3456-7890abcdef12", "Bangalô na Lagoa", "Bangalô com acesso direto à lagoa", user1, "2800", "10", "Avenida Beira Mar", "Florianópolis", "SC", "88000-000"),
@@ -164,11 +162,10 @@ public class DataLoader implements CommandLineRunner {
 
         propertyRepository.saveAll(properties);
 
-        // Rentals for Uriel, ending by end of 2025, and no future rentals marked as EXPIRED
         RentalEntity r1 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user4) // Uriel
-                .propertyEntity(properties.get(0)) // Apartamento Central
+                .userEntity(user4)
+                .propertyEntity(properties.get(0))
                 .startDate(LocalDate.of(2025, 8, 5))
                 .endDate(LocalDate.of(2025, 8, 10))
                 .value(new Price(properties.get(0).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
@@ -177,8 +174,8 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r2 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user4) // Uriel
-                .propertyEntity(properties.get(3)) // Sítio Tranquilo
+                .userEntity(user4)
+                .propertyEntity(properties.get(3))
                 .startDate(LocalDate.of(2025, 9, 15))
                 .endDate(LocalDate.of(2025, 9, 22))
                 .value(new Price(properties.get(3).getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
@@ -187,8 +184,8 @@ public class DataLoader implements CommandLineRunner {
 
         RentalEntity r3 = RentalEntity.builder()
                 .id(UUID.randomUUID())
-                .userEntity(user4) // Uriel
-                .propertyEntity(properties.get(5)) // Chalé na Montanha
+                .userEntity(user4)
+                .propertyEntity(properties.get(5))
                 .startDate(LocalDate.of(2025, 10, 1))
                 .endDate(LocalDate.of(2025, 10, 4))
                 .value(new Price(properties.get(5).getDailyRate().getAmount().multiply(BigDecimal.valueOf(3))))
@@ -197,7 +194,7 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r4 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(2)) // Cobertura Luxuosa
+                .propertyEntity(properties.get(2))
                 .startDate(LocalDate.of(2024, 12, 1))
                 .endDate(LocalDate.of(2024, 12, 5))
                 .value(new Price(properties.get(2).getDailyRate().getAmount().multiply(BigDecimal.valueOf(4))))
@@ -207,18 +204,17 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r5 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(4)) // Flat Executivo
+                .propertyEntity(properties.get(4))
                 .startDate(LocalDate.of(2025, 1, 10))
                 .endDate(LocalDate.of(2025, 1, 12))
                 .value(new Price(properties.get(4).getDailyRate().getAmount().multiply(BigDecimal.valueOf(2))))
                 .state(RentalState.DENIED)
                 .build();
 
-// Aluguéis futuros (todos terminam até o fim de 2025 e não são EXPIRED se a data for futura)
         RentalEntity r6 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(6)) // Estúdio Moderno
+                .propertyEntity(properties.get(6))
                 .startDate(LocalDate.of(2025, 11, 20))
                 .endDate(LocalDate.of(2025, 11, 25))
                 .value(new Price(properties.get(6).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
@@ -228,7 +224,7 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r7 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(7)) // Casa na Serra
+                .propertyEntity(properties.get(7))
                 .startDate(LocalDate.of(2025, 12, 10))
                 .endDate(LocalDate.of(2025, 12, 15))
                 .value(new Price(properties.get(7).getDailyRate().getAmount().multiply(BigDecimal.valueOf(5))))
@@ -238,11 +234,11 @@ public class DataLoader implements CommandLineRunner {
         RentalEntity r8 = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user4)
-                .propertyEntity(properties.get(8)) // Apartamento Beira-Mar (ajustado para 2025)
+                .propertyEntity(properties.get(8))
                 .startDate(LocalDate.of(2025, 12, 20))
                 .endDate(LocalDate.of(2025, 12, 27))
                 .value(new Price(properties.get(8).getDailyRate().getAmount().multiply(BigDecimal.valueOf(7))))
-                .state(RentalState.CONFIRMED) // Changed to CONFIRMED as it's a future rental
+                .state(RentalState.CONFIRMED)
                 .build();
 
         rentalRepository.saveAll(List.of(r1, r2, r3,r4,r5,r6,r7,r8));

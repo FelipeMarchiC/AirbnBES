@@ -30,6 +30,8 @@ const RegisterPage = () => {
 
     if (!name) {
       newErrors.name = 'Nome é obrigatório';
+    } else if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(name)) {
+      newErrors.name = 'Nome não pode conter números ou caracteres especiais.';
     }
 
     if (!email) {

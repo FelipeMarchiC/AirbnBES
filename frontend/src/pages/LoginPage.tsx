@@ -154,10 +154,10 @@ const LoginPage = () => {
             Para testes, use:
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            <strong>Usuário regular:</strong> uriel@eustacio.com / bes
+            <strong>Usuário regular:</strong> uriel@eustacio.com / superBES10%
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            <strong>Administrador:</strong> roberto-abadia@gmail.com / bes
+            <strong>Administrador:</strong> roberto-abadia@gmail.com / superBES10%
           </p>
         </div>
       </div>

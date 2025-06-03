@@ -62,7 +62,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('@AirbnBES:token', token);
       localStorage.setItem('@AirbnBES:user', JSON.stringify(user));
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      console.log('Payload decodificado:', JSON.parse(atob(token.split('.')[1])));
 
       setUser(user);
       toast.success('Login realizado com sucesso!');
@@ -93,7 +92,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastname: name.split(' ').slice(1).join(' ') || '',
       });
 
-      console.log('Registro bem-sucedido:', response.data);
 
       toast.success('Cadastro realizado com sucesso! Agora você pode fazer login.');
       navigate('/login', { replace: true });

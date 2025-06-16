@@ -125,7 +125,7 @@ public class RentalController {
                 presenter.responseEntity():ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @GetMapping("/properties/{propertyId}")
+    @GetMapping("/properties/{p ropertyId}")
     public ResponseEntity<?> findRentalHistoryByPropertyId(@PathVariable UUID propertyId){
         val presenter = new RestFindRentalPresenter();
         val requestModel= new IFindRentalService.FindByPropertyIdRequestModel(propertyId);

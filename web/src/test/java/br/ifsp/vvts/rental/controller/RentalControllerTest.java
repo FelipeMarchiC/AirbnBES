@@ -223,5 +223,17 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             Response response = findAllRequest(token);
             assertEquals(404, response.getStatusCode());
         }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 401 when token is invalid")
+        void shouldReturn401WhenTokenIsInvalid() {
+            Response response = findAllRequest(null);
+            assertEquals(401, response.getStatusCode());
+
+            Response response1 = findAllRequest("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTYiLCJlbWFpbCI6InVzZXJAbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTcxODcwMDAwMCwiZXhwIjoxNzE4NzA0MDAwfQ.fake-signature");
+            assertEquals(401, response1.getStatusCode());
+        }
     }
 }

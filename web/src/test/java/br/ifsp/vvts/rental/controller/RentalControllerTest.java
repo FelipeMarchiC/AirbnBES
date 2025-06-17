@@ -28,10 +28,7 @@ class RentalControllerTest extends BaseApiIntegrationTest {
         private Response createAndSendRentalRequest(UUID propertyId, LocalDate startDate, LocalDate endDate, String token) {
             PostRequest postRequest = new PostRequest(propertyId, startDate, endDate);
 
-            var request = given()
-                    .contentType("application/json")
-                    .port(port)
-                    .body(postRequest);
+            var request = given().contentType("application/json").port(port).body(postRequest);
 
             if (token != null) {
                 request.header("Authorization", "Bearer " + token);
@@ -185,6 +182,35 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             );
 
             assertEquals(400, response.getStatusCode());
+        }
+    }
+
+    @Nested
+    class FindAll {
+        private Response findAllRequest(String token) {
+            var request = given().contentType("application/json").port(port);
+
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+
+            return request.when().get("/api/v1/rental");
+        }
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 401 when user try to access other user rentals")
+        void userShouldNotAccessOtherUserRentals() {
+            UserEntity owner1 = registerAdminUser("x56das!p08A");
+            PropertyEntity property = createRandomProperty(owner1);
+            createRentalEntity(owner1, property);
+
+            UserEntity owner2 = registerAdminUser("b75kes!k07B");
+            String token = authenticate(owner2.getEmail(), "b75kes!k07B");
+            Response response = findAllRequest(token);
+
+            System.out.println("Response: " + response.prettyPrint());
+            assertEquals(401, response.getStatusCode());
         }
     }
 }

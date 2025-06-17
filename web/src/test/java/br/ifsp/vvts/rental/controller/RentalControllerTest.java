@@ -1,0 +1,190 @@
+package br.ifsp.vvts.rental.controller;
+
+import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.user.UserEntity;
+import br.ifsp.vvts.rental.requests.PostRequest;
+import br.ifsp.vvts.utils.BaseApiIntegrationTest;
+import io.restassured.response.Response;
+import jdk.jfr.Description;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class RentalControllerTest extends BaseApiIntegrationTest {
+
+    @Nested
+    class CreateRental {
+
+        private Response createAndSendRentalRequest(UUID propertyId, LocalDate startDate, LocalDate endDate, String token) {
+            PostRequest postRequest = new PostRequest(propertyId, startDate, endDate);
+
+            var request = given()
+                    .contentType("application/json")
+                    .port(port)
+                    .body(postRequest);
+
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+
+            return request.when().post("/api/v1/rental");
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should create a rental when the request is valid")
+        void shouldCreateRentalWhenRequestIsValid() {
+            UserEntity owner = registerAdminUser("x56das!p01A");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity user = registerUser("j783as!p0BA");
+            String token = authenticate(user.getEmail(), "j783as!p0BA");
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    token
+            );
+
+            assertEquals(201, response.getStatusCode());
+            assertEquals(user.getId().toString(), response.getBody().jsonPath().get("tenantId"));
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 400 Bad Request when propertyId is missing or null")
+        void shouldReturnBadRequestWhenPropertyIdIsMissing() {
+            UserEntity user = registerUser("j783as!p0BB");
+            String token = authenticate(user.getEmail(), "j783as!p0BB");
+
+            Response response = createAndSendRentalRequest(
+                    null,
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    token
+            );
+
+            assertEquals(400, response.getStatusCode());
+        }
+
+        @ParameterizedTest
+        @MethodSource("invalidDatesProvider")
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 400 Bad Request for invalid date combinations")
+        void shouldReturnBadRequestForInvalidDates(LocalDate startDate, LocalDate endDate) {
+            UserEntity owner = registerAdminUser("x56das!paramA");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity user = registerUser("x56das!paramB");
+            String token = authenticate(user.getEmail(), "x56das!paramB");
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    startDate,
+                    endDate,
+                    token
+            );
+
+            assertEquals(400, response.getStatusCode(), "Esperado 400 para datas inválidas");
+        }
+
+        static Stream<Arguments> invalidDatesProvider() {
+            return Stream.of(
+                    Arguments.of(null, LocalDate.now().plusDays(5)),                      // startDate null
+                    Arguments.of(LocalDate.now().plusDays(1), null),                      // endDate null
+                    Arguments.of(LocalDate.now().plusDays(5), LocalDate.now().plusDays(1)), // startDate > endDate
+                    Arguments.of(LocalDate.now().minusDays(1), LocalDate.now().plusDays(5)) // startDate no passado
+            );
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 404 Not Found when the property does not exist")
+        void shouldReturnNotFoundWhenPropertyDoesNotExist() {
+            UserEntity user = registerUser("j783as!p0BG");
+            String token = authenticate(user.getEmail(), "j783as!p0BG");
+
+            Response response = createAndSendRentalRequest(
+                    UUID.randomUUID(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    token
+            );
+
+            assertEquals(404, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 401 Unauthorized when no authentication token is provided")
+        void shouldReturnUnauthorizedWhenNoTokenIsProvided() {
+            UserEntity owner = registerAdminUser("x56das!authA");
+            PropertyEntity property = createRandomProperty(owner);
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    null
+            );
+
+            assertEquals(401, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 401 Unauthorized when the token is invalid")
+        void shouldReturnUnauthorizedWhenTokenIsInvalid() {
+            UserEntity owner = registerAdminUser("x56das!authB");
+            PropertyEntity property = createRandomProperty(owner);
+
+            String invalidToken = "invalid.token.12345";
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    invalidToken
+            );
+
+            assertEquals(401, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 400 Bad Request when the owner tries to rent their own property")
+        void shouldReturnBadRequestWhenOwnerTriesToRentOwnProperty() {
+            UserEntity owner = registerAdminUser("x56das!p08A");
+            PropertyEntity property = createRandomProperty(owner);
+
+            String ownerToken = authenticate(owner.getEmail(), "x56das!p08A");
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5),
+                    ownerToken
+            );
+
+            assertEquals(400, response.getStatusCode());
+        }
+    }
+}

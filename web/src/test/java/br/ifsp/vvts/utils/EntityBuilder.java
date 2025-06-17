@@ -1,6 +1,8 @@
 package br.ifsp.vvts.utils;
 
 import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
+import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
@@ -9,6 +11,7 @@ import com.github.javafaker.Faker;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
@@ -63,6 +66,19 @@ public class EntityBuilder {
                 .build();
 
         return property;
+    }
+
+    public static RentalEntity createRentalEntity(UserEntity user, PropertyEntity property) {
+        br.ifsp.domain.models.rental.RentalEntity rental = RentalEntity.builder()
+                .id(UUID.randomUUID())
+                .userEntity(user)
+                .endDate(LocalDate.now().plusDays(10))
+                .startDate(LocalDate.now())
+                .state(RentalState.PENDING)
+                .value(new Price(BigDecimal.valueOf(500)))
+                .propertyEntity(property)
+                .build();
+        return rental;
     }
 
 }

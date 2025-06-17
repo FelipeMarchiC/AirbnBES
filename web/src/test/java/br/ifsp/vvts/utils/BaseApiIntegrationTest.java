@@ -1,38 +1,27 @@
 package br.ifsp.vvts.utils;
 
 import br.ifsp.application.property.repository.JpaPropertyRepository;
-import br.ifsp.application.rental.create.ICreateRentalService;
 import br.ifsp.application.rental.repository.JpaRentalRepository;
-import br.ifsp.application.rental.repository.RentalMapper;
 import br.ifsp.application.user.repository.JpaUserRepository;
-import br.ifsp.domain.models.property.Property;
 import br.ifsp.domain.models.property.PropertyEntity;
-import br.ifsp.domain.models.rental.Rental;
-import br.ifsp.domain.models.user.User;
+import br.ifsp.domain.models.rental.RentalEntity;
+import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.UserEntity;
-import br.ifsp.domain.shared.valueobjects.Address;
-import br.ifsp.domain.shared.valueobjects.Price;
-import br.ifsp.vvts.rental.presenter.RestCreateRentalPresenter;
 import br.ifsp.vvts.security.auth.AuthRequest;
 import br.ifsp.vvts.security.auth.AuthResponse;
-import org.codehaus.groovy.control.CompilationUnit;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.baseURI;
-import static java.util.Collections.emptyList;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,6 +34,8 @@ public class BaseApiIntegrationTest {
     @Autowired
     private JpaPropertyRepository propertyRepository;
 
+    @Autowired JpaRentalRepository rentalRepository;
+
     @BeforeEach
     public void generalSetup() {
         RestAssured.baseURI = "http://localhost:" + port;
@@ -54,6 +45,14 @@ public class BaseApiIntegrationTest {
     void tearDown() {
         userRepository.deleteAll();
         propertyRepository.deleteAll();
+        rentalRepository.deleteAll();
+    }
+
+    @BeforeAll
+    void setUp() {
+        rentalRepository.deleteAll();
+        propertyRepository.deleteAll();
+        rentalRepository.deleteAll();
     }
 
     protected UserEntity registerUser(String password) {
@@ -83,5 +82,11 @@ public class BaseApiIntegrationTest {
         PropertyEntity property = EntityBuilder.createRandomProperty(user);
         propertyRepository.save(property);
         return property;
+    }
+
+    protected RentalEntity createRentalEntity(UserEntity user, PropertyEntity property) {
+        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property);
+        rentalRepository.save(rentalEntity);
+        return rentalEntity;
     }
 }

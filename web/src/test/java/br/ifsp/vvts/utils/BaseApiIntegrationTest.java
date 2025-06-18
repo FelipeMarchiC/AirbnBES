@@ -28,13 +28,17 @@ import static io.restassured.RestAssured.baseURI;
 public class BaseApiIntegrationTest {
     @LocalServerPort
     protected int port = 8080;
-    @Autowired
-    private JpaUserRepository userRepository;
 
     @Autowired
-    private JpaPropertyRepository propertyRepository;
+    protected JpaUserRepository userRepository;
 
-    @Autowired JpaRentalRepository rentalRepository;
+    @Autowired
+    protected JpaPropertyRepository propertyRepository;
+
+    @Autowired
+    protected JpaRentalRepository rentalRepository;
+
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     @BeforeEach
     public void generalSetup() {
@@ -43,9 +47,9 @@ public class BaseApiIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        userRepository.deleteAll();
-        propertyRepository.deleteAll();
         rentalRepository.deleteAll();
+        propertyRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @BeforeAll
@@ -70,7 +74,6 @@ public class BaseApiIntegrationTest {
     }
 
     protected String authenticate(String username, String password) {
-        RestTemplate restTemplate = new RestTemplate();
         AuthRequest authRequest = new AuthRequest(username, password);
         final String url = baseURI + "/api/v1/authenticate";
         final AuthResponse response = restTemplate.postForObject(url, authRequest, AuthResponse.class);

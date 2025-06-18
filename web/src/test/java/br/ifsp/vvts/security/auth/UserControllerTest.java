@@ -49,5 +49,36 @@ class UserControllerTest extends BaseApiIntegrationTest {
             Response response = registerUser("Jon", "Snow", email, "Password123!");
             assertEquals(409, response.getStatusCode());
         }
+
+        @ParameterizedTest
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @MethodSource("provideInvalidUserFields")
+        @Description("Should fail and return 400 when fields are invalid")
+        void shouldFailAndReturn400(String name, String lastname, String email, String password) {
+            Response response = registerUser(name, lastname, email, password);
+            assertEquals(400, response.getStatusCode(), "Expected status code 400 for invalid input");
+        }
+
+        public static Stream<Arguments> provideInvalidUserFields() {
+            String validLastName = "Jon";
+            String validFirstName = "Snow";
+            String validEmail = "jon.snow@example.com";
+            String validPassword = "Password123!";
+            return Stream.of(
+                    Arguments.of("", validLastName, validEmail, validPassword),
+                    Arguments.of(null, validLastName, validEmail, validPassword),
+
+                    Arguments.of(validFirstName, "", validEmail, validPassword),
+                    Arguments.of(validFirstName, null, validEmail, validPassword),
+
+                    Arguments.of(validFirstName, validLastName, "", validPassword),
+                    Arguments.of(validFirstName, validLastName, null, validPassword),
+                    Arguments.of(validFirstName, validLastName, "invalidEmail", validPassword),
+
+                    Arguments.of(validFirstName, validLastName, validEmail, ""),
+                    Arguments.of(validFirstName, validLastName, validEmail, null)
+            );
+        }
     }
 }

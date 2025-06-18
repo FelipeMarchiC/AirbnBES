@@ -37,5 +37,17 @@ class UserControllerTest extends BaseApiIntegrationTest {
             assertEquals(201, response.getStatusCode());
             assertNotNull(response.getBody().jsonPath().get("id"));
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should fail with 409 when email is already in use")
+        void shouldFailWhenEmailAlreadyExists() {
+            String email = "jon.snow@example.com";
+            registerUser("Jon", "Snow", email, "Password123!");
+
+            Response response = registerUser("Jon", "Snow", email, "Password123!");
+            assertEquals(409, response.getStatusCode());
+        }
     }
 }

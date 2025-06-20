@@ -2,7 +2,6 @@ package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
-import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
@@ -195,6 +194,7 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             }
             return request.when().get("/api/v1/rental");
         }
+
         @Test
         @Tag("ApiTest")
         @Tag("IntegrationTest")
@@ -448,5 +448,25 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(404, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 403 when some user try to accept a rental that he is not owner")
+        void shouldReturn403WhenAuthenticatedUserIsNotTheOwner() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity user1 = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(user1, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5));
+
+            UserEntity user2 = registerUser("validPassword123!");
+            String token = authenticate(user2.getEmail(), "validPassword123!");
+
+            Response response = confirmRentalRequest(token, String.valueOf(rental.getId()));
+            assertEquals(403, response.getStatusCode());
+        }
+
     }
 }

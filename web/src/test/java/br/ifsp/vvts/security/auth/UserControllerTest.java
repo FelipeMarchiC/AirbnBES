@@ -114,5 +114,14 @@ class UserControllerTest extends BaseApiIntegrationTest {
             Response response = authenticateUser(user.getEmail(), "wrongPassword");
             assertEquals(401, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        void shouldFailAuthenticationWithNonExistentEmail() {
+            Response response = authenticateUser("not.registered@email.com", "validPassword123!");
+            assertEquals(401, response.getStatusCode());
+        }
+
     }
 }

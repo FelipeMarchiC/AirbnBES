@@ -176,5 +176,23 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
             assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
         }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return property by id if the user it's not the owner too")
+        void getPropertyByIdForRegularUserButNotTheOwner() {
+            String token = authenticate(admin.getEmail(), adminPassword);
+
+            PropertyEntity property = EntityBuilder.createRandomProperty(user);
+            propertyRepository.save(property);
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+
+            Response response = sendGetPropertyByIdRequest(property.getId().toString(), token);
+
+            assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
+        }
     }
 }

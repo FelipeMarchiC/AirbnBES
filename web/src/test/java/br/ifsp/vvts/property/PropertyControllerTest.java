@@ -19,6 +19,7 @@ import org.apache.maven.surefire.shared.utils.cli.Commandline;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -193,6 +194,23 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             Response response = sendGetPropertyByIdRequest(property.getId().toString(), token);
 
             assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return 400 if send a invalid propertyId")
+        void getPropertyByIdWithWrongPropertyId() {
+            String token = authenticate(user.getEmail(), userPassword);
+            PropertyEntity property = EntityBuilder.createRandomProperty(user);
+            propertyRepository.save(property);
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+
+            Response response = sendGetPropertyByIdRequest(faker.rickAndMorty().character(), token);
+
+            assertThat(response.getStatusCode()).isEqualTo(400);
         }
     }
 }

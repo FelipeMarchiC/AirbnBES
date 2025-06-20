@@ -11,6 +11,7 @@ import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -413,5 +414,21 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
         }
 
 
+    }
+
+    @Nested
+    class FilterByPriceRange {
+        private Response sendRequest(BigDecimal min, BigDecimal max, String token) {
+            return given()
+                    .contentType(ContentType.JSON)
+                    .port(port)
+                    .header("Authorization", "Bearer " + token)
+                    .queryParam("min", min)
+                    .queryParam("max", max)
+                    .when().get("/api/v1/property/price-range")
+                    .then()
+                    .log().all()
+                    .extract().response();
+        }
     }
 }

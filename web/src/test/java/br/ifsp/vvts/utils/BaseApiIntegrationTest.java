@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import io.restassured.RestAssured;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
@@ -87,8 +88,8 @@ public class BaseApiIntegrationTest {
         return property;
     }
 
-    protected RentalEntity createRentalEntity(UserEntity user, PropertyEntity property) {
-        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property);
+    protected RentalEntity createRentalEntity(UserEntity user, PropertyEntity property, LocalDate startDate, LocalDate endDate) {
+        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property, startDate, endDate);
         rentalRepository.save(rentalEntity);
         return rentalEntity;
     }

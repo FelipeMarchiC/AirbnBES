@@ -68,12 +68,13 @@ public class EntityBuilder {
         return property;
     }
 
-    public static RentalEntity createRentalEntity(UserEntity user, PropertyEntity property) {
-        br.ifsp.domain.models.rental.RentalEntity rental = RentalEntity.builder()
+    public static RentalEntity createRentalEntity(UserEntity user, PropertyEntity property,
+                                                  LocalDate startDate, LocalDate endDate) {
+        RentalEntity rental = RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user)
-                .endDate(LocalDate.now().plusDays(10))
-                .startDate(LocalDate.now())
+                .endDate(endDate)
+                .startDate(startDate)
                 .state(RentalState.PENDING)
                 .value(new Price(BigDecimal.valueOf(500)))
                 .propertyEntity(property)

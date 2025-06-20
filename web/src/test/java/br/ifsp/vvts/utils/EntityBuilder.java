@@ -78,4 +78,18 @@ public class EntityBuilder {
                 .build();
     }
 
+    public static PropertyEntity createPropertyWithLocation(UserEntity owner, Address address) {
+        UUID uuid = UUID.randomUUID();
+        BigDecimal randomPrice = BigDecimal.valueOf(faker.number().numberBetween(50, 500));
+
+        return PropertyEntity.builder()
+                .id(uuid)
+                .name(faker.company().name() + " Apartment")
+                .description(faker.lorem().sentence())
+                .owner(owner)
+                .dailyRate(new Price(randomPrice))
+                .address(address)
+                .rentals(emptyList())
+                .build();
+    }
 }

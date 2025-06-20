@@ -1,34 +1,21 @@
 package br.ifsp.vvts.property;
 
-import br.ifsp.application.property.repository.JpaPropertyRepository;
 import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
-import br.ifsp.domain.models.user.Role;
-import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
-import br.ifsp.domain.shared.valueobjects.Price;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
 import br.ifsp.vvts.utils.EntityBuilder;
 import com.github.javafaker.Faker;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
-import org.apache.maven.surefire.shared.utils.cli.Arg;
-import org.apache.maven.surefire.shared.utils.cli.Commandline;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
-import static io.restassured.RestAssured.authentication;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +41,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
     @Nested
     class ListAllProperties {
 
-        private Response sendListAllPropertiesRequest(String token) {
+        private Response sendRequest(String token) {
             return given()
                     .contentType(ContentType.JSON)
                     .port(port)
@@ -74,7 +61,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             PropertyEntity property = EntityBuilder.createRandomProperty(user);
             propertyRepository.save(property);
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getBody().jsonPath().getList("id")).contains(property.getId().toString());
         }
@@ -89,7 +76,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             PropertyEntity property = EntityBuilder.createRandomProperty(admin);
             propertyRepository.save(property);
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getBody().jsonPath().getList("id")).contains(property.getId().toString());
         }
@@ -101,7 +88,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
         void listAllPropertiesWhenNoPropertiesAreRegistered() {
             String token = authenticate(admin.getEmail(), adminPassword);
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getBody().jsonPath().getList("id")).isEmpty();
         }
@@ -113,7 +100,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
         void listAllPropertiesWhenUserIsNotAuthorized() {
             String token = faker.rickAndMorty().character();
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getStatusCode()).isEqualTo(401);
         }
@@ -125,7 +112,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
         void shouldReturnOK200IfTheListIsEmpty() {
             String token = authenticate(user.getEmail(), userPassword);
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getStatusCode()).isEqualTo(200);
         }
@@ -140,7 +127,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             PropertyEntity property = EntityBuilder.createRandomProperty(user);
             propertyRepository.save(property);
 
-            Response response = sendListAllPropertiesRequest(token);
+            Response response = sendRequest(token);
 
             assertThat(response.getStatusCode()).isEqualTo(200);
         }
@@ -150,7 +137,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
     @Nested
     class GetPropertyById {
 
-        private Response sendGetPropertyByIdRequest(String propertyId, String token) {
+        private Response sendRequest(String propertyId, String token) {
             return given()
                     .contentType(ContentType.JSON)
                     .port(port)
@@ -173,7 +160,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
 
-            Response response = sendGetPropertyByIdRequest(property.getId().toString(), token);
+            Response response = sendRequest(property.getId().toString(), token);
 
             assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
         }
@@ -191,7 +178,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
 
-            Response response = sendGetPropertyByIdRequest(property.getId().toString(), token);
+            Response response = sendRequest(property.getId().toString(), token);
 
             assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
         }
@@ -208,7 +195,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
 
-            Response response = sendGetPropertyByIdRequest(faker.rickAndMorty().character(), token);
+            Response response = sendRequest(faker.rickAndMorty().character(), token);
 
             assertThat(response.getStatusCode()).isEqualTo(400);
         }
@@ -225,9 +212,69 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
             propertyRepository.save(EntityBuilder.createRandomProperty(user));
 
-            Response response = sendGetPropertyByIdRequest(UUID.randomUUID().toString(), token);
+            Response response = sendRequest(UUID.randomUUID().toString(), token);
 
             assertThat(response.getStatusCode()).isEqualTo(404);
         }
+    }
+
+    @Nested
+    class FilterByLocation {
+
+        private Response sendRequest(String location, String token) {
+            return given()
+                    .contentType(ContentType.JSON)
+                    .port(port)
+                    .header("Authorization", "Bearer " + token)
+                    .queryParam("location", location)
+                    .when().get("/api/v1/property/location")
+                    .then()
+                    .log().all()
+                    .extract().response();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return properties by exact location")
+        void shouldReturnPropertiesByExactLocation() {
+            String token = authenticate(user.getEmail(), userPassword);
+            Address l1 = Address.builder()
+                    .number(faker.address().buildingNumber())
+                    .street(faker.address().streetName())
+                    .city(faker.address().city())
+                    .state(faker.address().stateAbbr())
+                    .postalCode(faker.address().zipCode())
+                    .build();
+            PropertyEntity p1 = EntityBuilder.createPropertyWithLocation(user, l1);
+            propertyRepository.save(p1);
+
+            Response response = sendRequest(l1.toString(), token);
+
+            assertThat(response.jsonPath().getList("id")).contains(p1.getId().toString());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return properties by the state")
+        void shouldReturnPropertiesByTheState() {
+            String token = authenticate(user.getEmail(), userPassword);
+            Address l1 = Address.builder()
+                    .number(faker.address().buildingNumber())
+                    .street(faker.address().streetName())
+                    .city(faker.address().city())
+                    .state(faker.address().stateAbbr())
+                    .postalCode(faker.address().zipCode())
+                    .build();
+
+            PropertyEntity p1 = EntityBuilder.createPropertyWithLocation(user, l1);
+            propertyRepository.save(p1);
+
+            Response response = sendRequest(l1.getState(), token);
+
+            assertThat(response.jsonPath().getList("id")).contains(p1.getId().toString());
+        }
+
     }
 }

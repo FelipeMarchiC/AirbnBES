@@ -1,6 +1,5 @@
 package br.ifsp.vvts.property;
 
-import br.ifsp.application.user.repository.JpaUserRepository;
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.domain.shared.valueobjects.Address;
@@ -11,7 +10,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
@@ -20,13 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor
 public class PropertyControllerTest extends BaseApiIntegrationTest {
-    //    @Autowired private final JpaPropertyRepository propertyRepository;
     private static final Faker faker = new Faker();
     private UserEntity user;
     private UserEntity admin;
     private String userPassword;
     private String adminPassword;
-    @Autowired
 
     @BeforeEach
     void setUp() {

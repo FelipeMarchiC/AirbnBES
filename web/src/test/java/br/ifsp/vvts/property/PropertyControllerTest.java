@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -28,7 +27,6 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
     private String userPassword;
     private String adminPassword;
     @Autowired
-    private JpaUserRepository jpaUserRepository;
 
     @BeforeEach
     void setUp() {

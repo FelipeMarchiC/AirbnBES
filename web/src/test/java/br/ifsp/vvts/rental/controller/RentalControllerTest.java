@@ -357,5 +357,20 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             Response response = findRentalHistoryByTenantIdRequest(token, String.valueOf(user1.getId()));
             assertEquals(403, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 and empty list when tenant has no rentals")
+        void shouldReturn200AndEmptyListWhenTenantHasNoRentals() {
+            UserEntity tenant = registerUser("validPassword123!");
+            String token = authenticate(tenant.getEmail(), "validPassword123!");
+
+            Response response = findRentalHistoryByTenantIdRequest(token, String.valueOf(tenant.getId()));
+
+            var rentals = response.jsonPath().getList("$");
+            assertEquals(200, response.getStatusCode());
+            assertTrue(rentals.isEmpty());
+        }
     }
 }

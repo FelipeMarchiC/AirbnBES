@@ -21,7 +21,7 @@ public class EntityBuilder {
     private static Faker faker = Faker.instance();
 
     public static UserEntity createRandomAdmin(String password) {
-        UserEntity user = UserEntity.builder()
+        return UserEntity.builder()
                 .id(UUID.randomUUID())
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
@@ -30,11 +30,10 @@ public class EntityBuilder {
                 .role(Role.ADMIN)
                 .ownedProperties(emptyList())
                 .build();
-        return user;
     }
 
     public static UserEntity createRandomUser(String password) {
-        UserEntity user = UserEntity.builder()
+        return UserEntity.builder()
                 .id(UUID.randomUUID())
                 .name(faker.name().firstName())
                 .lastname(faker.name().lastName())
@@ -43,7 +42,6 @@ public class EntityBuilder {
                 .role(Role.USER)
                 .ownedProperties(emptyList())
                 .build();
-        return user;
     }
 
     public static PropertyEntity createRandomProperty(UserEntity owner) {

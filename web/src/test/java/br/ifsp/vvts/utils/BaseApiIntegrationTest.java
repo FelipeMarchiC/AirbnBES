@@ -69,12 +69,13 @@ public class BaseApiIntegrationTest {
 
     protected UserEntity registerAdminUser(String password) {
         final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        UserEntity user = EntityBuilder.createRandomAdmin(encoder.encode(password));
-        userRepository.save(user);
-        return user;
+        UserEntity admin = EntityBuilder.createRandomAdmin(encoder.encode(password));
+        userRepository.save(admin);
+        return admin;
     }
 
     protected String authenticate(String username, String password) {
+        RestTemplate restTemplate = new RestTemplate();
         AuthRequest authRequest = new AuthRequest(username, password);
         final String url = baseURI + "/api/v1/authenticate";
         final AuthResponse response = restTemplate.postForObject(url, authRequest, AuthResponse.class);

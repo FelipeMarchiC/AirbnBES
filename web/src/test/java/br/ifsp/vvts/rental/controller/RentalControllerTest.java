@@ -21,8 +21,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RentalControllerTest extends BaseApiIntegrationTest {
 
@@ -290,6 +289,22 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             Response response = findAllByPropertyIdRequest(token, String.valueOf(property.getId()));
 
             assertEquals(403, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 with empty list when property has no rentals")
+        void shouldReturnEmptyListWhenPropertyHasNoRentals() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            Response response = findAllByPropertyIdRequest(token, String.valueOf(property.getId()));
+
+            assertEquals(200, response.getStatusCode());
+            var rentals = response.jsonPath().getList("$");
+            assertTrue(rentals.isEmpty());
         }
     }
 }

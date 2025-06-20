@@ -6,7 +6,7 @@ import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
 @Suite
-@SelectPackages({"br/ifsp/vvts"})
+@SelectPackages({"br.ifsp.vvts"})
 @SuiteDisplayName("All Api tests")
 @IncludeTags({"ApiTest"})
 public class ApiTests {

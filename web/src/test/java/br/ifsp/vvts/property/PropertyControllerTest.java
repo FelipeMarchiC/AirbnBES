@@ -145,4 +145,36 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
         }
 
     }
+
+    @Nested
+    class GetPropertyById {
+
+        private Response sendGetPropertyByIdRequest(String propertyId, String token) {
+            return given()
+                    .contentType(ContentType.JSON)
+                    .port(port)
+                    .header("Authorization", "Bearer " + token)
+                    .when().get("/api/v1/property/" + propertyId)
+                    .then()
+                    .log().all()
+                    .extract().response();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return property by id to user")
+        void getPropertyByIdForRegularUser() {
+            String token = authenticate(user.getEmail(), userPassword);
+            PropertyEntity property = EntityBuilder.createRandomProperty(user);
+            propertyRepository.save(property);
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+
+            Response response = sendGetPropertyByIdRequest(property.getId().toString(), token);
+
+            assertThat(response.getBody().jsonPath().getString("id")).isEqualTo(property.getId().toString());
+        }
+    }
 }

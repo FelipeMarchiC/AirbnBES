@@ -1,7 +1,6 @@
 package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.domain.models.property.PropertyEntity;
-import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
@@ -15,8 +14,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -57,7 +54,6 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                     LocalDate.now().plusDays(5),
                     token
             );
-
             assertEquals(201, response.getStatusCode());
             assertEquals(user.getId().toString(), response.getBody().jsonPath().get("tenantId"));
         }
@@ -305,6 +301,41 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             assertEquals(200, response.getStatusCode());
             var rentals = response.jsonPath().getList("$");
             assertTrue(rentals.isEmpty());
+        }
+    }
+
+    @Nested
+    class FindRentalHistoryByTenantId {
+        private Response findRentalHistoryByTenantIdRequest(String token, String tenantId) {
+            var request = given().contentType("application/json").port(port);
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+            String path = "/api/v1/rental/tenants/" + tenantId;
+            return request.when().get(path);
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 and list all rentals by tenant id")
+        void shouldReturn200AndListAllRentalsByTenantId() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property1 = createRandomProperty(owner);
+            PropertyEntity property2 = createRandomProperty(owner);
+
+            UserEntity tenant = registerUser("validPassword123!");
+            createRentalEntity(tenant, property1, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5));
+            createRentalEntity(tenant, property2, LocalDate.now().plusDays(10),
+                    LocalDate.now().plusDays(15));
+
+            String token = authenticate(tenant.getEmail(), "validPassword123!");
+            Response response = findRentalHistoryByTenantIdRequest(token, String.valueOf(tenant.getId()));
+
+            var rentals = response.jsonPath().getList("$");
+            assertEquals(200, response.getStatusCode());
+            assertEquals(2, rentals.size());
         }
     }
 }

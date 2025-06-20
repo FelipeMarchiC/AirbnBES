@@ -10,6 +10,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -446,8 +448,98 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
             Response response = sendRequest(BigDecimal.valueOf(60.0), BigDecimal.valueOf(120.0), token);
 
-            List<String> ids = response.jsonPath().getList("id");
-            assertThat(ids).containsExactly(p100.getId().toString());
+            assertThat(response.jsonPath().getList("id")).containsExactly(p100.getId().toString());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("should throws if has a value too small or too big")
+        void shouldHandleBoundaryPositiveValues() {
+            String token = authenticate(user.getEmail(), userPassword);
+            var pSmall = EntityBuilder.createPropertyWithPrice(user, 0.000000001);
+            propertyRepository.save(pSmall);
+
+            BigDecimal min = BigDecimal.ONE.scaleByPowerOfTen(-Integer.MAX_VALUE);
+            BigDecimal max = BigDecimal.ONE.scaleByPowerOfTen(Integer.MAX_VALUE);
+            Response response = sendRequest(min, max, token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("should return 400 if min is negative")
+        void shouldReturn400IfMinIsNegative() {
+            String token = authenticate(user.getEmail(), userPassword);
+            var pSmall = EntityBuilder.createPropertyWithPrice(user, 1000);
+            propertyRepository.save(pSmall);
+
+            BigDecimal min = BigDecimal.valueOf(-1);
+            BigDecimal max = BigDecimal.valueOf(1000);
+            Response response = sendRequest(min, max, token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("should return 400 if max is negative")
+        void shouldReturn400IfMaxIsNegative() {
+            String token = authenticate(user.getEmail(), userPassword);
+            var pSmall = EntityBuilder.createPropertyWithPrice(user, 1000);
+            propertyRepository.save(pSmall);
+
+            BigDecimal min = BigDecimal.valueOf(1000);
+            BigDecimal max = BigDecimal.valueOf(-1);
+            Response response = sendRequest(min, max, token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Boundary: zero and positive range")
+        void shouldHandleZeroMin() {
+            String token = authenticate(user.getEmail(), userPassword);
+            var pZero = EntityBuilder.createPropertyWithPrice(user, 0.0);
+            var pPositive = EntityBuilder.createPropertyWithPrice(user, 10.0);
+            propertyRepository.saveAll(List.of(pZero, pPositive));
+
+            Response response = sendRequest(BigDecimal.ZERO, BigDecimal.valueOf(5.0), token);
+
+            assertThat(response.jsonPath().getList("id")).containsExactly(pZero.getId().toString());
+        }
+
+        @ParameterizedTest
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return 400 with the min is greater than max")
+        @CsvSource({
+                "150,100",
+                "200.50,200.49",
+                "0.01,0.00",
+                "2147483648,2147483647",
+        })
+        void shouldReturnBadRequestWhenMinIsGreaterThanMax(String minStr, String maxStr) {
+            String token = authenticate(user.getEmail(), userPassword);
+            BigDecimal min = new BigDecimal(minStr);
+            BigDecimal max = new BigDecimal(maxStr);
+            Response response = sendRequest(min, max, token);
+            assertThat(response.getStatusCode()).isEqualTo(400);
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Unauthorized when missing token")
+        void shouldReturnUnauthorizedWithoutToken() {
+            Response response = sendRequest(BigDecimal.ZERO, BigDecimal.valueOf(5.0), null);
+
+            assertThat(response.getStatusCode()).isEqualTo(401);
         }
     }
 }

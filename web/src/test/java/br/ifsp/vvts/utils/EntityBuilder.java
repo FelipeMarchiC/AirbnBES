@@ -92,4 +92,24 @@ public class EntityBuilder {
                 .rentals(emptyList())
                 .build();
     }
+
+    public static PropertyEntity createPropertyWithPrice(UserEntity owner, double price) {
+        UUID uuid = UUID.randomUUID();
+        BigDecimal bdPrice = BigDecimal.valueOf(price);
+        return PropertyEntity.builder()
+                .id(uuid)
+                .name(faker.company().name() + " Apartment")
+                .description(faker.lorem().sentence())
+                .owner(owner)
+                .dailyRate(new Price(bdPrice))
+                .address(Address.builder()
+                        .number(faker.address().buildingNumber())
+                        .street(faker.address().streetName())
+                        .city(faker.address().city())
+                        .state(faker.address().stateAbbr())
+                        .postalCode(faker.address().zipCode())
+                        .build())
+                .rentals(emptyList())
+                .build();
+    }
 }

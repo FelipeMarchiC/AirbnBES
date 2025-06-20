@@ -47,7 +47,8 @@ public class EntityBuilder {
     public static PropertyEntity createRandomProperty(UserEntity owner) {
         UUID uuid = UUID.randomUUID();
         BigDecimal randomPrice = BigDecimal.valueOf(faker.number().numberBetween(50, 500));
-        PropertyEntity property = PropertyEntity.builder()
+
+        return PropertyEntity.builder()
                 .id(uuid)
                 .name(faker.company().name() + " Apartment")
                 .description(faker.lorem().sentence())
@@ -62,13 +63,11 @@ public class EntityBuilder {
                         .build())
                 .rentals(emptyList())
                 .build();
-
-        return property;
     }
 
     public static RentalEntity createRentalEntity(UserEntity user, PropertyEntity property,
                                                   LocalDate startDate, LocalDate endDate) {
-        RentalEntity rental = RentalEntity.builder()
+        return RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user)
                 .endDate(endDate)
@@ -77,7 +76,6 @@ public class EntityBuilder {
                 .value(new Price(BigDecimal.valueOf(500)))
                 .propertyEntity(property)
                 .build();
-        return rental;
     }
 
 }

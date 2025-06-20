@@ -479,5 +479,25 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             Response response = confirmRentalRequest(token, invalidRentalId);
             assertEquals(400, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 409 Conflict when the rental has already been confirmed")
+        void shouldReturn409WhenRentalIsAlreadyConfirmed() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5));
+
+            Response firstResponse = confirmRentalRequest(token, String.valueOf(rental.getId()));
+            assertEquals(200, firstResponse.getStatusCode());
+
+            Response secondResponse = confirmRentalRequest(token, String.valueOf(rental.getId()));
+            assertEquals(409, secondResponse.getStatusCode());
+        }
     }
 }

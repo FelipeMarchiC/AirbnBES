@@ -335,5 +335,27 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
             assertThat(response.jsonPath().getList("id")).contains(p1.getId().toString());
         }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return properties by the postal code")
+        void shouldReturnPropertiesByThePostalCode() {
+            String token = authenticate(user.getEmail(), userPassword);
+            Address l1 = Address.builder()
+                    .number(faker.address().buildingNumber())
+                    .street(faker.address().streetName())
+                    .city(faker.address().city())
+                    .state(faker.address().stateAbbr())
+                    .postalCode(faker.address().zipCode())
+                    .build();
+
+            PropertyEntity p1 = EntityBuilder.createPropertyWithLocation(user, l1);
+            propertyRepository.save(p1);
+
+            Response response = sendRequest(l1.getPostalCode(), token);
+
+            assertThat(response.jsonPath().getList("id")).contains(p1.getId().toString());
+        }
     }
 }

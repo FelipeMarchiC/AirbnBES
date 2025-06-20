@@ -270,5 +270,26 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             var rentals = response.jsonPath().getList("$");
             assertEquals(2, rentals.size());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 403 when user is not the owner of the property")
+        void shouldReturn403WhenUserIsNotTheOwnerOfTheProperty() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity user1 = registerUser("validPassword123!");
+            createRentalEntity(user1, property,
+                    LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+            createRentalEntity(user1, property,
+                    LocalDate.now().plusDays(10), LocalDate.now().plusDays(15));
+
+            UserEntity user2 = registerUser("validPassword123!");
+            String token = authenticate(user2.getEmail(), "validPassword123!");
+            Response response = findAllByPropertyIdRequest(token, String.valueOf(property.getId()));
+
+            assertEquals(403, response.getStatusCode());
+        }
     }
 }

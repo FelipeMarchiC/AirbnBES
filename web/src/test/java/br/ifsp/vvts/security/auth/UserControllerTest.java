@@ -1,6 +1,8 @@
 package br.ifsp.vvts.security.auth;
 
+import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
+import br.ifsp.vvts.security.config.JwtService;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
 import com.github.javafaker.Faker;
 import io.restassured.response.Response;
@@ -79,6 +81,29 @@ class UserControllerTest extends BaseApiIntegrationTest {
                     Arguments.of(validFirstName, validLastName, validEmail, ""),
                     Arguments.of(validFirstName, validLastName, validEmail, null)
             );
+        }
+    }
+
+    @Nested
+    class Authenticate {
+        private final JwtService jwtService = new JwtService();
+
+        private Response authenticateUser(String email, String password) {
+            AuthRequest authRequestBody = new AuthRequest(email, password);
+            var request = given().contentType("application/json").port(port).body(authRequestBody);
+            return request.when().post("/api/v1/authenticate");
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should authenticate a user and return a token")
+        void shouldAuthenticateUserAndReturnAToken() {
+            UserEntity user = registerUser("validPassword123!");
+            Response response = authenticateUser(user.getEmail(), "validPassword123!");
+
+            assertEquals(200, response.getStatusCode());
+            assertNotNull(response.getBody().jsonPath().get("token"));
         }
     }
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -418,6 +419,7 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
     @Nested
     class FilterByPriceRange {
+
         private Response sendRequest(BigDecimal min, BigDecimal max, String token) {
             return given()
                     .contentType(ContentType.JSON)
@@ -429,6 +431,23 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
                     .then()
                     .log().all()
                     .extract().response();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return only properties within [min, max]")
+        void shouldReturnPropertiesWithinRange() {
+            String token = authenticate(user.getEmail(), userPassword);
+            var p50 = EntityBuilder.createPropertyWithPrice(user, 50.0);
+            var p100 = EntityBuilder.createPropertyWithPrice(user, 100.0);
+            var p150 = EntityBuilder.createPropertyWithPrice(user, 150.0);
+            propertyRepository.saveAll(List.of(p50, p100, p150));
+
+            Response response = sendRequest(BigDecimal.valueOf(60.0), BigDecimal.valueOf(120.0), token);
+
+            List<String> ids = response.jsonPath().getList("id");
+            assertThat(ids).containsExactly(p100.getId().toString());
         }
     }
 }

@@ -135,5 +135,19 @@ class UserControllerTest extends BaseApiIntegrationTest {
                     () -> assertEquals(400, response2.getStatusCode())
             );
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return bad request (400) for empty email")
+        void shouldReturnBadRequest400WhenFieldsAreEmpty() {
+            Response response1 = authenticateUser("", "validPassword123!");
+            Response response2 = authenticateUser("validemail@example.com", "");
+
+            assertAll(
+                    () -> assertEquals(400, response1.getStatusCode()),
+                    () -> assertEquals(400, response2.getStatusCode())
+            );
+        }
     }
 }

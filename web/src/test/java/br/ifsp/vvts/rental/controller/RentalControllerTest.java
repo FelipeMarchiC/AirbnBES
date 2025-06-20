@@ -435,5 +435,18 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
             assertEquals(200, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 404 when rental not found")
+        void shouldReturn404WhenRentalNotFound() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            Response response = confirmRentalRequest(token, String.valueOf(UUID.randomUUID()));
+
+            assertEquals(404, response.getStatusCode());
+        }
     }
 }

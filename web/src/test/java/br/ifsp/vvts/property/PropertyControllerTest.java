@@ -212,5 +212,22 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(400);
         }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return 404 if send a propertyId that does not exists")
+        void getPropertyByIdWithNonExistentPropertyId() {
+            String token = authenticate(user.getEmail(), userPassword);
+            PropertyEntity property = EntityBuilder.createRandomProperty(user);
+            propertyRepository.save(property);
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+            propertyRepository.save(EntityBuilder.createRandomProperty(user));
+
+            Response response = sendGetPropertyByIdRequest(UUID.randomUUID().toString(), token);
+
+            assertThat(response.getStatusCode()).isEqualTo(404);
+        }
     }
 }

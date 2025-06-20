@@ -1,6 +1,7 @@
 package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
@@ -336,6 +337,25 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             var rentals = response.jsonPath().getList("$");
             assertEquals(200, response.getStatusCode());
             assertEquals(2, rentals.size());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 403 when user tries to access another tenant rental history")
+        void shouldReturn403WhenUserTriesToAccessAnotherTenantRentalHistory() {
+            UserEntity owner = registerUser("validPassword123!");
+            PropertyEntity property1 = createRandomProperty(owner);
+
+            UserEntity user1 = registerUser("validPassword123!");
+            createRentalEntity(user1, property1, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5));
+
+            UserEntity user2 = registerUser("validPassword123!");
+            String token = authenticate(user2.getEmail(), "validPassword123!");
+
+            Response response = findRentalHistoryByTenantIdRequest(token, String.valueOf(user1.getId()));
+            assertEquals(403, response.getStatusCode());
         }
     }
 }

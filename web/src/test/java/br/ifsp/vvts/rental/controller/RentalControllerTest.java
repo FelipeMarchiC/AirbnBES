@@ -468,5 +468,16 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             assertEquals(403, response.getStatusCode());
         }
 
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 400 when rental ID format is invalid")
+        void shouldReturn400WhenRentalIdIsInvalid() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+            String invalidRentalId = "not-a-valid-uuid";
+            Response response = confirmRentalRequest(token, invalidRentalId);
+            assertEquals(400, response.getStatusCode());
+        }
     }
 }

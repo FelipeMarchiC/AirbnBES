@@ -1,6 +1,7 @@
 package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.domain.models.property.PropertyEntity;
+import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.user.User;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
@@ -400,6 +401,39 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                     () -> assertEquals(401, response2.getStatusCode()),
                     () -> assertEquals(401, response3.getStatusCode())
             );
+        }
+    }
+
+    @Nested
+    class ConfirmRental {
+
+        private Response confirmRentalRequest(String token, String rentalId) {
+            var request = given().contentType("application/json").port(port);
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+            String path = "/api/v1/rental/" + rentalId + "/owner/confirm";
+            return request.when().put(path);
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 when rental is successfully confirmed")
+        void shouldReturn200WhenRentalIsSuccessfullyConfirmed() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5));
+
+            Response response = confirmRentalRequest(token, String.valueOf(rental.getId()));
+
+            assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
+            assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+            assertEquals(200, response.getStatusCode());
         }
     }
 }

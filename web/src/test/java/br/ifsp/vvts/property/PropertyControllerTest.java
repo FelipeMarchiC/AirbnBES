@@ -357,5 +357,61 @@ public class PropertyControllerTest extends BaseApiIntegrationTest {
 
             assertThat(response.jsonPath().getList("id")).contains(p1.getId().toString());
         }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return 400 if location is null")
+        void shouldReturn400IfLocationIsNull() {
+            String token = authenticate(user.getEmail(), userPassword);
+
+            Response response = sendRequest(null, token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+            assertThat(response.jsonPath().getList("id")).isEmpty();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return 400 when location is blank")
+        void shouldReturn400IfLocationIsBlank() {
+            String token = authenticate(user.getEmail(), userPassword);
+
+            Response response = sendRequest("   ", token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+            assertThat(response.jsonPath().getList("id")).isEmpty();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return empty when location is too long")
+        void shouldReturnEmptyWhenLocationIsTooLong() {
+            String token = authenticate(user.getEmail(), userPassword);
+
+            String longLocation = "a".repeat(300);
+
+            Response response = sendRequest(longLocation, token);
+
+            assertThat(response.statusCode()).isEqualTo(400);
+            assertThat(response.jsonPath().getList("id")).isEmpty();
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @DisplayName("Should return empty when location is random garbage string")
+        void shouldReturnEmptyWhenLocationIsRandomString() {
+            String token = authenticate(user.getEmail(), userPassword);
+
+            Response response = sendRequest(faker.rickAndMorty().character(), token);
+
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.jsonPath().getList("id")).isEmpty();
+        }
+
+
     }
 }

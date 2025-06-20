@@ -385,5 +385,21 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(404, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 401 when no token is invalid")
+        void shouldReturn401WhenTokenIsInvalid() {
+            UserEntity tenant = registerUser("validPassword123!");
+            Response response1 = findRentalHistoryByTenantIdRequest(null, String.valueOf(tenant.getId()));
+            Response response2 = findRentalHistoryByTenantIdRequest("", String.valueOf(tenant.getId()));
+            Response response3 = findRentalHistoryByTenantIdRequest("invalid-token", String.valueOf(tenant.getId()));
+            assertAll(
+                    () -> assertEquals(401, response1.getStatusCode()),
+                    () -> assertEquals(401, response2.getStatusCode()),
+                    () -> assertEquals(401, response3.getStatusCode())
+            );
+        }
     }
 }

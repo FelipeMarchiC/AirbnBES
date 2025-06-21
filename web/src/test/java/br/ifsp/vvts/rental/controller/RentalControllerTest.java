@@ -590,5 +590,33 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(403, response.getStatusCode());
         }
+
+        @ParameterizedTest
+        @MethodSource("invalidStatesProvider")
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 400 when rental is in invalid state for denial")
+        void shouldReturn400WhenRentalIsInInvalidState(RentalState state) {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property,
+                    LocalDate.now().plusDays(1), LocalDate.now().plusDays(5), state);
+
+            Response response = denyRentalRequest(token, rental.getId().toString());
+
+            assertEquals(400, response.getStatusCode());
+        }
+
+        static Stream<RentalState> invalidStatesProvider() {
+            return Stream.of(
+                    RentalState.CONFIRMED,
+                    RentalState.DENIED,
+                    RentalState.CANCELLED,
+                    RentalState.EXPIRED
+            );
+        }
     }
 }

@@ -90,7 +90,13 @@ public class BaseApiIntegrationTest {
     }
 
     protected RentalEntity createRentalEntity(UserEntity user, PropertyEntity property, LocalDate startDate, LocalDate endDate) {
-        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property, startDate, endDate);
+        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property, startDate, endDate, RentalState.PENDING);
+        rentalRepository.save(rentalEntity);
+        return rentalEntity;
+    }
+
+    protected RentalEntity createRentalEntity(UserEntity user, PropertyEntity property, LocalDate startDate, LocalDate endDate, RentalState state) {
+        RentalEntity rentalEntity = EntityBuilder.createRentalEntity(user, property, startDate, endDate, state);
         rentalRepository.save(rentalEntity);
         return rentalEntity;
     }

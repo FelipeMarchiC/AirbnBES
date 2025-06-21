@@ -2,6 +2,7 @@ package br.ifsp.vvts.rental.controller;
 
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
+import br.ifsp.domain.models.rental.RentalState;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
@@ -456,6 +457,8 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
             assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+            RentalEntity savedRental = rentalRepository.findByPropertyEntityId(property.getId()).getFirst();
+            assertEquals(savedRental.getState(), RentalState.CONFIRMED);
             assertEquals(200, response.getStatusCode());
         }
 
@@ -522,5 +525,19 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             Response secondResponse = confirmRentalRequest(token, String.valueOf(rental.getId()));
             assertEquals(409, secondResponse.getStatusCode());
         }
+    }
+    @Nested
+    class DenyRental {
+
+        private Response denyRentalRequest(String token, String rentalId) {
+            var request = given().contentType("application/json").port(port);
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+            String path = "/api/v1/rental/" + rentalId + "/owner/deny";
+            return request.when().put(path);
+        }
+
+
     }
 }

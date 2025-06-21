@@ -66,13 +66,13 @@ public class EntityBuilder {
     }
 
     public static RentalEntity createRentalEntity(UserEntity user, PropertyEntity property,
-                                                  LocalDate startDate, LocalDate endDate) {
+                                                  LocalDate startDate, LocalDate endDate, RentalState state) {
         return RentalEntity.builder()
                 .id(UUID.randomUUID())
                 .userEntity(user)
                 .endDate(endDate)
                 .startDate(startDate)
-                .state(RentalState.PENDING)
+                .state(state)
                 .value(new Price(BigDecimal.valueOf(500)))
                 .propertyEntity(property)
                 .build();

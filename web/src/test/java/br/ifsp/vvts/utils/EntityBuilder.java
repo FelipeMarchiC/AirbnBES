@@ -112,4 +112,25 @@ public class EntityBuilder {
                 .rentals(emptyList())
                 .build();
     }
+
+    public static PropertyEntity createProperty(
+            String id, String name, String desc, UserEntity owner, String price,
+            String number, String street, String city, String state, String cep
+    ) {
+        return PropertyEntity.builder()
+                .id(UUID.fromString(id))
+                .name(name)
+                .description(desc)
+                .owner(owner)
+                .dailyRate(new Price(new BigDecimal(price)))
+                .address(Address.builder()
+                        .number(number)
+                        .street(street)
+                        .city(city)
+                        .state(state)
+                        .postalCode(cep)
+                        .build())
+                .rentals(emptyList())
+                .build();
+    }
 }

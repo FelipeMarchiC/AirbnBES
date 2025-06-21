@@ -714,6 +714,23 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                 Response response = cancelRentalRequest(token, "invalid-uuid", null);
                 assertEquals(400, response.getStatusCode());
             }
+
+            @Test
+            @Tag("IntegrationTest")
+            @Tag("ApiTest")
+            @Description("Should return 400 when rental is already cancelled")
+            void shouldReturn400WhenRentalIsAlreadyCancelled() {
+                UserEntity owner = registerAdminUser("validPassword123!");
+                PropertyEntity property = createRandomProperty(owner);
+                String token = authenticate(owner.getEmail(), "validPassword123!");
+
+                UserEntity tenant = registerUser("validPassword123!");
+                RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(5), RentalState.CANCELLED);
+
+                Response response = cancelRentalRequest(token, rental.getId().toString(), null);
+                assertEquals(400, response.getStatusCode());
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ import br.ifsp.domain.models.rental.RentalEntity;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
+import br.ifsp.vvts.utils.EntityBuilder;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.Nested;
@@ -15,10 +16,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RentalControllerTest extends BaseApiIntegrationTest {
@@ -181,6 +184,26 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                     ownerToken
             );
 
+            assertEquals(400, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return 400 if the value is too high to the Big Decimal")
+        void shouldReturnBadRequestWhenValueIsTooHighToBigDecimal() {
+            UserEntity owner = registerAdminUser("x56das!p08A");
+            PropertyEntity property = EntityBuilder.createPropertyWithPrice(owner, Double.MAX_VALUE);
+            propertyRepository.save(property);
+
+            String ownerToken = authenticate(owner.getEmail(), "x56das!p08A");
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(3),
+                    ownerToken
+            );
             assertEquals(400, response.getStatusCode());
         }
     }

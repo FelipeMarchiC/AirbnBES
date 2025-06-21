@@ -735,17 +735,15 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
     @Nested
     class TenantCancelRental {
-        private Response tenantCancelRentalRequest(String token, String rentalId, String cancelDate) {
+        private Response tenantCancelRentalRequest(String token, String rentalId) {
             var request = given().contentType("application/json").port(port);
             if (token != null) {
                 request.header("Authorization", "Bearer " + token);
             }
-            if (cancelDate != null) {
-                request.queryParam("cancelDate", cancelDate);
-            }
-
             String path = "/api/v1/rental/" + rentalId + "/tenant/cancel";
             return request.when().put(path);
         }
+
+        
     }
 }

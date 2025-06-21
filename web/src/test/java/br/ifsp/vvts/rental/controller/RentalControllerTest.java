@@ -635,102 +635,117 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(401, response.getStatusCode());
         }
-
-        @Nested
-        class CancelRental {
-            private Response cancelRentalRequest(String token, String rentalId, String cancelDate) {
-                var request = given().contentType("application/json").port(port);
-                if (token != null) {
-                    request.header("Authorization", "Bearer " + token);
-                }
-                if (cancelDate != null) {
-                    request.queryParam("cancelDate", cancelDate);
-                }
-
-                String path = "/api/v1/rental/" + rentalId + "/owner/cancel";
-                return request.when().put(path);
+    }
+    @Nested
+    class CancelRental {
+        private Response cancelRentalRequest(String token, String rentalId, String cancelDate) {
+            var request = given().contentType("application/json").port(port);
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+            if (cancelDate != null) {
+                request.queryParam("cancelDate", cancelDate);
             }
 
-            @Test
-            @Tag("IntegrationTest")
-            @Tag("ApiTest")
-            @Description("Should return 200 when rental is successfully cancelled")
-            void shouldReturn200WhenRentalIsSuccessfullyCancelled() {
-                UserEntity owner = registerAdminUser("validPassword123!");
-                PropertyEntity property = createRandomProperty(owner);
-                String token = authenticate(owner.getEmail(), "validPassword123!");
+            String path = "/api/v1/rental/" + rentalId + "/owner/cancel";
+            return request.when().put(path);
+        }
 
-                UserEntity tenant = registerUser("validPassword123!");
-                RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
-                        LocalDate.now().plusDays(5), RentalState.CONFIRMED);
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 when rental is successfully cancelled")
+        void shouldReturn200WhenRentalIsSuccessfullyCancelled() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
 
-                Response response = cancelRentalRequest(token, String.valueOf(rental.getId()), null);
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5), RentalState.CONFIRMED);
 
-                assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
-                assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+            Response response = cancelRentalRequest(token, String.valueOf(rental.getId()), null);
 
-                RentalEntity updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
-                assertEquals(RentalState.CANCELLED, updatedRental.getState());
-                assertEquals(200, response.getStatusCode());
+            assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
+            assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+
+            RentalEntity updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
+            assertEquals(RentalState.CANCELLED, updatedRental.getState());
+            assertEquals(200, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 404 when rental not found")
+        void shouldReturn404WhenRentalNotFound() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+            Response response = cancelRentalRequest(token, UUID.randomUUID().toString(), null);
+            assertEquals(404, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 403 when authenticated user is not the property owner")
+        void shouldReturn403WhenUserIsNotOwner() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5), RentalState.CONFIRMED);
+
+            UserEntity otherUser = registerUser("validPassword123!");
+            String token = authenticate(otherUser.getEmail(), "validPassword123!");
+
+            Response response = cancelRentalRequest(token, rental.getId().toString(), null);
+            assertEquals(403, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 400 when rental ID is invalid")
+        void shouldReturn400WhenRentalIdIsInvalid() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+            Response response = cancelRentalRequest(token, "invalid-uuid", null);
+            assertEquals(400, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 400 when rental is already cancelled")
+        void shouldReturn400WhenRentalIsAlreadyCancelled() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5), RentalState.CANCELLED);
+
+            Response response = cancelRentalRequest(token, rental.getId().toString(), null);
+            assertEquals(400, response.getStatusCode());
+        }
+    }
+
+    @Nested
+    class TenantCancelRental {
+        private Response tenantCancelRentalRequest(String token, String rentalId, String cancelDate) {
+            var request = given().contentType("application/json").port(port);
+            if (token != null) {
+                request.header("Authorization", "Bearer " + token);
+            }
+            if (cancelDate != null) {
+                request.queryParam("cancelDate", cancelDate);
             }
 
-            @Test
-            @Tag("IntegrationTest")
-            @Tag("ApiTest")
-            @Description("Should return 404 when rental not found")
-            void shouldReturn404WhenRentalNotFound() {
-                UserEntity owner = registerAdminUser("validPassword123!");
-                String token = authenticate(owner.getEmail(), "validPassword123!");
-                Response response = cancelRentalRequest(token, UUID.randomUUID().toString(), null);
-                assertEquals(404, response.getStatusCode());
-            }
-
-            @Test
-            @Tag("IntegrationTest")
-            @Tag("ApiTest")
-            @Description("Should return 403 when authenticated user is not the property owner")
-            void shouldReturn403WhenUserIsNotOwner() {
-                UserEntity owner = registerAdminUser("validPassword123!");
-                PropertyEntity property = createRandomProperty(owner);
-
-                UserEntity tenant = registerUser("validPassword123!");
-                RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
-                        LocalDate.now().plusDays(5), RentalState.CONFIRMED);
-
-                UserEntity otherUser = registerUser("validPassword123!");
-                String token = authenticate(otherUser.getEmail(), "validPassword123!");
-
-                Response response = cancelRentalRequest(token, rental.getId().toString(), null);
-                assertEquals(403, response.getStatusCode());
-            }
-
-            @Test
-            @Tag("IntegrationTest")
-            @Tag("ApiTest")
-            @Description("Should return 400 when rental ID is invalid")
-            void shouldReturn400WhenRentalIdIsInvalid() {
-                UserEntity owner = registerAdminUser("validPassword123!");
-                String token = authenticate(owner.getEmail(), "validPassword123!");
-                Response response = cancelRentalRequest(token, "invalid-uuid", null);
-                assertEquals(400, response.getStatusCode());
-            }
-
-            @Test
-            @Tag("IntegrationTest")
-            @Tag("ApiTest")
-            @Description("Should return 400 when rental is already cancelled")
-            void shouldReturn400WhenRentalIsAlreadyCancelled() {
-                UserEntity owner = registerAdminUser("validPassword123!");
-                PropertyEntity property = createRandomProperty(owner);
-                String token = authenticate(owner.getEmail(), "validPassword123!");
-
-                UserEntity tenant = registerUser("validPassword123!");
-                RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
-                        LocalDate.now().plusDays(5), RentalState.CANCELLED);
-
-                Response response = cancelRentalRequest(token, rental.getId().toString(), null);
-                assertEquals(400, response.getStatusCode());
-            }
+            String path = "/api/v1/rental/" + rentalId + "/tenant/cancel";
+            return request.when().put(path);
         }
     }
 }

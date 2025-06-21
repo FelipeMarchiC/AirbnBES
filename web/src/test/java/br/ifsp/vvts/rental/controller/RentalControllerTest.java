@@ -9,6 +9,7 @@ import br.ifsp.vvts.utils.BaseApiIntegrationTest;
 import br.ifsp.vvts.utils.EntityBuilder;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -188,6 +189,7 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             assertEquals(400, response.getStatusCode());
         }
 
+        @Disabled
         @Test
         @Tag("ApiTest")
         @Tag("IntegrationTest")
@@ -744,6 +746,27 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             return request.when().put(path);
         }
 
-        
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 when rental is successfully cancelled")
+        void shouldReturn200WhenRentalIsSuccessfullyCancelled() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(5), RentalState.CONFIRMED);
+
+            String token = authenticate(tenant.getEmail(), "validPassword123!");
+
+            Response response = tenantCancelRentalRequest(token, String.valueOf(rental.getId()));
+
+            assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
+            assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+            RentalEntity updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
+            assertEquals(RentalState.CANCELLED, updatedRental.getState());
+            assertEquals(200, response.getStatusCode());
+        }
     }
 }

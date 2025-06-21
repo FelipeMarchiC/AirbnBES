@@ -618,5 +618,22 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                     RentalState.EXPIRED
             );
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 401 when no token is provided")
+        void shouldReturn401WhenNoTokenProvided() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property,
+                    LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+
+            Response response = denyRentalRequest(null, rental.getId().toString());
+
+            assertEquals(401, response.getStatusCode());
+        }
     }
 }

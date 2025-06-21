@@ -570,5 +570,25 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             assertEquals(404, response.getStatusCode());
         }
+
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 403 when user is not the owner of the property")
+        void shouldReturn403WhenUserIsNotOwner() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property,
+                    LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+
+            UserEntity otherUser = registerUser("validPassword123!");
+            String token = authenticate(otherUser.getEmail(), "validPassword123!");
+
+            Response response = denyRentalRequest(token, rental.getId().toString());
+
+            assertEquals(403, response.getStatusCode());
+        }
     }
 }

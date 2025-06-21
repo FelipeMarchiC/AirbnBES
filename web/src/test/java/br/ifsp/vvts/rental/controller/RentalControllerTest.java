@@ -650,6 +650,29 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                 String path = "/api/v1/rental/" + rentalId + "/owner/cancel";
                 return request.when().put(path);
             }
+
+            @Test
+            @Tag("IntegrationTest")
+            @Tag("ApiTest")
+            @Description("Should return 200 when rental is successfully cancelled")
+            void shouldReturn200WhenRentalIsSuccessfullyCancelled() {
+                UserEntity owner = registerAdminUser("validPassword123!");
+                PropertyEntity property = createRandomProperty(owner);
+                String token = authenticate(owner.getEmail(), "validPassword123!");
+
+                UserEntity tenant = registerUser("validPassword123!");
+                RentalEntity rental = createRentalEntity(tenant, property, LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(5), RentalState.CONFIRMED);
+
+                Response response = cancelRentalRequest(token, String.valueOf(rental.getId()), null);
+
+                assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
+                assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
+
+                RentalEntity updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
+                assertEquals(RentalState.CANCELLED, updatedRental.getState());
+                assertEquals(200, response.getStatusCode());
+            }
         }
     }
 }

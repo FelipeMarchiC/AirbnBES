@@ -538,6 +538,25 @@ class RentalControllerTest extends BaseApiIntegrationTest {
             return request.when().put(path);
         }
 
+        @Test
+        @Tag("IntegrationTest")
+        @Tag("ApiTest")
+        @Description("Should return 200 when rental is successfully denied by the owner")
+        void shouldReturn200WhenRentalIsSuccessfullyDenied() {
+            UserEntity owner = registerAdminUser("validPassword123!");
+            PropertyEntity property = createRandomProperty(owner);
+            String token = authenticate(owner.getEmail(), "validPassword123!");
+
+            UserEntity tenant = registerUser("validPassword123!");
+            RentalEntity rental = createRentalEntity(tenant, property,
+                    LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+
+            Response response = denyRentalRequest(token, String.valueOf(rental.getId()));
+
+            assertEquals(200, response.getStatusCode());
+            RentalEntity updated = rentalRepository.findById(rental.getId()).orElseThrow();
+            assertEquals(RentalState.DENIED, updated.getState());
+        }
 
     }
 }

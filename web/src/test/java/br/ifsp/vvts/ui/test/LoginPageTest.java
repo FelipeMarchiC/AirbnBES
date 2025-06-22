@@ -6,6 +6,7 @@ import br.ifsp.vvts.ui.BaseSeleniumTest;
 import br.ifsp.vvts.ui.page.LoginPageObject;
 import br.ifsp.vvts.utils.EntityBuilder;
 import com.github.javafaker.Faker;
+import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -70,5 +71,17 @@ public class LoginPageTest extends BaseSeleniumTest {
                 .until(ExpectedConditions.urlContains("/login"));
 
         assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @Tag("UiTest")
+    @Description("Should navigate to register page")
+    void shouldNavigateToRegisterPage(){
+        loginPageObject.clickRegisterLink();
+
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.urlContains("/register"));
+
+        assertThat(driver.getCurrentUrl()).contains("/register");
     }
 }

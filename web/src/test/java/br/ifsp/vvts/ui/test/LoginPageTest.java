@@ -10,11 +10,11 @@ import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.pitest.reloc.antlr.common.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,10 +57,13 @@ public class LoginPageTest extends BaseSeleniumTest {
                 .until(ExpectedConditions.urlContains("/"));
 
         assertThat(driver.getCurrentUrl()).contains("/");
+        List<String> toasts = loginPageObject.getToastMessages();
+        assertThat(toasts).anyMatch(msg -> msg.toLowerCase().contains("login realizado com sucesso!"));
     }
 
     @Test
     @Tag("UiTest")
+    @Description("Should not login user with unregistered email")
     void shouldNotLoginUserWithUnregisteredEmail() {
         String unregisteredEmail = faker.internet().emailAddress();
         String password = "anyPassword123!";
@@ -71,6 +74,8 @@ public class LoginPageTest extends BaseSeleniumTest {
                 .until(ExpectedConditions.urlContains("/login"));
 
         assertThat(driver.getCurrentUrl()).contains("/login");
+        List<String> toasts = loginPageObject.getToastMessages();
+        assertThat(toasts).anyMatch(msg -> msg.toLowerCase().contains("credenciais inválidas. tente novamente."));
     }
 
     @Test

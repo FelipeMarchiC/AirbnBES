@@ -13,19 +13,16 @@ import java.util.List;
 
 public class RegisterPageObject extends BasePageObject {
     private static final Faker faker = Faker.instance();
-    private final WebDriverWait wait;
 
     private final By fullNameInput = By.id("name");
     private final By emailInput = By.id("email");
     private final By passwordInput = By.id("password");
     private final By confirmPasswordInput = By.id("confirmPassword");
     private final By registerButton = By.xpath("//*[@id=\"root\"]/div[1]/main/div/div/form/div[2]/button");
-    private final By toaster = By.xpath("//*[@id='_rht_toaster']/*");
     private final By loginLink = By.linkText("Faça login");
 
     public RegisterPageObject(WebDriver driver) {
         super(driver);
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     public RegisterPageObject fillFullName(String fullName) {
@@ -63,14 +60,5 @@ public class RegisterPageObject extends BasePageObject {
                 .fillPassword(password)
                 .fillConfirmPassword(confirmPassword)
                 .clickRegisterButton();
-    }
-
-    public List<String> getToastMessages() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(toaster));
-        List<WebElement> elements = driver.findElements(toaster);
-        return elements.stream()
-                .map(WebElement::getText)
-                .filter(text -> !text.isBlank())
-                .toList();
     }
 }

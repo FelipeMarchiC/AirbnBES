@@ -35,4 +35,29 @@ public class RegisterPageTest extends BaseSeleniumTest {
         registerPageObject = new RegisterPageObject(driver);
     }
 
+    @Test
+    @Tag("UiTest")
+    @DisplayName("Should register user with valid input data")
+    void shouldRegisterUserWithValidInputData() {
+        String password = "validPassword123!";
+        String email = faker.internet().emailAddress();
+
+        registerPageObject.registerUser(
+                faker.name().fullName(),
+                email,
+                password,
+                password
+        );
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+
+        assertTrue(userRepository.findByEmail(email).isPresent());
+
+        List<String> toasts = registerPageObject.getToastMessages();
+        assertThat(toasts).anyMatch(msg -> msg.contains("Cadastro realizado com sucesso! Agora você pode fazer login."));
+    }
+
 }

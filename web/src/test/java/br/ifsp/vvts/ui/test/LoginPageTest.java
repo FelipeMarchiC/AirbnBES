@@ -1,6 +1,7 @@
 package br.ifsp.vvts.ui.test;
 
 import br.ifsp.application.user.repository.JpaUserRepository;
+import br.ifsp.domain.models.user.Role;
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.ui.BaseSeleniumTest;
 import br.ifsp.vvts.ui.page.LoginPageObject;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,13 +47,7 @@ public class LoginPageTest extends BaseSeleniumTest {
     @Test
     @Tag("UiTest")
     void shouldLoginUserWithValidCredentials() {
-        String password = "validPassword123!";
-        UserEntity user = EntityBuilder.createRandomUser(password);
-        String email = user.getEmail();
-
-        userRepository.save(user);
-
-        loginPageObject.loginUser(email, password);
+        loginPageObject.loginUser(user.getEmail(), usersPassword);
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.urlContains("/"));
@@ -81,12 +77,12 @@ public class LoginPageTest extends BaseSeleniumTest {
     @Test
     @Tag("UiTest")
     @Description("Should navigate to register page")
-    void shouldNavigateToRegisterPage(){
+    void shouldNavigateToRegisterPage() {
         loginPageObject.clickRegisterLink();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/register"));
+                .until(ExpectedConditions.urlContains("/cadastro"));
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        assertThat(driver.getCurrentUrl()).contains("/cadastro");
     }
 }

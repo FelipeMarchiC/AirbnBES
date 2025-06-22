@@ -57,4 +57,18 @@ public class LoginPageTest extends BaseSeleniumTest {
 
         assertThat(driver.getCurrentUrl()).contains("/");
     }
+
+    @Test
+    @Tag("UiTest")
+    void shouldNotLoginUserWithUnregisteredEmail() {
+        String unregisteredEmail = faker.internet().emailAddress();
+        String password = "anyPassword123!";
+
+        loginPageObject.loginUser(unregisteredEmail, password);
+
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
 }

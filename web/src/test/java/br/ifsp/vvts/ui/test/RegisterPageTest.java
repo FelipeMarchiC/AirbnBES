@@ -36,6 +36,11 @@ public class RegisterPageTest extends BaseSeleniumTest {
         registerPageObject = new RegisterPageObject(driver);
     }
 
+    @AfterEach
+    void cleanUp() {
+        userRepository.deleteAll();
+    }
+
     @Test
     @Tag("UiTest")
     @DisplayName("Should register user with valid input data")
@@ -89,5 +94,17 @@ public class RegisterPageTest extends BaseSeleniumTest {
         List<String> toasts = registerPageObject.getToastMessages();
         assertThat(toasts).anyMatch(msg -> msg.toLowerCase()
                 .contains("este e-mail já está cadastrado. por favor, faça login ou use outro e-mail."));
+    }
+
+    @Test
+    @Tag("UiTest")
+    @DisplayName("Should navigate to login page when click in login link")
+    void shouldNavigateToLoginPage() {
+        registerPageObject.clickLoginLink();
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
     }
 }

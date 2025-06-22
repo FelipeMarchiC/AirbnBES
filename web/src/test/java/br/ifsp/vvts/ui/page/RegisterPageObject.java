@@ -20,8 +20,8 @@ public class RegisterPageObject extends BasePageObject {
     private final By passwordInput = By.id("password");
     private final By confirmPasswordInput = By.id("confirmPassword");
     private final By registerButton = By.xpath("//*[@id=\"root\"]/div[1]/main/div/div/form/div[2]/button");
-
     private final By toaster = By.xpath("//*[@id='_rht_toaster']/*");
+    private final By loginLink = By.linkText("Faça login");
 
     public RegisterPageObject(WebDriver driver) {
         super(driver);
@@ -31,6 +31,10 @@ public class RegisterPageObject extends BasePageObject {
     public RegisterPageObject fillFullName(String fullName) {
         driver.findElement(fullNameInput).sendKeys(fullName);
         return this;
+    }
+
+    public void clickLoginLink() {
+        driver.findElement(loginLink).click();
     }
 
     public RegisterPageObject fillEmail(String email) {

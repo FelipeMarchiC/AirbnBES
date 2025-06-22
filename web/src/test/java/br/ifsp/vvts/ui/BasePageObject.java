@@ -1,4 +1,4 @@
-package br.ifsp.ui;
+package br.ifsp.vvts.ui;
 
 import org.openqa.selenium.WebDriver;
 import pitest.fasterxml.jackson.databind.ser.Serializers;

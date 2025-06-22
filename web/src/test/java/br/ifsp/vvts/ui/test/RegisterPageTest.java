@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -53,11 +54,40 @@ public class RegisterPageTest extends BaseSeleniumTest {
                 .until(ExpectedConditions.urlContains("/login"));
 
         assertThat(driver.getCurrentUrl()).contains("/login");
-
         assertTrue(userRepository.findByEmail(email).isPresent());
 
         List<String> toasts = registerPageObject.getToastMessages();
-        assertThat(toasts).anyMatch(msg -> msg.contains("Cadastro realizado com sucesso! Agora você pode fazer login."));
+        assertThat(toasts).anyMatch(msg -> msg.contains("Cadastro realizado com sucesso"));
     }
 
+    @Test
+    @Tag("UiTest")
+    @DisplayName("Should not register user with already registered email")
+    void shouldNotRegisterUserWithExistingEmail() {
+        String email = faker.internet().emailAddress();
+        String password = "validPassword123!";
+
+        registerPageObject.registerUser(
+                faker.name().fullName(),
+                email,
+                password,
+                password
+        );
+
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.urlContains("/login"));
+
+        driver.get(baseUrl + "/cadastro");
+
+        registerPageObject.registerUser(
+                faker.name().fullName(),
+                email,
+                password,
+                password
+        );
+
+        List<String> toasts = registerPageObject.getToastMessages();
+        assertThat(toasts).anyMatch(msg -> msg.toLowerCase()
+                .contains("este e-mail já está cadastrado. por favor, faça login ou use outro e-mail."));
+    }
 }

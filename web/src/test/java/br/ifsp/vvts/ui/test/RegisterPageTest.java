@@ -154,4 +154,28 @@ public class RegisterPageTest extends BaseSeleniumTest {
         List<String> toasts = registerPageObject.getToastMessages();
         assertThat(toasts).anyMatch(msg -> msg.toLowerCase().contains("e-mail muito longo") || msg.toLowerCase().contains("limite de caracteres excedido"));
     }
+
+    @Test
+    @Tag("UiTest")
+    @DisplayName("Should not register user if password is too long")
+    void shouldNotRegisterUserIfPasswordIsTooLong() {
+        String longPassword = "P4ssw0rd!" + "x".repeat(500);
+        String email = faker.internet().emailAddress();
+        String name = faker.name().fullName();
+
+        registerPageObject.registerUser(
+                name,
+                email,
+                longPassword,
+                longPassword
+        );
+
+        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.urlContains("/cadastro"));
+        assertThat(driver.getCurrentUrl()).contains("/cadastro");
+
+        assertFalse(userRepository.findByEmail(email).isPresent());
+
+        List<String> toasts = registerPageObject.getToastMessages();
+        assertThat(toasts).anyMatch(msg -> msg.toLowerCase().contains("senha muito longa") || msg.toLowerCase().contains("limite de caracteres excedido"));
+    }
 }

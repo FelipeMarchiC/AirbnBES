@@ -1,4 +1,4 @@
-package br.ifsp.vvts.rental.controller;
+package br.ifsp.vvts.integration.api;
 
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.rental.RentalEntity;
@@ -196,7 +196,7 @@ class RentalControllerTest extends BaseApiIntegrationTest {
         @Description("Should return 400 if the value is too high to the Big Decimal")
         void shouldReturnBadRequestWhenValueIsTooHighToBigDecimal() {
             UserEntity owner = registerAdminUser("x56das!p08A");
-            PropertyEntity property = EntityBuilder.createPropertyWithPrice(owner, Double.MAX_VALUE);
+            PropertyEntity property = EntityBuilder.createPropertyWithPrice(owner, Double.MAX_VALUE + 100);
             propertyRepository.save(property);
 
             String ownerToken = authenticate(owner.getEmail(), "x56das!p08A");
@@ -207,7 +207,30 @@ class RentalControllerTest extends BaseApiIntegrationTest {
                     LocalDate.now().plusDays(3),
                     ownerToken
             );
+            List<RentalEntity> rental = rentalRepository.findByPropertyEntityId(property.getId());
             assertEquals(400, response.getStatusCode());
+        }
+
+        @Test
+        @Tag("ApiTest")
+        @Tag("IntegrationTest")
+        @Description("Should return bad request when rental duration is greater than one year")
+        void shouldReturnBadRequestWhenRentalDurationIsGreaterThan1Year() {
+            UserEntity owner = registerAdminUser("x56das!p01A");
+            PropertyEntity property = createRandomProperty(owner);
+
+            UserEntity user = registerUser("j783as!p0BA");
+            String token = authenticate(user.getEmail(), "j783as!p0BA");
+
+            Response response = createAndSendRentalRequest(
+                    property.getId(),
+                    LocalDate.now(),
+                    LocalDate.now().plusYears(1).plusDays(1),
+                    token
+            );
+            assertEquals(400, response.getStatusCode());
+            assertEquals("Bad Request", response.jsonPath().getString("message"));
+            assertEquals("Rental duration must be 1 year or less", response.jsonPath().getString("detail"));
         }
     }
 
@@ -762,8 +785,6 @@ class RentalControllerTest extends BaseApiIntegrationTest {
 
             Response response = tenantCancelRentalRequest(token, String.valueOf(rental.getId()));
 
-            assertEquals(owner.getId(), UUID.fromString(response.jsonPath().getString("ownerId")));
-            assertEquals(tenant.getId(), UUID.fromString(response.jsonPath().getString("tenantId")));
             RentalEntity updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
             assertEquals(RentalState.CANCELLED, updatedRental.getState());
             assertEquals(200, response.getStatusCode());

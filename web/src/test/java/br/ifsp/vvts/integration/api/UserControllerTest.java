@@ -1,7 +1,9 @@
-package br.ifsp.vvts.security.auth;
+package br.ifsp.vvts.integration.api;
 
 import br.ifsp.domain.models.user.UserEntity;
 import br.ifsp.vvts.rental.requests.PostRequest;
+import br.ifsp.vvts.security.auth.AuthRequest;
+import br.ifsp.vvts.security.auth.RegisterUserRequest;
 import br.ifsp.vvts.security.config.JwtService;
 import br.ifsp.vvts.utils.BaseApiIntegrationTest;
 import com.github.javafaker.Faker;

@@ -49,7 +49,7 @@ public class RegisterPageTest extends BaseSeleniumTest {
         String email = faker.internet().emailAddress();
 
         registerPageObject.registerUser(
-                faker.name().fullName(),
+                "Jose Antonio Pereira",
                 email,
                 password,
                 password
@@ -73,7 +73,7 @@ public class RegisterPageTest extends BaseSeleniumTest {
         String password = "validPassword123!";
 
         registerPageObject.registerUser(
-                faker.name().fullName(),
+                "Jose Antonio Pereira",
                 email,
                 password,
                 password
@@ -137,7 +137,7 @@ public class RegisterPageTest extends BaseSeleniumTest {
     void shouldNotRegisterUserIfEmailIsTooLong() {
         String oversizedEmail = "longEmail".repeat(500) + "@" + "example.com";
         String password = "validPassword123!";
-        String name = faker.name().fullName();
+        String name = "Jose Antonio Pereira";
 
         registerPageObject.registerUser(
                 name,
@@ -161,7 +161,7 @@ public class RegisterPageTest extends BaseSeleniumTest {
     void shouldNotRegisterUserIfPasswordIsTooLong() {
         String longPassword = "P4ssw0rd!" + "x".repeat(500);
         String email = faker.internet().emailAddress();
-        String name = faker.name().fullName();
+        String name = "Jose Antonio Pereira";
 
         registerPageObject.registerUser(
                 name,

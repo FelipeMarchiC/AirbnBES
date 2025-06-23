@@ -1,4 +1,4 @@
-package br.ifsp.vvts.property;
+package br.ifsp.vvts.integration.api;
 
 import br.ifsp.domain.models.property.PropertyEntity;
 import br.ifsp.domain.models.user.UserEntity;

@@ -1,4 +1,4 @@
-package br.ifsp.vvts.persistence.rental;
+package br.ifsp.vvts.integration.persistence.rental;
 
 import br.ifsp.application.property.repository.JpaPropertyRepository;
 import br.ifsp.application.rental.repository.JpaRentalRepository;

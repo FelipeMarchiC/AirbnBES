@@ -76,5 +76,16 @@ public class DashboardPageTest extends BaseSeleniumTest {
             assertThat(confirmedRentals)
                     .isNotEmpty();
         }
+
+        @Test
+        @Tag("UiTest")
+        @DisplayName("Should filter rentals by cancelled status")
+        void shouldFilterRentalsByRefusedStatus() {
+            dashboardPageObject.selectStatusOption("Cancelado");
+
+            List<WebElement> confirmedRentals = driver.findElements(By.xpath("//*[contains(text(), 'CANCELLED')]"));
+            assertThat(confirmedRentals)
+                    .isNotEmpty();
+        }
     }
 }

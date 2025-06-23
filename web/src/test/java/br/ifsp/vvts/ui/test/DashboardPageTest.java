@@ -4,11 +4,14 @@ import br.ifsp.vvts.ui.BaseSeleniumTest;
 import br.ifsp.vvts.ui.page.DashboardPageObject;
 import br.ifsp.vvts.ui.page.LoginPageObject;
 import org.junit.jupiter.api.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,14 +40,30 @@ public class DashboardPageTest extends BaseSeleniumTest {
 
     @Nested
     class ManageRentals {
+
+        @BeforeEach
+        void setUp() {
+            dashboardPageObject.clickManageRentalsButton();
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.urlContains("/admin/alugueis"));
+        }
+
         @Test
         @Tag("UiTest")
         @DisplayName("Should render manage rentals page")
         void shouldRenderManageRentalsPage() {
-            dashboardPageObject.clickManageRentalsButton();
-            new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.urlContains("/admin/alugueis"));
             assertThat(driver.getCurrentUrl()).contains("/admin/alugueis");
+        }
+
+        @Test
+        @Tag("UiTest")
+        @DisplayName("Should filter rentals by confirmed status")
+        void shouldFilterRentalsByConfirmedStatus() {
+            dashboardPageObject.selectStatusOption("Confirmado");
+
+            List<WebElement> confirmedRentals = driver.findElements(By.xpath("//*[contains(text(), 'CONFIRMED')]"));
+            assertThat(confirmedRentals)
+                    .isNotEmpty();
         }
     }
 }
